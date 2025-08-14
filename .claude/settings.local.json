@@ -60,6 +60,7 @@
       "Bash(./add-global-notifications.sh:*)",
       "Bash(git log:*)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }

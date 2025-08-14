@@ -14,6 +14,11 @@
     <link rel="stylesheet" href="components/user-dropdown.css">
     <script src="components/time-selector.js"></script>
     <script src="components/i18n.js"></script>
+    <script>
+        // 确保 i18n 初始化
+        console.log('After loading i18n.js - I18n class:', typeof I18n);
+        console.log('After loading i18n.js - window.i18n:', window.i18n);
+    </script>
     <script src="components/simple-message-icon.js"></script>
     <script src="components/user-dropdown-simple-new.js"></script>
     <script src="components/header-nav.js"></script>
@@ -4294,7 +4299,7 @@
                         <div>
                             <div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 10px; font-weight: 600;" data-i18n="autoChargeCondition">自动充电条件</div>
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                <input type="checkbox" id="chargeTimeEnabledDisplay" checked disabled style="width: 14px; height: 14px; accent-color: #00ff88; cursor: default; opacity: 0.9;">
+                                <input type="checkbox" id="chargeTimeEnabledDisplay" disabled style="width: 14px; height: 14px; accent-color: #00ff88; cursor: default; opacity: 0.9;">
                                 <span style="font-size: 12px;">⏰</span>
                                 <span id="chargeTimeDisplay" style="font-size: 12px; color: rgba(255,255,255,0.85);">
                                     <span id="chargeStartTime">22:00</span> - <span id="chargeEndTime">06:00</span>
@@ -4302,7 +4307,7 @@
                                 <span id="chargeTimeDisabled" style="font-size: 11px; color: rgba(255,255,255,0.5); display: none;" data-i18n="notUsed">(未使用)</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" id="chargePriceEnabledDisplay" checked disabled style="width: 14px; height: 14px; accent-color: #00ff88; cursor: default; opacity: 0.9;">
+                                <input type="checkbox" id="chargePriceEnabledDisplay" disabled style="width: 14px; height: 14px; accent-color: #00ff88; cursor: default; opacity: 0.9;">
                                 <span style="font-size: 12px;">💰</span>
                                 <span id="chargePriceDisplay" style="font-size: 12px; color: rgba(255,255,255,0.85);">
                                     <span data-i18n="lessThan">低于</span> <span id="chargePriceValue" style="font-weight: 600;">50</span>$
@@ -4315,7 +4320,7 @@
                         <div>
                             <div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 10px; font-weight: 600;" data-i18n="autoDischargeCondition">自动放电条件</div>
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                <input type="checkbox" id="dischargeTimeEnabledDisplay" checked disabled style="width: 14px; height: 14px; accent-color: #FFC107; cursor: default; opacity: 0.9;">
+                                <input type="checkbox" id="dischargeTimeEnabledDisplay" disabled style="width: 14px; height: 14px; accent-color: #FFC107; cursor: default; opacity: 0.9;">
                                 <span style="font-size: 12px;">⏰</span>
                                 <span id="dischargeTimeDisplay" style="font-size: 12px; color: rgba(255,255,255,0.85);">
                                     <span id="dischargeStartTime">16:00</span> - <span id="dischargeEndTime">21:00</span>
@@ -4323,7 +4328,7 @@
                                 <span id="dischargeTimeDisabled" style="font-size: 11px; color: rgba(255,255,255,0.5); display: none;" data-i18n="notUsed">(未使用)</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" id="dischargePriceEnabledDisplay" checked disabled style="width: 14px; height: 14px; accent-color: #FFC107; cursor: default; opacity: 0.9;">
+                                <input type="checkbox" id="dischargePriceEnabledDisplay" disabled style="width: 14px; height: 14px; accent-color: #FFC107; cursor: default; opacity: 0.9;">
                                 <span style="font-size: 12px;">💰</span>
                                 <span id="dischargePriceDisplay" style="font-size: 12px; color: rgba(255,255,255,0.85);">
                                     <span data-i18n="greaterThan">高于</span> <span id="dischargePriceValue" style="font-weight: 600;">100</span>$
@@ -4493,9 +4498,8 @@
                         <div style="font-size: 10px; color: rgba(255,255,255,0.7); margin-bottom: 2px;" data-i18n="dischargedFamilies">已放电家庭</div>
                         <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px;">235</div>
                         <div style="display: flex; align-items: center; gap: 2px;">
-                            <span style="font-size: 8px; color: #00ff88;">↑</span>
-                            <span style="font-size: 8px; color: rgba(255,255,255,0.6);" data-i18n="compareYesterday">比昨日</span>
-                            <span style="font-size: 8px; color: #00ff88; font-weight: 600;">+21%</span>
+                            <span style="font-size: 11px; color: rgba(255,255,255,0.6);" data-i18n="compareYesterday">比昨日</span>
+                            <span style="font-size: 11px; color: #00ff88; font-weight: 600;">+41</span>
                         </div>
                     </div>
                     
@@ -4505,9 +4509,8 @@
                         <div style="font-size: 10px; color: rgba(255,255,255,0.7); margin-bottom: 2px;" data-i18n="dischargedAmount">已放电量</div>
                         <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px;">23547kWh</div>
                         <div style="display: flex; align-items: center; gap: 2px;">
-                            <span style="font-size: 8px; color: #00ff88;">↑</span>
-                            <span style="font-size: 8px; color: rgba(255,255,255,0.6);" data-i18n="compareYesterday">比昨日</span>
-                            <span style="font-size: 8px; color: #00ff88; font-weight: 600;">+21%</span>
+                            <span style="font-size: 11px; color: rgba(255,255,255,0.6);" data-i18n="compareYesterday">比昨日</span>
+                            <span style="font-size: 11px; color: #00ff88; font-weight: 600;">+4086kWh</span>
                         </div>
                     </div>
                     
@@ -4517,9 +4520,8 @@
                         <div style="font-size: 10px; color: rgba(255,255,255,0.7); margin-bottom: 2px;" data-i18n="earnedProfit">已获利</div>
                         <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px;">$23547</div>
                         <div style="display: flex; align-items: center; gap: 2px;">
-                            <span style="font-size: 8px; color: #00ff88;">↑</span>
-                            <span style="font-size: 8px; color: rgba(255,255,255,0.6);" data-i18n="compareYesterday">比昨日</span>
-                            <span style="font-size: 8px; color: #00ff88; font-weight: 600;">+21%</span>
+                            <span style="font-size: 11px; color: rgba(255,255,255,0.6);" data-i18n="compareYesterday">比昨日</span>
+                            <span style="font-size: 11px; color: #00ff88; font-weight: 600;">+$4086</span>
                         </div>
                     </div>
                 </div>
@@ -4665,7 +4667,7 @@
                 <div class="stat-overview-card">
                     <div class="stat-overview-icon">🔋</div>
                     <div class="stat-overview-label" data-i18n="installedCapacity">装机量</div>
-                    <div class="stat-overview-value" id="installedCapacity">235MW</div>
+                    <div class="stat-overview-value" id="installedCapacity">235KW</div>
                 </div>
 
                 <div class="stat-overview-card">
@@ -5100,8 +5102,255 @@
             }
             
             const isCurrentlyAuto = currentOperationMode === 'auto';
-            const newMode = isCurrentlyAuto ? 'manual' : 'auto';
-            switchOperationMode(newMode);
+            
+            if (!isCurrentlyAuto) {
+                // 切换到自动模式时，显示确认弹窗
+                showAutoModeConfirmDialog();
+            } else {
+                // 从自动模式切换到手动模式，直接切换
+                switchOperationMode('manual');
+            }
+        }
+        
+        function showAutoModeConfirmDialog() {
+            // 获取当前地区的设置
+            const currentRegion = selectedMainRegion || 'NSW';
+            const regionData = selectedRegionData[currentRegion] || {};
+            
+            // 获取充电和放电条件
+            const chargeData = regionData.charge || { 
+                segments: [{ start: 22, end: 6 }],
+                priceThreshold: 50,
+                chargeSOC: 90,
+                timeEnabled: true,
+                priceEnabled: true
+            };
+            const dischargeData = regionData.discharge || { 
+                segments: [{ start: 6, end: 22 }],
+                priceThreshold: 100,
+                dischargeSOC: 20,
+                timeEnabled: true,
+                priceEnabled: true
+            };
+            
+            // 格式化时间段显示
+            const formatTimeSegments = (segments) => {
+                if (!segments || segments.length === 0) return '未设置';
+                return segments.map(seg => `${seg.start}:00 - ${seg.end}:00`).join(', ');
+            };
+            
+            // 生成充电条件HTML
+            const generateChargeConditionsHTML = () => {
+                let conditionsHTML = '';
+                const i18n = window.i18n;
+                
+                // 时间条件
+                if (chargeData.timeEnabled !== false) {
+                    conditionsHTML += `
+                        <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                            <span style="color: #00ff88; font-size: 10px;">✓ ${i18n ? i18n.getText('conditionEnabled') : '已启用'}</span>
+                            <span style="color: rgba(255, 255, 255, 0.6);">${i18n ? i18n.getText('timeSegment') : '时间段'}：</span>
+                            <span style="color: #fff;">${formatTimeSegments(chargeData.segments)}</span>
+                        </div>`;
+                } else {
+                    conditionsHTML += `
+                        <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 6px; opacity: 0.5;">
+                            <span style="color: rgba(255, 255, 255, 0.4); font-size: 10px;">✗ ${i18n ? i18n.getText('conditionDisabled') : '未启用'}</span>
+                            <span style="color: rgba(255, 255, 255, 0.4); text-decoration: line-through;">${i18n ? i18n.getText('timeSegment') : '时间段'}：${formatTimeSegments(chargeData.segments)}</span>
+                        </div>`;
+                }
+                
+                // 价格条件
+                if (chargeData.priceEnabled !== false) {
+                    conditionsHTML += `
+                        <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                            <span style="color: #00ff88; font-size: 10px;">✓ ${i18n ? i18n.getText('conditionEnabled') : '已启用'}</span>
+                            <span style="color: rgba(255, 255, 255, 0.6);">${i18n ? i18n.getText('priceThreshold') : '价格阈值'}：</span>
+                            <span style="color: #fff;">< $${chargeData.priceThreshold || 50}/MWh</span>
+                        </div>`;
+                } else {
+                    conditionsHTML += `
+                        <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 6px; opacity: 0.5;">
+                            <span style="color: rgba(255, 255, 255, 0.4); font-size: 10px;">✗ ${i18n ? i18n.getText('conditionDisabled') : '未启用'}</span>
+                            <span style="color: rgba(255, 255, 255, 0.4); text-decoration: line-through;">${i18n ? i18n.getText('priceThreshold') : '价格阈值'}：< $${chargeData.priceThreshold || 50}/MWh</span>
+                        </div>`;
+                }
+                
+                // SOC条件始终显示为启用
+                conditionsHTML += `
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="color: #00ff88; font-size: 10px;">✓ ${i18n ? i18n.getText('conditionEnabled') : '已启用'}</span>
+                        <span style="color: rgba(255, 255, 255, 0.6);">${i18n ? i18n.getText('chargeToSOC') : '充电至 SOC'}：</span>
+                        <span style="color: #fff;">${chargeData.chargeSOC || 90}%</span>
+                    </div>`;
+                
+                return conditionsHTML;
+            };
+            
+            // 生成放电条件HTML
+            const generateDischargeConditionsHTML = () => {
+                let conditionsHTML = '';
+                const i18n = window.i18n;
+                
+                // 时间条件
+                if (dischargeData.timeEnabled !== false) {
+                    conditionsHTML += `
+                        <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                            <span style="color: #ffc107; font-size: 10px;">✓ ${i18n ? i18n.getText('conditionEnabled') : '已启用'}</span>
+                            <span style="color: rgba(255, 255, 255, 0.6);">${i18n ? i18n.getText('timeSegment') : '时间段'}：</span>
+                            <span style="color: #fff;">${formatTimeSegments(dischargeData.segments)}</span>
+                        </div>`;
+                } else {
+                    conditionsHTML += `
+                        <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 6px; opacity: 0.5;">
+                            <span style="color: rgba(255, 255, 255, 0.4); font-size: 10px;">✗ ${i18n ? i18n.getText('conditionDisabled') : '未启用'}</span>
+                            <span style="color: rgba(255, 255, 255, 0.4); text-decoration: line-through;">${i18n ? i18n.getText('timeSegment') : '时间段'}：${formatTimeSegments(dischargeData.segments)}</span>
+                        </div>`;
+                }
+                
+                // 价格条件
+                if (dischargeData.priceEnabled !== false) {
+                    conditionsHTML += `
+                        <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                            <span style="color: #ffc107; font-size: 10px;">✓ ${i18n ? i18n.getText('conditionEnabled') : '已启用'}</span>
+                            <span style="color: rgba(255, 255, 255, 0.6);">${i18n ? i18n.getText('priceThreshold') : '价格阈值'}：</span>
+                            <span style="color: #fff;">> $${dischargeData.priceThreshold || 100}/MWh</span>
+                        </div>`;
+                } else {
+                    conditionsHTML += `
+                        <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 6px; opacity: 0.5;">
+                            <span style="color: rgba(255, 255, 255, 0.4); font-size: 10px;">✗ ${i18n ? i18n.getText('conditionDisabled') : '未启用'}</span>
+                            <span style="color: rgba(255, 255, 255, 0.4); text-decoration: line-through;">${i18n ? i18n.getText('priceThreshold') : '价格阈值'}：> $${dischargeData.priceThreshold || 100}/MWh</span>
+                        </div>`;
+                }
+                
+                // SOC条件始终显示为启用
+                conditionsHTML += `
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="color: #ffc107; font-size: 10px;">✓ ${i18n ? i18n.getText('conditionEnabled') : '已启用'}</span>
+                        <span style="color: rgba(255, 255, 255, 0.6);">${i18n ? i18n.getText('dischargeToSOC') : '放电至 SOC'}：</span>
+                        <span style="color: #fff;">${dischargeData.dischargeSOC || 20}%</span>
+                    </div>`;
+                
+                return conditionsHTML;
+            };
+            
+            // 创建确认弹窗
+            const modal = document.createElement('div');
+            modal.id = 'autoModeConfirmModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                z-index: 10005;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(15px) saturate(1.5);
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: linear-gradient(145deg, #1e1e2e 0%, #252535 100%);
+                border-radius: 20px;
+                padding: 0;
+                width: 640px;
+                max-width: 90%;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 1px rgba(255, 255, 255, 0.1);
+                animation: slideUp 0.3s ease;
+            `;
+            
+            modalContent.innerHTML = `
+                <div style="padding: 24px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255, 255, 255, 0.02);">
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #fff;">${window.i18n ? window.i18n.getText('confirmAutoMode') : '确认启用自动模式'}</h3>
+                </div>
+                
+                <div style="padding: 24px 28px; max-height: 400px; overflow-y: auto;">
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: rgba(255, 255, 255, 0.8); font-size: 14px; margin: 0 0 16px 0;">
+                            ${window.i18n ? window.i18n.getText('autoModeDescription') : '启用自动模式后，系统将根据以下条件自动执行充放电操作：'}
+                        </p>
+                    </div>
+                    
+                    <!-- 充电和放电条件 - 左右排列 -->
+                    <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+                        <!-- 充电条件 -->
+                        <div style="flex: 1; background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 12px; padding: 16px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <span style="font-size: 16px;">🔋</span>
+                                <span style="color: #00ff88; font-weight: 600; font-size: 14px;">${window.i18n ? window.i18n.getText('chargeCondition') : '充电条件'}</span>
+                            </div>
+                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.9); line-height: 1.6;">
+                                ${generateChargeConditionsHTML()}
+                            </div>
+                        </div>
+                        
+                        <!-- 放电条件 -->
+                        <div style="flex: 1; background: rgba(255, 193, 7, 0.05); border: 1px solid rgba(255, 193, 7, 0.2); border-radius: 12px; padding: 16px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <span style="font-size: 16px;">⚡</span>
+                                <span style="color: #ffc107; font-weight: 600; font-size: 14px;">${window.i18n ? window.i18n.getText('dischargeCondition') : '放电条件'}</span>
+                            </div>
+                            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.9); line-height: 1.6;">
+                                ${generateDischargeConditionsHTML()}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 编辑提示 -->
+                    <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 14px;">💡</span>
+                        <span style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">
+                            ${window.i18n ? window.i18n.getText('editConditionHint') : '如需修改条件，请点击"编辑设置"按钮'}
+                        </span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; gap: 12px; padding: 20px 28px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <button onclick="openConditionSettingsModal(); closeAutoModeConfirmDialog();" style="background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        ${window.i18n ? window.i18n.getText('editSettings') : '编辑设置'}
+                    </button>
+                    <button onclick="closeAutoModeConfirmDialog()" style="background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        ${window.i18n ? window.i18n.getText('cancel') : '取消'}
+                    </button>
+                    <button onclick="confirmEnableAutoMode()" style="background: linear-gradient(135deg, #00ff88, #00dd77); color: #000; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; border: none;">
+                        ${window.i18n ? window.i18n.getText('confirmEnable') : '确认启用'}
+                    </button>
+                </div>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // 添加动画样式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes slideUp {
+                    from { transform: translateY(20px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        function closeAutoModeConfirmDialog() {
+            const modal = document.getElementById('autoModeConfirmModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function confirmEnableAutoMode() {
+            closeAutoModeConfirmDialog();
+            switchOperationMode('auto');
         }
         
         // 显示自动开关禁用提示
@@ -5863,7 +6112,8 @@
             try {
                 const headerNav = new HeaderNav({
                     currentPage: 'home',
-                    containerId: 'headerContainer'
+                    containerId: 'headerContainer',
+                    showLanguageSelector: true
                 });
                 console.log('HeaderNav initialized successfully');
                 return true;
@@ -5955,7 +6205,7 @@
                     if (!window.i18n && typeof I18n !== 'undefined') {
                         window.i18n = new I18n({
                             defaultLanguage: 'zh',
-                            containerId: 'languageSelector'
+                            containerId: 'headerLanguageSelector'
                         });
                         console.log('i18n system initialized for homepage');
                     }
@@ -12552,7 +12802,53 @@
                             ])
                         },
                         symbol: 'circle',
-                        showSymbol: false
+                        showSymbol: false,
+                        markLine: {
+                            silent: true,
+                            symbol: 'none',
+                            data: [
+                                {
+                                    yAxis: base + 50,  // 阈值水平线
+                                    label: {
+                                        show: false  // 隐藏阈值文字
+                                    },
+                                    lineStyle: {
+                                        color: 'rgba(255, 255, 255, 0.3)',
+                                        width: 2,
+                                        type: 'dashed'
+                                    }
+                                },
+                                {
+                                    xAxis: currentTime,  // 当前时间垂直线
+                                    label: {
+                                        show: false  // 隐藏当前时间文字
+                                    },
+                                    lineStyle: {
+                                        color: 'rgba(255, 255, 255, 0.3)',
+                                        width: 2,
+                                        type: 'dashed'
+                                    }
+                                }
+                            ]
+                        },
+                        markPoint: {
+                            symbol: 'circle',
+                            symbolSize: 10,
+                            label: {
+                                show: false
+                            },
+                            itemStyle: {
+                                color: '#fff',
+                                borderColor: 'rgba(255, 255, 255, 0.5)',
+                                borderWidth: 2
+                            },
+                            data: [
+                                {
+                                    coord: [currentTime, base + 50],  // 交叉点坐标
+                                    value: 'Intersection'
+                                }
+                            ]
+                        }
                     },
                     {
                         name: window.i18n ? window.i18n.getText('predictedPrice') : 'Predicted Price',
@@ -14973,29 +15269,83 @@
         }
         
         function loadRegionData(region, type) {
-            const key = `${region}_${type}`;
+            // 确保有地区数据
+            if (!selectedRegionData[region]) {
+                selectedRegionData[region] = { charge: {}, discharge: {} };
+            }
             
-            if (selectedRegionData[key]) {
-                // 加载已保存的数据
-                if (type === 'charge') {
-                    chargeTimeSettings = selectedRegionData[key];
-                } else {
-                    dischargeTimeSettings = selectedRegionData[key];
+            const regionData = selectedRegionData[region];
+            
+            // 加载充电设置
+            if (regionData.charge) {
+                chargeTimeSettings = { 
+                    segments: regionData.charge.segments || [{ start: 22, end: 6, id: `charge-${Date.now()}` }]
+                };
+                // 设置checkbox状态
+                const chargeTimeCheckbox = document.getElementById('chargeTimeEnabled');
+                const chargePriceCheckbox = document.getElementById('chargePriceEnabled');
+                const chargePriceInput = document.getElementById('chargePrice');
+                
+                if (chargeTimeCheckbox) chargeTimeCheckbox.checked = regionData.charge.timeEnabled !== false;
+                if (chargePriceCheckbox) chargePriceCheckbox.checked = regionData.charge.priceEnabled !== false;
+                if (chargePriceInput && regionData.charge.priceThreshold) {
+                    chargePriceInput.value = regionData.charge.priceThreshold;
                 }
             } else {
-                // 使用默认数据
-                if (type === 'charge') {
-                    chargeTimeSettings = { segments: [{ start: 22, end: 6, id: `charge-${Date.now()}` }] };
-                } else {
-                    dischargeTimeSettings = { segments: [{ start: 6, end: 22, id: `discharge-${Date.now()}` }] };
+                chargeTimeSettings = { segments: [{ start: 22, end: 6, id: `charge-${Date.now()}` }] };
+            }
+            
+            // 加载放电设置
+            if (regionData.discharge) {
+                dischargeTimeSettings = { 
+                    segments: regionData.discharge.segments || [{ start: 6, end: 22, id: `discharge-${Date.now()}` }]
+                };
+                // 设置checkbox状态
+                const dischargeTimeCheckbox = document.getElementById('dischargeTimeEnabled');
+                const dischargePriceCheckbox = document.getElementById('dischargePriceEnabled');
+                const dischargePriceInput = document.getElementById('dischargePrice');
+                
+                if (dischargeTimeCheckbox) dischargeTimeCheckbox.checked = regionData.discharge.timeEnabled !== false;
+                if (dischargePriceCheckbox) dischargePriceCheckbox.checked = regionData.discharge.priceEnabled !== false;
+                if (dischargePriceInput && regionData.discharge.priceThreshold) {
+                    dischargePriceInput.value = regionData.discharge.priceThreshold;
                 }
-                selectedRegionData[key] = type === 'charge' ? chargeTimeSettings : dischargeTimeSettings;
+            } else {
+                dischargeTimeSettings = { segments: [{ start: 6, end: 22, id: `discharge-${Date.now()}` }] };
             }
         }
         
         function saveRegionData(region, type) {
-            const key = `${region}_${type}`;
-            selectedRegionData[key] = type === 'charge' ? chargeTimeSettings : dischargeTimeSettings;
+            // 确保 selectedRegionData[region] 存在
+            if (!selectedRegionData[region]) {
+                selectedRegionData[region] = { charge: {}, discharge: {} };
+            }
+            
+            // 获取checkbox状态
+            const chargeTimeEnabled = document.getElementById('chargeTimeEnabled')?.checked;
+            const chargePriceEnabled = document.getElementById('chargePriceEnabled')?.checked;
+            const dischargeTimeEnabled = document.getElementById('dischargeTimeEnabled')?.checked;
+            const dischargePriceEnabled = document.getElementById('dischargePriceEnabled')?.checked;
+            
+            // 获取价格值
+            const chargePriceValue = document.getElementById('chargePrice')?.value || 50;
+            const dischargePriceValue = document.getElementById('dischargePrice')?.value || 100;
+            
+            // 保存充电设置
+            selectedRegionData[region].charge = {
+                segments: chargeTimeSettings.segments,
+                timeEnabled: chargeTimeEnabled !== undefined ? chargeTimeEnabled : true,
+                priceEnabled: chargePriceEnabled !== undefined ? chargePriceEnabled : true,
+                priceThreshold: parseInt(chargePriceValue)
+            };
+            
+            // 保存放电设置
+            selectedRegionData[region].discharge = {
+                segments: dischargeTimeSettings.segments,
+                timeEnabled: dischargeTimeEnabled !== undefined ? dischargeTimeEnabled : true,
+                priceEnabled: dischargePriceEnabled !== undefined ? dischargePriceEnabled : true,
+                priceThreshold: parseInt(dischargePriceValue)
+            };
         }
         
         function updateModalCurrentSettings() {
@@ -15134,36 +15484,16 @@
             }
         }
         
-        // Switch Modal Mode Function
+        // Switch Modal Mode Function (已移除tab，函数保留以兼容)
         function switchModalMode(mode) {
-            // Update tab states
-            const manualTab = document.getElementById('manualModeTab');
-            const autoTab = document.getElementById('autoModeTab');
+            // 由于已移除手动/自动tab，此函数现在不执行任何操作
+            // 自动条件始终显示
             const autoConditions = document.getElementById('autoModeConditions');
-            
-            if (mode === 'manual') {
-                manualTab.classList.add('active');
-                autoTab.classList.remove('active');
-                manualTab.style.color = '#00ff88';
-                autoTab.style.color = 'rgba(255,255,255,0.7)';
-                
-                // Hide automatic conditions
-                if (autoConditions) {
-                    autoConditions.style.display = 'none';
-                }
-            } else if (mode === 'auto') {
-                autoTab.classList.add('active');
-                manualTab.classList.remove('active');
-                autoTab.style.color = '#00ff88';
-                manualTab.style.color = 'rgba(255,255,255,0.7)';
-                
-                // Show automatic conditions
-                if (autoConditions) {
-                    autoConditions.style.display = 'block';
-                }
+            if (autoConditions) {
+                autoConditions.style.display = 'block';
             }
             
-            // Save current mode to localStorage
+            // 仍然保存模式以兼容其他可能的调用
             localStorage.setItem('modalMode', mode);
         }
 
@@ -15174,6 +15504,9 @@
             // 保存所有地区的设置数据到localStorage
             localStorage.setItem('regionTimeSettings', JSON.stringify(selectedRegionData));
             
+            // 更新显示的勾选状态
+            updateConditionsDisplayFromSaved();
+            
             // 关闭弹窗
             closeConditionSettingsModal();
             
@@ -15183,6 +15516,86 @@
             console.log('多地区时间条件设置已保存:', selectedRegionData);
         }
         
+        // 从保存的设置更新显示
+        function updateConditionsDisplayFromSaved() {
+            const currentRegion = selectedMainRegion || 'NSW';
+            const regionData = selectedRegionData[currentRegion];
+            
+            if (!regionData) {
+                // 如果没有保存的数据，使用默认值
+                document.getElementById('chargeTimeEnabledDisplay').checked = true;
+                document.getElementById('chargePriceEnabledDisplay').checked = true;
+                document.getElementById('dischargeTimeEnabledDisplay').checked = true;
+                document.getElementById('dischargePriceEnabledDisplay').checked = true;
+                return;
+            }
+            
+            // 从保存的数据中获取checkbox状态
+            const chargeTimeEnabled = regionData.charge?.timeEnabled !== false;
+            const chargePriceEnabled = regionData.charge?.priceEnabled !== false;
+            const dischargeTimeEnabled = regionData.discharge?.timeEnabled !== false;
+            const dischargePriceEnabled = regionData.discharge?.priceEnabled !== false;
+            
+            // 更新checkbox显示
+            const chargeTimeCheckbox = document.getElementById('chargeTimeEnabledDisplay');
+            const chargePriceCheckbox = document.getElementById('chargePriceEnabledDisplay');
+            const dischargeTimeCheckbox = document.getElementById('dischargeTimeEnabledDisplay');
+            const dischargePriceCheckbox = document.getElementById('dischargePriceEnabledDisplay');
+            
+            if (chargeTimeCheckbox) chargeTimeCheckbox.checked = chargeTimeEnabled;
+            if (chargePriceCheckbox) chargePriceCheckbox.checked = chargePriceEnabled;
+            if (dischargeTimeCheckbox) dischargeTimeCheckbox.checked = dischargeTimeEnabled;
+            if (dischargePriceCheckbox) dischargePriceCheckbox.checked = dischargePriceEnabled;
+            
+            // 更新显示的透明度和未使用标签
+            updateConditionDisplayStyle('charge', 'time', chargeTimeEnabled);
+            updateConditionDisplayStyle('charge', 'price', chargePriceEnabled);
+            updateConditionDisplayStyle('discharge', 'time', dischargeTimeEnabled);
+            updateConditionDisplayStyle('discharge', 'price', dischargePriceEnabled);
+            
+            // 更新时间和价格值
+            if (regionData.charge) {
+                const chargeSegments = regionData.charge.segments || regionData.charge.timeSegments;
+                if (chargeSegments && chargeSegments.length > 0) {
+                    document.getElementById('chargeStartTime').textContent = chargeSegments[0].start + ':00';
+                    document.getElementById('chargeEndTime').textContent = chargeSegments[0].end + ':00';
+                }
+                if (regionData.charge.priceThreshold !== undefined) {
+                    document.getElementById('chargePriceValue').textContent = regionData.charge.priceThreshold;
+                }
+            }
+            
+            if (regionData.discharge) {
+                const dischargeSegments = regionData.discharge.segments || regionData.discharge.timeSegments;
+                if (dischargeSegments && dischargeSegments.length > 0) {
+                    document.getElementById('dischargeStartTime').textContent = dischargeSegments[0].start + ':00';
+                    document.getElementById('dischargeEndTime').textContent = dischargeSegments[0].end + ':00';
+                }
+                if (regionData.discharge.priceThreshold !== undefined) {
+                    document.getElementById('dischargePriceValue').textContent = regionData.discharge.priceThreshold;
+                }
+            }
+        }
+        
+        // 更新条件显示样式
+        function updateConditionDisplayStyle(type, condition, enabled) {
+            const prefix = type === 'charge' ? 'charge' : 'discharge';
+            const suffix = condition === 'time' ? 'Time' : 'Price';
+            
+            const display = document.getElementById(`${prefix}${suffix}Display`);
+            const disabled = document.getElementById(`${prefix}${suffix}Disabled`);
+            
+            if (display && disabled) {
+                if (enabled) {
+                    display.style.opacity = '1';
+                    disabled.style.display = 'none';
+                } else {
+                    display.style.opacity = '0.4';
+                    disabled.style.display = 'inline';
+                }
+            }
+        }
+        
         // 页面加载时恢复设置
         function loadConditionSettings() {
             const savedRegionSettings = localStorage.getItem('regionTimeSettings');
@@ -15190,10 +15603,15 @@
                 try {
                     selectedRegionData = JSON.parse(savedRegionSettings);
                     console.log('已恢复地区时间设置:', selectedRegionData);
+                    // 更新显示
+                    updateConditionsDisplayFromSaved();
                 } catch (e) {
                     console.error('恢复地区设置时出错:', e);
                     selectedRegionData = {};
                 }
+            } else {
+                // 如果没有保存的设置，也更新显示为默认值
+                updateConditionsDisplayFromSaved();
             }
         }
         
@@ -18333,16 +18751,6 @@
             </div>
             
             <div class="modal-body" style="padding: 24px 32px; overflow-y: auto; flex: 1; min-height: 0;">
-                <!-- Manual/Auto Mode Tabs -->
-                <div style="display: flex; gap: 16px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0;">
-                    <button id="manualModeTab" class="mode-tab active" onclick="switchModalMode('manual')" style="background: none; border: none; padding: 12px 24px; color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 600; cursor: pointer; position: relative; transition: all 0.3s;">
-                        <span data-i18n="manualMode">手动</span>
-                    </button>
-                    <button id="autoModeTab" class="mode-tab" onclick="switchModalMode('auto')" style="background: none; border: none; padding: 12px 24px; color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 600; cursor: pointer; position: relative; transition: all 0.3s;">
-                        <span data-i18n="autoMode">自动</span>
-                    </button>
-                </div>
-                
                 <!-- SOC设置 -->
                 <div style="background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); padding: 20px; margin-bottom: 24px;">
                     <div style="color: rgba(255,255,255,0.9); font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
@@ -18402,8 +18810,11 @@
                     </div>
                 </div>
                 
+                <!-- 自动条件标题 -->
+                <h2 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 700; color: #fff;" data-i18n="autoConditions">自动条件</h2>
+                
                 <!-- Auto Mode Conditions Container -->
-                <div id="autoModeConditions" style="display: none;">
+                <div id="autoModeConditions" style="display: block;">
                 <!-- 充电和放电条件设置 -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
                     <!-- 充电条件 -->

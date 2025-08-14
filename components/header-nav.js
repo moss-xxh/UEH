@@ -9,6 +9,9 @@ class HeaderNav {
         this.showMessageCenter = options.showMessageCenter !== false; // 默认显示
         this.showUserAvatar = options.showUserAvatar !== false; // 默认显示
         this.showLanguageSelector = options.showLanguageSelector !== false; // 默认显示多语言选择器
+        this.showBackButton = options.showBackButton || false; // 是否显示返回按钮
+        this.backButtonText = options.backButtonText || '返回'; // 返回按钮文字
+        this.backButtonUrl = options.backButtonUrl || 'javascript:history.back()'; // 返回按钮链接
         
         // 消息中心相关
         this.messages = [];
@@ -102,19 +105,39 @@ class HeaderNav {
             </div>
         `;
         
+        // 创建语言切换图标（不可点击）
+        const languageIcon = ``;
+        
         // 创建设置图标
         const settingsIcon = `
             <div class="settings-icon" onclick="window.location.href='settings.html'" style="cursor: pointer; padding: 0 10px;">
                 <span style="font-size: 20px;">⚙️</span>
             </div>
         `;
-        const languageSelector = this.showLanguageSelector ? '<div id="headerLanguageSelector"></div>' : '';
+        const languageSelector = '';
         const themeToggleBtn = '';
         const userAvatar = this.showUserAvatar ? '<div id="userDropdownContainer"></div>' : '';
+        
+        const backButton = this.showBackButton ? `
+            <button class="back-button" onclick="location.href='${this.backButtonUrl}'" style="
+                background: transparent;
+                border: 1px solid var(--color-border);
+                color: var(--color-text);
+                padding: 8px 16px;
+                border-radius: 6px;
+                cursor: pointer;
+                margin-right: 20px;
+                font-size: 14px;
+                transition: all 0.3s;
+            ">
+                ← ${this.backButtonText}
+            </button>
+        ` : '';
         
         const currentLang = this.i18n ? this.i18n.getCurrentLanguage() : 'zh';
         const headerHTML = `
             <div class="header" data-lang="${currentLang}">
+                ${backButton}
                 <div class="logo">
                     <img src="logo.png" alt="U Energy" style="height: 45px; width: auto;">
                 </div>
@@ -123,6 +146,7 @@ class HeaderNav {
                 </div>
                 <div class="header-right">
                     ${messageCenter}
+                    ${languageIcon}
                     ${settingsIcon}
                     ${languageSelector}
                     ${themeToggleBtn}
@@ -202,6 +226,36 @@ class HeaderNav {
         
         // LOGO点击跳转首页
         this.bindLogoClick();
+    }
+    
+    toggleLanguageDropdown() {
+        console.log('Toggle language dropdown');
+        const dropdown = document.getElementById('languageDropdown');
+        if (dropdown) {
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            console.log('Dropdown display:', dropdown.style.display);
+        } else {
+            console.error('Language dropdown not found');
+        }
+    }
+    
+    closeLanguageDropdown() {
+        const dropdown = document.getElementById('languageDropdown');
+        if (dropdown) {
+            dropdown.style.display = 'none';
+        }
+    }
+    
+    changeLanguage(lang) {
+        console.log('Changing language to:', lang);
+        if (this.i18n) {
+            this.i18n.setLanguage(lang);
+        } else if (window.i18n) {
+            window.i18n.setLanguage(lang);
+        } else {
+            console.error('i18n not found');
+        }
+        this.closeLanguageDropdown();
     }
     
     bindScrollEvents() {

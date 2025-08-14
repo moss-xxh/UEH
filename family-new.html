@@ -103,9 +103,9 @@
             background: rgba(0, 0, 0, 0.95) !important;
             z-index: 10;
             border-left: 1px solid var(--color-border);
-            min-width: 120px;
-            max-width: 120px;
-            width: 120px;
+            min-width: 200px;
+            max-width: 200px;
+            width: 200px;
             text-align: center;
         }
         
@@ -427,9 +427,9 @@
             
             /* Fixed action column on mobile */
             .data-table .fixed-action-column {
-                min-width: 100px;
-                max-width: 100px;
-                width: 100px;
+                min-width: 180px;
+                max-width: 180px;
+                width: 180px;
             }
         }
 
@@ -550,7 +550,10 @@
         /* Action Buttons */
         .action-buttons {
             display: flex;
+            flex-direction: row;
             gap: 12px;
+            align-items: center;
+            white-space: nowrap;
         }
 
         .action-btn {
@@ -562,6 +565,8 @@
             cursor: pointer;
             transition: all 0.2s ease;
             text-decoration: none;
+            white-space: nowrap;
+            display: inline-block;
         }
 
         .action-btn:hover {
@@ -570,6 +575,10 @@
 
         .action-btn.edit {
             color: #00ff88;
+        }
+
+        .action-btn.view {
+            color: #4a9eff;
         }
 
         .action-btn.delete {
@@ -1063,7 +1072,6 @@
                         <option value="" data-i18n-key="family.placeholder.allActivity">所有活跃度</option>
                         <option value="active" data-i18n-key="family.activityStatus.active">活跃</option>
                         <option value="inactive" data-i18n-key="family.activityStatus.inactive">非活跃</option>
-                        <option value="not-participating" data-i18n-key="family.activityStatus.notParticipating">未参与</option>
                     </select>
                     
                     <input type="text" class="search-input" id="deviceCodeInput" data-i18n-placeholder="family.placeholder.deviceCode" placeholder="请输入设备编码..." onkeyup="handleDeviceCodeSearch(this.value)">
@@ -1137,6 +1145,20 @@
                                         <button class="sort-btn sort-desc" onclick="sortTable('soc', 'desc', this)" title="降序">▼</button>
                                     </span>
                                 </th>
+                                <th>
+                                    <span data-i18n-key="family.table.socValue">电池价值</span>
+                                    <span class="sort-buttons">
+                                        <button class="sort-btn sort-asc" onclick="sortTable('socValue', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('socValue', 'desc', this)" title="降序">▼</button>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span data-i18n-key="family.table.batteryCost">每kWh成本</span>
+                                    <span class="sort-buttons">
+                                        <button class="sort-btn sort-asc" onclick="sortTable('batteryCost', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('batteryCost', 'desc', this)" title="降序">▼</button>
+                                    </span>
+                                </th>
                                 <th data-i18n-key="family.table.meterNumber">表号</th>
                                 <th data-i18n-key="family.table.location">地址</th>
                                 <th>
@@ -1190,11 +1212,108 @@
     </div>
 
     <script>
+        // Define sortTable globally immediately - SIMPLE AND DIRECT
+        window.currentSortColumn = null;
+        window.currentSortDirection = null;
+        window.familyData = [];
+        window.filteredData = [];
+        
+        window.sortTable = function(column, direction, element) {
+            console.log('sortTable called:', column, direction);
+            
+            // Check if data is available
+            if (!window.filteredData || window.filteredData.length === 0) {
+                console.error('No data to sort');
+                return;
+            }
+            
+            // Check if clicking the same sort button
+            const isCurrentSort = window.currentSortColumn === column && window.currentSortDirection === direction;
+            
+            // Remove active class from all sort buttons
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (isCurrentSort) {
+                // Cancel sort - restore original order
+                window.currentSortColumn = null;
+                window.currentSortDirection = null;
+                
+                // Reset to original order
+                window.filteredData = [...window.familyData];
+                
+                // Reapply filters if any
+                const searchValue = document.getElementById('searchInput')?.value?.toLowerCase();
+                if (searchValue) {
+                    window.filteredData = window.filteredData.filter(family => 
+                        family.name.toLowerCase().includes(searchValue) ||
+                        family.deviceCode.toLowerCase().includes(searchValue)
+                    );
+                }
+            } else {
+                // Apply new sort
+                window.currentSortColumn = column;
+                window.currentSortDirection = direction;
+                
+                // Add active class to clicked button
+                if (element) element.classList.add('active');
+                
+                // Sort the data
+                window.filteredData.sort((a, b) => {
+                    let aVal, bVal;
+                    
+                    switch(column) {
+                        case 'todayProfit':
+                            aVal = parseFloat(a.todayProfit);
+                            bVal = parseFloat(b.todayProfit);
+                            break;
+                        case 'totalProfit':
+                            aVal = parseFloat(a.totalProfit);
+                            bVal = parseFloat(b.totalProfit);
+                            break;
+                        case 'soc':
+                            aVal = a.soc;
+                            bVal = b.soc;
+                            break;
+                        case 'socValue':
+                            aVal = a.soc * 15;
+                            bVal = b.soc * 15;
+                            break;
+                        case 'batteryCost':
+                            aVal = a.soc * 0.5;
+                            bVal = b.soc * 0.5;
+                            break;
+                        case 'usageDays':
+                            aVal = a.usageDays;
+                            bVal = b.usageDays;
+                            break;
+                        default:
+                            aVal = a[column];
+                            bVal = b[column];
+                    }
+                    
+                    if (direction === 'asc') {
+                        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                    } else {
+                        return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+                    }
+                });
+            }
+            
+            // Re-render the table
+            if (window.renderTable) {
+                window.renderTable();
+            } else {
+                console.error('renderTable function not found');
+            }
+        };
+        
         // Generate family data immediately
         function generateFamilyData() {
             const names = ['张明', '李华', '王芳', '赵强', '陈晓', '刘静', '周涛', '吴敏', '郑伟', '林丽'];
             const locations = ['NSW', 'NSW', 'NSW', 'Perth WA', 'Adelaide SA', 'Gold Coast QLD', 'Canberra ACT', 'Newcastle NSW', 'Hobart TAS', 'Darwin NT'];
-            const statuses = ['active', 'inactive', 'not-participating'];
+            const statuses = ['active', 'inactive'];
             const deviceStatuses = ['charging', 'discharging', 'standby', 'offline'];
             
             const data = [];
@@ -1251,10 +1370,10 @@
         }
         
         // Generate data immediately
-        const familyData = generateFamilyData();
+        window.familyData = generateFamilyData();
         let currentPage = 1;
         let pageSize = 20;
-        let filteredData = [...familyData];
+        window.filteredData = [...window.familyData];
         let pagination = null;
         
         // Ensure data loads even if other methods fail
@@ -1265,6 +1384,8 @@
                 }
             }, 100);
         };
+        
+        // Functions will be made globally accessible after they are defined
         
         // Initialize components
         document.addEventListener('DOMContentLoaded', function() {
@@ -1410,12 +1531,10 @@
         function createFamilyTableRow(family) {
             const row = document.createElement('tr');
             
-            const statusClass = family.status === 'active' ? 'active' : 
-                               family.status === 'inactive' ? 'inactive' : 'not-participating';
+            const statusClass = family.status === 'active' ? 'active' : 'inactive';
             
             const statusText = family.status === 'active' ? (window.i18n ? window.i18n.getText('family.activityStatus.active') : '活跃') :
-                              family.status === 'inactive' ? (window.i18n ? window.i18n.getText('family.activityStatus.inactive') : '非活跃') :
-                              (window.i18n ? window.i18n.getText('family.activityStatus.notParticipating') : '未参与');
+                              (window.i18n ? window.i18n.getText('family.activityStatus.inactive') : '非活跃');
 
             const deviceStatusClass = family.deviceStatus === 'charging' ? 'charging' :
                                     family.deviceStatus === 'discharging' ? 'discharging' :
@@ -1445,6 +1564,8 @@
                     </span>
                 </td>
                 <td>${family.soc}%</td>
+                <td>$${(family.soc * 15).toFixed(2)}</td>
+                <td>$${(family.soc * 0.5).toFixed(2)}</td>
                 <td>${family.meterNumber}</td>
                 <td>${family.location}</td>
                 <td>${family.usageDays}</td>
@@ -1452,6 +1573,9 @@
                     <div class="action-buttons">
                         <button class="action-btn edit" onclick="viewFamilyDetails(${family.id})">
                             ${window.i18n ? window.i18n.getText('family.buttons.viewDetails') : '查看详情'}
+                        </button>
+                        <button class="action-btn view" onclick="viewRunningData(${family.id}, '${family.meterNumber}')">
+                            ${window.i18n ? window.i18n.getText('family.buttons.runningData') : '运行数据'}
                         </button>
                     </div>
                 </td>
@@ -1468,16 +1592,20 @@
                 return;
             }
             
-            console.log('Loading family cards, data length:', filteredData.length);
+            console.log('Loading family cards, filteredData length:', window.filteredData.length);
+            console.log('Current sort:', window.currentSortColumn, window.currentSortDirection);
             tbody.innerHTML = '';
 
-            // Apply filters if any
-            filteredData = [...familyData];
+            // Don't reset filteredData here if we're sorting
+            if (!window.currentSortColumn) {
+                // Only reset if not sorting
+                window.filteredData = [...window.familyData];
+            }
             
             // Apply search filter
             const searchValue = document.getElementById('searchInput').value.toLowerCase();
             if (searchValue) {
-                filteredData = filteredData.filter(family => 
+                window.filteredData = window.filteredData.filter(family => 
                     family.name.toLowerCase().includes(searchValue) ||
                     family.deviceCode.toLowerCase().includes(searchValue)
                 );
@@ -1486,7 +1614,7 @@
             // Apply meter number filter
             const meterValue = document.getElementById('meterInput').value.toLowerCase();
             if (meterValue) {
-                filteredData = filteredData.filter(family => 
+                window.filteredData = window.filteredData.filter(family => 
                     family.meterNumber.toLowerCase().includes(meterValue)
                 );
             }
@@ -1494,18 +1622,18 @@
             // Apply activity filter
             const activityFilter = document.getElementById('activityFilter').value;
             if (activityFilter) {
-                filteredData = filteredData.filter(family => family.status === activityFilter);
+                window.filteredData = window.filteredData.filter(family => family.status === activityFilter);
             }
             
             // Apply device status filter
             const deviceStatusFilter = document.getElementById('deviceStatusFilter').value;
             if (deviceStatusFilter) {
-                filteredData = filteredData.filter(family => family.deviceStatus === deviceStatusFilter);
+                window.filteredData = window.filteredData.filter(family => family.deviceStatus === deviceStatusFilter);
             }
 
             // Update pagination
             if (pagination) {
-                pagination.updateTotal(filteredData.length);
+                pagination.updateTotal(window.filteredData.length);
                 pagination.currentPage = currentPage;
                 pagination.pageSize = pageSize;
                 pagination.refresh();
@@ -1514,12 +1642,12 @@
             // Get page data
             const start = (currentPage - 1) * pageSize;
             const end = start + pageSize;
-            const pageData = filteredData.slice(start, end);
+            const pageData = window.filteredData.slice(start, end);
             
             if (pageData.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="11" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
+                        <td colspan="12" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
                             ${window.i18n ? window.i18n.getText('noData') : '暂无数据'}
                         </td>
                     </tr>
@@ -1533,97 +1661,8 @@
             });
         }
 
-        // Table sorting with cancel functionality
-        let currentSortColumn = null;
-        let currentSortDirection = null;
-        
-        function sortTable(column, direction, element) {
-            // Check if clicking the same sort button
-            const isCurrentSort = currentSortColumn === column && currentSortDirection === direction;
-            
-            // Remove active class from all sort buttons
-            document.querySelectorAll('.sort-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            if (isCurrentSort) {
-                // Cancel sort - restore original order
-                currentSortColumn = null;
-                currentSortDirection = null;
-                
-                // Reset to original order
-                filteredData = [...familyData];
-                
-                // Reapply filters
-                const searchValue = document.getElementById('searchInput').value.toLowerCase();
-                if (searchValue) {
-                    filteredData = filteredData.filter(family => 
-                        family.name.toLowerCase().includes(searchValue) ||
-                        family.deviceCode.toLowerCase().includes(searchValue)
-                    );
-                }
-                
-                const meterValue = document.getElementById('meterInput').value.toLowerCase();
-                if (meterValue) {
-                    filteredData = filteredData.filter(family => 
-                        family.meterNumber.toLowerCase().includes(meterValue)
-                    );
-                }
-                
-                const activityFilter = document.getElementById('activityFilter').value;
-                if (activityFilter) {
-                    filteredData = filteredData.filter(family => family.status === activityFilter);
-                }
-                
-                const deviceStatusFilter = document.getElementById('deviceStatusFilter').value;
-                if (deviceStatusFilter) {
-                    filteredData = filteredData.filter(family => family.deviceStatus === deviceStatusFilter);
-                }
-            } else {
-                // Apply new sort
-                currentSortColumn = column;
-                currentSortDirection = direction;
-                
-                // Add active class to clicked button
-                element.classList.add('active');
-                
-                // Sort the data
-                filteredData.sort((a, b) => {
-                    let aVal, bVal;
-                    
-                    switch(column) {
-                        case 'todayProfit':
-                            aVal = parseFloat(a.todayProfit);
-                            bVal = parseFloat(b.todayProfit);
-                            break;
-                        case 'totalProfit':
-                            aVal = parseFloat(a.totalProfit);
-                            bVal = parseFloat(b.totalProfit);
-                            break;
-                        case 'soc':
-                            aVal = a.soc;
-                            bVal = b.soc;
-                            break;
-                        case 'usageDays':
-                            aVal = a.usageDays;
-                            bVal = b.usageDays;
-                            break;
-                        default:
-                            return 0;
-                    }
-                    
-                    if (direction === 'asc') {
-                        return aVal - bVal;
-                    } else {
-                        return bVal - aVal;
-                    }
-                });
-            }
-            
-            // Reset to first page and reload table
-            currentPage = 1;
-            loadFamilyCards();
-        }
+        // Make loadFamilyCards available globally as renderTable
+        window.renderTable = loadFamilyCards;
 
         // View family details
         function viewFamilyDetails(familyId) {
@@ -1892,6 +1931,31 @@
             console.log('Exporting data...');
             alert(window.i18n ? window.i18n.getText('exportSuccess') : '导出成功');
         }
+
+        // View running data
+        function viewRunningData(familyId, meterNumber) {
+            // Open running data page in new tab with meter number
+            window.open(`running-data.html?meter=${meterNumber}`, '_blank');
+        }
+
+        // Make all functions globally accessible
+        window.viewFamilyDetails = viewFamilyDetails;
+        window.viewRunningData = viewRunningData;
+        window.closeFamilyDrawer = closeFamilyDrawer;
+        window.saveFamilyChanges = saveFamilyChanges;
+        window.deleteFamilyRecord = deleteFamilyRecord;
+        window.switchDrawerTab = switchDrawerTab;
+        window.handleSearch = handleSearch;
+        window.handleMeterSearch = handleMeterSearch;
+        window.handleActivityFilter = handleActivityFilter;
+        window.handleDeviceCodeSearch = handleDeviceCodeSearch;
+        window.handleDeviceStatusFilter = handleDeviceStatusFilter;
+        window.handleRegionFilter = handleRegionFilter;
+        window.applyFilters = applyFilters;
+        window.resetFilters = resetFilters;
+        window.exportData = exportData;
+        window.refreshData = refreshData;
+        window.loadFamilyCards = loadFamilyCards;
 
         // Initialize profit chart
         function initProfitChart() {

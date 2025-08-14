@@ -32,11 +32,14 @@
                     <span data-i18n="conditionSettingsDescription">设置自动化充放电条件</span>
                 </div>
                 
+                <!-- 自动条件标题 -->
+                <h2 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 700; color: #fff;" data-i18n="autoConditions">自动条件</h2>
+                
                 <!-- 时间条件设置 -->
                 <div class="time-condition-container" style="display: flex; flex-direction: column; gap: 32px;">
                     <!-- 充电时间段管理 -->
                     <div class="time-periods-section" style="background: rgba(255, 255, 255, 0.02); border-radius: 8px; padding: 24px; border: 1px solid rgba(255, 255, 255, 0.05);">
-                        <h3 style="font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.9); margin: 0 0 16px 0;" data-i18n="settings.timeCondition.chargeTime" data-text-zh="充电时间" data-text-en="Charge Time">充电时间</h3>
+                        <h3 style="font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.9); margin: 0 0 16px 0;" data-i18n="settings.timeCondition.chargeTime" data-text-zh="充电条件" data-text-en="Charge Condition">充电条件</h3>
                         <div id="chargeTimePeriods" class="time-periods-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;"></div>
                         <button class="btn btn-secondary add-period-btn" onclick="addTimePeriod('charge')" style="width: 100%; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; background: transparent; border: 2px dashed rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.6); border-radius: 6px; cursor: pointer; transition: all 0.3s ease;">
                             <span>+</span>
@@ -46,7 +49,7 @@
 
                     <!-- 放电时间段管理 -->
                     <div class="time-periods-section" style="background: rgba(255, 255, 255, 0.02); border-radius: 8px; padding: 24px; border: 1px solid rgba(255, 255, 255, 0.05);">
-                        <h3 style="font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.9); margin: 0 0 16px 0;" data-i18n="settings.timeCondition.dischargeTime" data-text-zh="放电时间" data-text-en="Discharge Time">放电时间</h3>
+                        <h3 style="font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.9); margin: 0 0 16px 0;" data-i18n="settings.timeCondition.dischargeTime" data-text-zh="放电条件" data-text-en="Discharge Condition">放电条件</h3>
                         <div id="dischargeTimePeriods" class="time-periods-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;"></div>
                         <button class="btn btn-secondary add-period-btn" onclick="addTimePeriod('discharge')" style="width: 100%; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; background: transparent; border: 2px dashed rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.6); border-radius: 6px; cursor: pointer; transition: all 0.3s ease;">
                             <span>+</span>

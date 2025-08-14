@@ -549,27 +549,27 @@
             <div class="stat-card card">
                 <div class="stat-label" data-i18n="profit.stats.userCount">用户数量</div>
                 <div class="stat-value" id="userCount">1,234</div>
-                <div class="stat-change"><span data-i18n="profit.stats.comparedYesterday">比昨日</span> ↑ 12</div>
+                <div class="stat-change" id="userCountChange"><span class="compare-text" data-i18n="profit.stats.comparedYesterday">比昨日</span> ↑ 12</div>
             </div>
             <div class="stat-card card">
-                <div class="stat-label" data-i18n="profit.stats.totalRevenue">累计收益</div>
+                <div class="stat-label" data-i18n="profit.stats.totalRevenue">累计获利</div>
                 <div class="stat-value" id="totalRevenue">$457,000</div>
-                <div class="stat-change"><span data-i18n="profit.stats.comparedYesterday">比昨日</span> ↑ $2,000</div>
+                <div class="stat-change" id="totalRevenueChange"><span class="compare-text" data-i18n="profit.stats.comparedYesterday">比昨日</span> ↑ $2,000</div>
             </div>
             <div class="stat-card card">
                 <div class="stat-label" data-i18n="profit.stats.avgProfit">人均获利</div>
                 <div class="stat-value" id="avgProfit">$370</div>
-                <div class="stat-change"><span data-i18n="profit.stats.comparedYesterday">比昨日</span> ↑ $5</div>
+                <div class="stat-change" id="avgProfitChange"><span class="compare-text" data-i18n="profit.stats.comparedYesterday">比昨日</span> ↑ $5</div>
             </div>
             <div class="stat-card card">
-                <div class="stat-label" data-i18n="profit.stats.maxStationProfit">最大获利 (电站)</div>
+                <div class="stat-label" data-i18n="profit.stats.maxStationProfit">最大获利 (家庭)</div>
                 <div class="stat-value" id="maxStationProfit">$5,000</div>
-                <div class="stat-change"><span data-i18n="profit.stats.comparedYesterday">比昨日</span> ↑ $200</div>
+                <div class="stat-change" id="maxProfitChange"><span class="compare-text" data-i18n="profit.stats.comparedYesterday">比昨日</span> ↑ $200</div>
             </div>
             <div class="stat-card card">
-                <div class="stat-label" data-i18n="profit.stats.minStationProfit">最小获利 (电站)</div>
+                <div class="stat-label" data-i18n="profit.stats.minStationProfit">最小获利 (家庭)</div>
                 <div class="stat-value" id="minStationProfit">$10</div>
-                <div class="stat-change"><span data-i18n="profit.stats.comparedYesterday">比昨日</span> ↑ $1</div>
+                <div class="stat-change" id="minProfitChange"><span class="compare-text" data-i18n="profit.stats.comparedYesterday">比昨日</span> ↑ $1</div>
             </div>
         </div>
 
@@ -631,7 +631,6 @@
                                 <button class="filter-tab active" onclick="filterByStatus('all', this)" id="statusAll" data-i18n="profit.filters.all">全部</button>
                                 <button class="filter-tab" onclick="filterByStatus('active', this)" id="statusActive" data-i18n="profit.filters.active">活跃</button>
                                 <button class="filter-tab" onclick="filterByStatus('inactive', this)" id="statusInactive" data-i18n="profit.filters.inactive">非活跃</button>
-                                <button class="filter-tab" onclick="filterByStatus('notParticipating', this)" id="statusNotParticipating" data-i18n="profit.filters.notParticipating">未参与</button>
                             </div>
                             <!-- 导出功能 -->
                             <button class="export-btn" onclick="exportTableData()">
@@ -657,6 +656,13 @@
                                     <span class="sort-buttons">
                                         <button class="sort-btn sort-asc" onclick="sortTable('profit', 'asc', this)" title="升序">▲</button>
                                         <button class="sort-btn sort-desc" onclick="sortTable('profit', 'desc', this)" title="降序">▼</button>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span data-i18n="profit.table.profitPerKwh">每kWh获利 ($)</span>
+                                    <span class="sort-buttons">
+                                        <button class="sort-btn sort-asc" onclick="sortTable('profitPerKwh', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('profitPerKwh', 'desc', this)" title="降序">▼</button>
                                     </span>
                                 </th>
                                 <th data-i18n="profit.table.dailyAvg" id="avgHeader">日均
@@ -804,6 +810,7 @@
             updateTableHeaders(period);
             generateTableData();
             refreshData();
+            updateComparisonText();
         }
 
         function handleTimeInputChange() {
@@ -920,8 +927,50 @@
             document.getElementById('avgProfit').textContent = avgProfit;
             document.getElementById('maxStationProfit').textContent = maxProfit;
             document.getElementById('minStationProfit').textContent = minProfit;
+            
+            // 更新对比文本
+            updateComparisonText();
         }
 
+        // 更新对比文本
+        function updateComparisonText() {
+            const currentLang = window.i18n ? window.i18n.currentLanguage : 'zh';
+            
+            // 定义不同时间周期的对比文本
+            const comparisonTexts = {
+                zh: {
+                    day: '比昨日',
+                    month: '比上月',
+                    year: '比去年',
+                    total: ''  // 累计时不显示对比
+                },
+                en: {
+                    day: 'vs Yesterday',
+                    month: 'vs Last Month',
+                    year: 'vs Last Year',
+                    total: ''  // 累计时不显示对比
+                }
+            };
+            
+            const compareText = comparisonTexts[currentLang][currentTimePeriod];
+            const compareElements = document.querySelectorAll('.compare-text');
+            
+            // 更新所有对比文本
+            compareElements.forEach(element => {
+                element.textContent = compareText;
+            });
+            
+            // 如果是累计模式，隐藏整个对比行
+            const changeElements = document.querySelectorAll('.stat-change');
+            changeElements.forEach(element => {
+                if (currentTimePeriod === 'total') {
+                    element.style.display = 'none';
+                } else {
+                    element.style.display = 'block';
+                }
+            });
+        }
+        
         // 初始化所有图表
         function initAllCharts() {
             initUserManagementChart();
@@ -944,13 +993,11 @@
             const userTypes = {
                 zh: {
                     active: '活跃用户',
-                    inactive: '非活跃用户',
-                    notParticipating: '未参与用户'
+                    inactive: '非活跃用户'
                 },
                 en: {
                     active: 'Active Users',
-                    inactive: 'Inactive Users', 
-                    notParticipating: 'Not Participating'
+                    inactive: 'Inactive Users'
                 }
             };
             
@@ -996,14 +1043,9 @@
                             itemStyle: { color: '#00ff88' }
                         },
                         { 
-                            value: Math.round(735 * multiplier), 
+                            value: Math.round(1315 * multiplier),  // Combined inactive + not participating (735 + 580)
                             name: userTypes[currentLang].inactive,
                             itemStyle: { color: '#ffd93d' }
-                        },
-                        { 
-                            value: Math.round(580 * multiplier), 
-                            name: userTypes[currentLang].notParticipating,
-                            itemStyle: { color: '#ff6b6b' }
                         }
                     ]
                 }]
@@ -1301,7 +1343,13 @@
                     let aVal, bVal;
                     switch(column) {
                         case 'discharge': aVal = a.discharge; bVal = b.discharge; break;
+                        case 'sellPrice': aVal = a.sellPrice; bVal = b.sellPrice; break;
+                        case 'costPrice': aVal = a.costPrice; bVal = b.costPrice; break;
                         case 'profit': aVal = a.profit; bVal = b.profit; break;
+                        case 'profitPerKwh': 
+                            aVal = a.discharge > 0 ? a.profit / a.discharge : 0;
+                            bVal = b.discharge > 0 ? b.profit / b.discharge : 0;
+                            break;
                         case 'dailyAvg': aVal = a.dailyAvg; bVal = b.dailyAvg; break;
                         case 'comparison': aVal = a.comparison; bVal = b.comparison; break;
                         default: return 0;
@@ -1343,7 +1391,7 @@
         function generateTableData() {
             const users = ['Harvey Lee', 'Lucas Wang', 'David Zhang', 'Fiona Liu', 
                           'Michael Chen', 'Lisa Zhao', 'John Sun', '周敏', '吴强', '郑华'];
-            const statuses = ['active', 'inactive', 'notParticipating'];
+            const statuses = ['active', 'inactive'];
             const data = [];
             
             const timeSelector = document.getElementById('timeSelector');
@@ -1405,7 +1453,7 @@
             let discharge = 0;
             let dailyAvg = 50;
             
-            if (status !== 'notParticipating') {
+            if (status === 'active' || status === 'inactive') {
                 switch (period) {
                     case 'day':
                         discharge = 20 + Math.floor(Math.random() * 40);
@@ -1426,13 +1474,17 @@
                 }
             }
             
-            const profit = status === 'notParticipating' ? 0 : Math.floor(discharge * 1.8);
+            const sellPrice = status === 'active' || status === 'inactive' ? (0.3 + Math.random() * 0.2).toFixed(3) : 0;
+            const costPrice = status === 'active' || status === 'inactive' ? (0.1 + Math.random() * 0.05).toFixed(3) : 0;
+            const profit = status === 'active' || status === 'inactive' ? Math.floor(discharge * (sellPrice - costPrice)) : 0;
             
             return {
                 date: date,
                 user: user,
                 status: status,
                 discharge: discharge,
+                sellPrice: parseFloat(sellPrice),
+                costPrice: parseFloat(costPrice),
                 profit: profit,
                 dailyAvg: dailyAvg,
                 comparison: profit - dailyAvg
@@ -1454,7 +1506,7 @@
             if (!tableData || tableData.length === 0) {
                 generateTableData();
                 if (!tableData || tableData.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">暂无数据</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">暂无数据</td></tr>';
                     return;
                 }
             }
@@ -1489,11 +1541,13 @@
                     }
                     
                     // 添加数据单元格
+                    const profitPerKwh = row.discharge > 0 ? (row.profit / row.discharge).toFixed(2) : '0.00';
                     tr.innerHTML += `
                         <td>${row.user}</td>
                         <td class="status-${row.status === 'notParticipating' ? 'not-participating' : row.status}">${getStatusText(row.status)}</td>
                         <td>${row.discharge.toFixed(1)}</td>
                         <td class="${row.profit > 0 ? 'profit-positive' : 'profit-negative'}">${row.profit}</td>
+                        <td class="${profitPerKwh > 0 ? 'profit-positive' : ''}">${profitPerKwh}</td>
                         <td>${row.dailyAvg}</td>
                         <td class="${row.comparison >= 0 ? 'profit-positive' : 'profit-negative'}">${row.comparison >= 0 ? '+' : ''}${row.comparison}</td>
                     `;
@@ -1502,8 +1556,8 @@
                 });
             });
             
-            // 最后一页添加总计行
-            if (endIndex === tableData.length && tableData.length > 0) {
+            // 添加总计行（显示所有数据的合计）
+            if (tableData.length > 0) {
                 const totalDischarge = tableData.reduce((sum, item) => sum + item.discharge, 0);
                 const totalProfit = tableData.reduce((sum, item) => sum + item.profit, 0);
                 
@@ -1511,6 +1565,7 @@
                 const currentLang = window.i18n ? window.i18n.currentLanguage : 'zh';
                 const totalText = currentLang === 'en' ? 'Total' : '合计';
                 
+                const avgProfitPerKwh = totalDischarge > 0 ? (totalProfit / totalDischarge).toFixed(2) : '0.00';
                 const totalRow = document.createElement('tr');
                 totalRow.style.borderTop = '2px solid var(--color-border)';
                 totalRow.style.background = 'var(--color-bg)';
@@ -1518,8 +1573,8 @@
                     <td colspan="3" style="text-align: center; font-weight: 600; color: var(--color-primary);">${totalText}</td>
                     <td style="font-weight: 600;">${totalDischarge.toFixed(1)}</td>
                     <td class="profit-positive" style="font-weight: 600;">${totalProfit}</td>
-                    <td>-</td>
-                    <td>-</td>
+                    <td class="profit-positive" style="font-weight: 600;">${avgProfitPerKwh}</td>
+                    <td colspan="2"></td>
                 `;
                 tbody.appendChild(totalRow);
             }
@@ -1531,13 +1586,11 @@
             const statusTexts = {
                 zh: {
                     active: '活跃',
-                    inactive: '非活跃',
-                    notParticipating: '未参与'
+                    inactive: '非活跃'
                 },
                 en: {
                     active: 'Active',
-                    inactive: 'Inactive',
-                    notParticipating: 'Not Participating'
+                    inactive: 'Inactive'
                 }
             };
             return statusTexts[currentLang][status] || status;
