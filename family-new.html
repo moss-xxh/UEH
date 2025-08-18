@@ -690,7 +690,7 @@
             position: fixed;
             top: 0;
             right: 0;
-            width: 480px;
+            width: 680px;
             height: 100vh;
             background: rgba(15, 15, 15, 0.98);
             backdrop-filter: blur(20px);
@@ -803,16 +803,16 @@
         .drawer-info-label {
             font-size: 12px;
             color: var(--color-text-secondary);
-            margin-bottom: 6px;
-            font-weight: 400;
-            opacity: 0.7;
+            margin-bottom: 8px;
+            font-weight: 500;
+            opacity: 0.8;
         }
 
         .drawer-info-value {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 600;
             color: var(--color-text);
-            line-height: 1.2;
+            line-height: 1.4;
         }
 
         /* Fixed Action Buttons at Bottom of Drawer */
@@ -853,12 +853,13 @@
         .drawer-action-btn.primary {
             background: var(--color-primary);
             border-color: var(--color-primary);
-            color: #fff;
+            color: #000;
         }
 
         .drawer-action-btn.primary:hover {
             background: #00e67a;
             border-color: #00e67a;
+            color: #000;
             box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
         }
 
@@ -966,7 +967,7 @@
 
         .drawer-chart-control.active {
             background: var(--color-primary);
-            color: #fff;
+            color: #000;
             border-color: var(--color-primary);
         }
 
@@ -1029,7 +1030,7 @@
             
             .drawer-container {
                 width: 100%;
-                max-width: 400px;
+                max-width: 500px;
             }
         }
     </style>
@@ -1107,6 +1108,10 @@
                         <span>📥</span>
                         <span data-i18n-key="family.buttons.export">导出</span>
                     </button>
+                    <button class="filter-btn export-detail" onclick="exportDetailData()" style="background: rgba(30, 127, 255, 0.1); border-color: rgba(30, 127, 255, 0.3);">
+                        <span>📊</span>
+                        <span data-i18n-key="family.buttons.exportDetail">导出明细</span>
+                    </button>
                     <button class="filter-btn refresh" onclick="refreshData()">
                         <span>🔄</span>
                         <span data-i18n-key="family.buttons.refresh">刷新</span>
@@ -1135,7 +1140,13 @@
                                         <button class="sort-btn sort-desc" onclick="sortTable('totalProfit', 'desc', this)" title="降序">▼</button>
                                     </span>
                                 </th>
-                                <th data-i18n-key="family.table.avgProfit">日均获利 ($)</th>
+                                <th>
+                                    <span data-i18n-key="family.table.avgProfit">日均获利 ($)</span>
+                                    <span class="sort-buttons">
+                                        <button class="sort-btn sort-asc" onclick="sortTable('avgProfit', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('avgProfit', 'desc', this)" title="降序">▼</button>
+                                    </span>
+                                </th>
                                 <th data-i18n-key="family.table.deviceCode">设备编码</th>
                                 <th data-i18n-key="family.table.deviceStatus">设备状态</th>
                                 <th>
@@ -1195,7 +1206,7 @@
             <div class="drawer-tabs">
                 <div class="drawer-tab active" onclick="switchDrawerTab('basicInfo', this)" data-i18n-key="family.drawer.tabs.basicInfo">基本信息</div>
                 <div class="drawer-tab" onclick="switchDrawerTab('revenueInfo', this)" data-i18n-key="family.drawer.tabs.revenueInfo">收益信息</div>
-                <div class="drawer-tab" onclick="switchDrawerTab('operatingData', this)" data-i18n-key="family.drawer.tabs.operatingData">运行数据</div>
+                <div class="drawer-tab" onclick="switchDrawerTab('dispatchRecords', this)" data-i18n-key="family.drawer.tabs.dispatchRecords">调度记录</div>
             </div>
             
             <div class="drawer-content" id="drawerContent">
@@ -1205,8 +1216,7 @@
             <!-- Fixed Action Buttons -->
             <div class="drawer-actions">
                 <button class="drawer-action-btn" onclick="closeFamilyDrawer()" data-i18n-key="family.drawer.actions.cancel">取消</button>
-                <button class="drawer-action-btn primary" onclick="saveFamilyChanges()" data-i18n-key="family.drawer.actions.save">保存</button>
-                <button class="drawer-action-btn danger" onclick="deleteFamilyRecord()" data-i18n-key="family.drawer.actions.delete">删除</button>
+                <button class="drawer-action-btn primary" onclick="confirmFamilyDetails()" data-i18n-key="family.drawer.actions.confirm">确定</button>
             </div>
         </div>
     </div>
@@ -1271,6 +1281,10 @@
                         case 'totalProfit':
                             aVal = parseFloat(a.totalProfit);
                             bVal = parseFloat(b.totalProfit);
+                            break;
+                        case 'avgProfit':
+                            aVal = parseFloat(a.avgProfit);
+                            bVal = parseFloat(b.avgProfit);
                             break;
                         case 'soc':
                             aVal = a.soc;
@@ -1433,6 +1447,11 @@
             
             updateTitle();
             updateI18nElements();
+            
+            // Update drawer elements specifically (they might be outside the initial DOM scan)
+            setTimeout(() => {
+                updateI18nElements();
+            }, 100);
             
             // Initialize header navigation
             if (typeof HeaderNav !== 'undefined') {
@@ -1672,6 +1691,18 @@
                 const drawerContainer = drawer.querySelector('.drawer-container');
                 drawerContainer.setAttribute('data-family-id', familyId);
                 drawer.classList.add('show');
+                
+                // Update i18n elements in the drawer
+                drawer.querySelectorAll('[data-i18n-key]').forEach(element => {
+                    const key = element.getAttribute('data-i18n-key');
+                    if (key && window.i18n) {
+                        const text = window.i18n.getText(key);
+                        if (text && text !== key) {
+                            element.textContent = text;
+                        }
+                    }
+                });
+                
                 // Reset tabs to first one
                 document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
                 document.querySelector('.drawer-tab').classList.add('active');
@@ -1684,58 +1715,48 @@
             document.getElementById('familyDrawer').classList.remove('show');
         }
 
-        // Save family changes
-        function saveFamilyChanges() {
+        // Confirm family details
+        function confirmFamilyDetails() {
             // Get the current family ID from the drawer
             const drawerId = document.querySelector('.drawer-container').getAttribute('data-family-id');
             
-            // Add save logic here
-            console.log('Saving changes for family ID:', drawerId);
+            console.log('Confirmed family ID:', drawerId);
             
-            // Show success message
-            alert(window.i18n ? window.i18n.getText('family.drawer.messages.saveSuccess') : '保存成功');
-            
-            // Close drawer after successful save
+            // Close drawer
             closeFamilyDrawer();
         }
 
-        // Delete family record
-        function deleteFamilyRecord() {
-            // Get the current family ID from the drawer
-            const drawerId = document.querySelector('.drawer-container').getAttribute('data-family-id');
-            
-            // Confirm deletion
-            const confirmMessage = window.i18n ? window.i18n.getText('family.drawer.messages.deleteConfirm') : '确定要删除这条记录吗？';
-            if (confirm(confirmMessage)) {
-                // Add delete logic here
-                console.log('Deleting family ID:', drawerId);
-                
-                // Remove from familyData array
-                const index = familyData.findIndex(f => f.id == drawerId);
-                if (index > -1) {
-                    familyData.splice(index, 1);
-                    // Refresh the table
-                    displayFamilyData();
-                }
-                
-                // Show success message
-                const successMessage = window.i18n ? window.i18n.getText('family.drawer.messages.deleteSuccess') : '删除成功';
-                alert(successMessage);
-                
-                // Close drawer after successful deletion
-                closeFamilyDrawer();
-            }
-        }
-
+        // Track dispatch records page
+        let dispatchCurrentPage = 1;
+        
         // Switch drawer tab
         function switchDrawerTab(tab, element) {
             document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
             element.classList.add('active');
             
+            // Reset dispatch page when switching tabs
+            if (tab === 'dispatchRecords') {
+                dispatchCurrentPage = 1;
+            }
+            
             // Get the current family from the drawer (stored during viewFamilyDetails)
             const drawerId = element.closest('.drawer-container').getAttribute('data-family-id');
             const family = drawerId ? familyData.find(f => f.id == drawerId) : familyData[0];
             loadDrawerContent(tab, family);
+        }
+        
+        // Change dispatch records page
+        function changeDispatchPage(direction) {
+            dispatchCurrentPage += direction;
+            
+            // Get the current family data
+            const drawerId = document.querySelector('.drawer-container').getAttribute('data-family-id');
+            const family = drawerId ? familyData.find(f => f.id == drawerId) : familyData[0];
+            
+            if (!family) return;
+            
+            // Reload the dispatch records tab with new page
+            loadDrawerContent('dispatchRecords', family);
         }
 
         // Load drawer content
@@ -1769,29 +1790,33 @@
                             </div>
                             <div class="drawer-info-item">
                                 <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.operatingDays') : '运行天数'}</div>
-                                <div class="drawer-info-value">${family.usageDays}${window.i18n ? window.i18n.getText('family.drawer.day') : '天'}</div>
+                                <div class="drawer-info-value">${Math.floor(Math.random() * 300 + 200)}${window.i18n ? window.i18n.getText('family.drawer.day') : '天'}</div>
                             </div>
                             <div class="drawer-info-item">
                                 <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.owner') : '所属用户'}</div>
                                 <div class="drawer-info-value">${window.i18n ? window.i18n.getText(family.nameKey) : family.name}</div>
                             </div>
-                            <div class="drawer-info-item full-width">
-                                <div style="display: flex; flex-direction: column; gap: 8px;">
-                                    <div style="display: flex; align-items: center; gap: 24px; color: var(--color-text-secondary); font-size: 13px;">
-                                        <span>${window.i18n ? window.i18n.getText('family.drawer.meterNumber') : '电表'}</span>
-                                        <span>${window.i18n ? window.i18n.getText('family.drawer.address') : '地址'}</span>
-                                    </div>
-                                    <div style="display: flex; align-items: center; gap: 24px;">
-                                        <div class="drawer-info-value">${family.meterNumber}</div>
-                                        <div class="drawer-info-value" style="font-size: 16px; font-weight: 500; flex: 1;">
-                                            ${family.location}
-                                            <span style="margin-left: 12px; color: var(--color-primary); cursor: pointer; font-size: 16px;">📍</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="drawer-info-item">
+                                <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.meterNumber') : '电表'}</div>
+                                <div class="drawer-info-value">${family.meterNumber}</div>
+                            </div>
+                            <div class="drawer-info-item" style="grid-column: span 2;">
+                                <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.address') : '地址'}</div>
+                                <div class="drawer-info-value">${family.location}</div>
                             </div>
                         </div>
+                        
+                        <!-- Operating Data Chart -->
+                        <div class="drawer-chart-container" style="margin-top: 30px;">
+                            <div class="drawer-chart-header">
+                                <div class="drawer-chart-title">${window.i18n ? window.i18n.getText('family.drawer.operatingDataTitle') : '运行数据'}</div>
+                                <div class="drawer-date-picker">${new Date().toISOString().split('T')[0]} ▼</div>
+                            </div>
+                            <div id="operatingChart" class="drawer-chart"></div>
+                        </div>
                     `;
+                    // Initialize operating chart
+                    setTimeout(() => initOperatingChart(), 100);
                     break;
                     
                 case 'revenueInfo':
@@ -1827,48 +1852,288 @@
                             <div class="drawer-chart-header">
                                 <div class="drawer-chart-title">${window.i18n ? window.i18n.getText('family.drawer.profitTrend') : '收益趋势'}</div>
                                 <div class="drawer-chart-controls">
-                                    <button class="drawer-chart-control active" onclick="updateProfitChart('day', this)">${window.i18n ? window.i18n.getText('family.drawer.day') : '日'}</button>
-                                    <button class="drawer-chart-control" onclick="updateProfitChart('month', this)">${window.i18n ? window.i18n.getText('family.drawer.month') : '月'}</button>
-                                    <button class="drawer-chart-control" onclick="updateProfitChart('year', this)">${window.i18n ? window.i18n.getText('family.drawer.year') : '年'}</button>
-                                    <div class="drawer-date-picker">2025-05-06 ▼</div>
+                                    <button class="drawer-chart-control active" onclick="updateProfitChart('day', this)" data-view="day">${window.i18n ? window.i18n.getText('family.drawer.day') : '天'}</button>
+                                    <button class="drawer-chart-control" onclick="updateProfitChart('month', this)" data-view="month">${window.i18n ? window.i18n.getText('family.drawer.month') : '月'}</button>
+                                    <button class="drawer-chart-control" onclick="updateProfitChart('year', this)" data-view="year">${window.i18n ? window.i18n.getText('family.drawer.year') : '年'}</button>
+                                    <input type="date" id="profitDatePicker" class="drawer-chart-date-picker" style="background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-text); padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;" onchange="onProfitDateChange(event)">
                                 </div>
                             </div>
                             <div id="profitChart" class="drawer-chart"></div>
                         </div>
                     `;
-                    // Initialize profit chart
-                    setTimeout(() => initProfitChart(), 100);
+                    // Set initial date and initialize chart
+                    setTimeout(() => {
+                        const today = new Date();
+                        document.getElementById('profitDatePicker').value = today.toISOString().split('T')[0];
+                        initProfitChart('day');
+                    }, 100);
                     break;
                     
-                case 'operatingData':
+                case 'dispatchRecords':
+                    // Generate mock dispatch records data
+                    const dispatchRecords = generateDispatchRecords();
+                    
+                    // Pagination settings
+                    const recordsPerPage = 10;
+                    const currentPage = dispatchCurrentPage;
+                    const allRecords = dispatchRecords.filter(r => !r.totalCharge);
+                    const totalPages = Math.ceil(allRecords.length / recordsPerPage);
+                    const startIndex = (currentPage - 1) * recordsPerPage;
+                    const endIndex = startIndex + recordsPerPage;
+                    const pageRecords = allRecords.slice(startIndex, endIndex);
+                    
+                    const recordsHtml = pageRecords.map(record => {
+                        const typeClass = record.type === 'charge' ? 'charging' : 'discharging';
+                        const typeText = record.type === 'charge' ? 
+                            (window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.charge') : '充电') :
+                            (window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.discharge') : '放电');
+                        const amountPrefix = record.type === 'charge' ? '-' : '+';
+                        const amountClass = record.type === 'charge' ? 'cost' : 'revenue';
+                        
+                        return `
+                            <tr>
+                                <td style="font-size: 13px; white-space: nowrap;">${record.timeRange}</td>
+                                <td>
+                                    <span class="dispatch-type-badge ${typeClass}">
+                                        ${typeText}
+                                    </span>
+                                </td>
+                                <td style="white-space: nowrap;">${record.energy} kWh</td>
+                                <td class="${amountClass}" style="white-space: nowrap;">${amountPrefix}$${record.amount}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                    
                     content.innerHTML = `
-                        <div class="operating-stats">
-                            <div>
-                                <div class="operating-stat-value">${family.soc}%</div>
-                                <div class="operating-stat-label">${window.i18n ? window.i18n.getText('family.drawer.socTrend') : 'soc趋势'}</div>
+                        <style>
+                            .dispatch-records-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-top: 20px;
+                                table-layout: fixed;
+                            }
+                            .dispatch-records-table th {
+                                background: var(--color-bg);
+                                color: var(--color-text-secondary);
+                                font-weight: 600;
+                                text-align: left;
+                                padding: 12px 16px;
+                                border-bottom: 2px solid var(--color-border);
+                                font-size: 13px;
+                                white-space: nowrap;
+                            }
+                            .dispatch-records-table th:first-child {
+                                width: 35%;
+                            }
+                            .dispatch-records-table th:nth-child(2) {
+                                width: 15%;
+                            }
+                            .dispatch-records-table th:nth-child(3) {
+                                width: 25%;
+                            }
+                            .dispatch-records-table th:nth-child(4) {
+                                width: 25%;
+                            }
+                            .dispatch-records-table td {
+                                padding: 12px 16px;
+                                border-bottom: 1px solid var(--color-border-light);
+                                color: var(--color-text);
+                                font-size: 14px;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            }
+                            .dispatch-records-table tbody tr:hover {
+                                background: var(--color-bg-hover);
+                            }
+                            .dispatch-type-badge {
+                                display: inline-flex;
+                                align-items: center;
+                                padding: 4px 12px;
+                                border-radius: 12px;
+                                font-size: 12px;
+                                font-weight: 600;
+                            }
+                            .dispatch-type-badge.charging {
+                                background: rgba(255, 184, 0, 0.1);
+                                color: #ffb800;
+                                border: 1px solid rgba(255, 184, 0, 0.2);
+                            }
+                            .dispatch-type-badge.discharging {
+                                background: rgba(0, 255, 136, 0.1);
+                                color: #00ff88;
+                                border: 1px solid rgba(0, 255, 136, 0.2);
+                            }
+                            .dispatch-records-table .revenue {
+                                color: #00ff88;
+                                font-weight: 600;
+                            }
+                            .dispatch-records-table .cost {
+                                color: #ff6b6b;
+                                font-weight: 600;
+                            }
+                            .dispatch-summary {
+                                display: grid;
+                                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                                gap: 16px;
+                                margin-bottom: 24px;
+                            }
+                            .dispatch-summary-card {
+                                background: var(--color-bg);
+                                border: 1px solid var(--color-border);
+                                border-radius: 8px;
+                                padding: 16px;
+                                text-align: center;
+                            }
+                            .dispatch-summary-value {
+                                font-size: 24px;
+                                font-weight: 700;
+                                margin-bottom: 8px;
+                            }
+                            .dispatch-summary-label {
+                                font-size: 12px;
+                                color: var(--color-text-secondary);
+                            }
+                            .dispatch-summary-value.positive {
+                                color: #00ff88;
+                            }
+                            .dispatch-summary-value.negative {
+                                color: #ff6b6b;
+                            }
+                        </style>
+                        
+                        <div class="dispatch-summary">
+                            <div class="dispatch-summary-card">
+                                <div class="dispatch-summary-value">${dispatchRecords.filter(r => !r.totalCharge).length}</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalCount') : '总调度次数'}</div>
                             </div>
-                            <div>
-                                <div class="operating-stat-value">${Math.floor(Math.random() * 300 + 200)}</div>
-                                <div class="operating-stat-label">${window.i18n ? window.i18n.getText('family.drawer.operatingDays') : '运行天数'}</div>
+                            <div class="dispatch-summary-card">
+                                <div class="dispatch-summary-value" style="color: #ffb800;">${dispatchRecords.totalCharge} kWh</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalCharge') : '充电量'}</div>
                             </div>
-                            <div>
-                                <div class="operating-stat-value">${Math.floor(Math.random() * 2000 + 1000)}</div>
-                                <div class="operating-stat-label">${window.i18n ? window.i18n.getText('family.drawer.chargeCycles') : '充放电次数'}</div>
+                            <div class="dispatch-summary-card">
+                                <div class="dispatch-summary-value positive">${dispatchRecords.totalDischarge} kWh</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalDischarge') : '放电量'}</div>
+                            </div>
+                            <div class="dispatch-summary-card">
+                                <div class="dispatch-summary-value positive">$${calculateTotalRevenue(dispatchRecords)}</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalRevenue') : '总收益'}</div>
+                            </div>
+                            <div class="dispatch-summary-card">
+                                <div class="dispatch-summary-value negative">$${calculateTotalCost(dispatchRecords)}</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalCost') : '总成本'}</div>
                             </div>
                         </div>
                         
-                        <div class="drawer-chart-container">
-                            <div class="drawer-chart-header">
-                                <div class="drawer-chart-title">${window.i18n ? window.i18n.getText('family.drawer.operatingDataTitle') : '运行数据'}</div>
-                                <div class="drawer-date-picker">2023-05-06 ▼</div>
-                            </div>
-                            <div id="operatingChart" class="drawer-chart"></div>
+                        <div style="overflow-x: auto; width: 100%;">
+                        <table class="dispatch-records-table">
+                            <thead>
+                                <tr>
+                                    <th>${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.time') : '时间'}</th>
+                                    <th>${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.type') : '类型'}</th>
+                                    <th>${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.energy') : '电量'}</th>
+                                    <th>${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.amount') : '金额'}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${recordsHtml}
+                            </tbody>
+                        </table>
+                        </div>
+                        
+                        <div class="dispatch-pagination" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;">
+                            <button class="pagination-btn" onclick="changeDispatchPage(-1)" style="padding: 6px 12px; background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-text); border-radius: 4px; cursor: pointer;" ${currentPage === 1 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                ← ${window.i18n ? window.i18n.getText('common.previous') : '上一页'}
+                            </button>
+                            <span style="color: var(--color-text-secondary); font-size: 14px;">
+                                ${currentPage} / ${totalPages}
+                            </span>
+                            <button class="pagination-btn" onclick="changeDispatchPage(1)" style="padding: 6px 12px; background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-text); border-radius: 4px; cursor: pointer;" ${currentPage === totalPages ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                ${window.i18n ? window.i18n.getText('common.next') : '下一页'} →
+                            </button>
                         </div>
                     `;
-                    // Initialize operating chart
-                    setTimeout(() => initOperatingChart(), 100);
                     break;
             }
+        }
+
+        // Generate dispatch records data
+        function generateDispatchRecords() {
+            const records = [];
+            const today = new Date();
+            
+            // Track total charge and discharge
+            let totalCharge = 0;
+            let totalDischarge = 0;
+            
+            // Generate records for the last 7 days
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                
+                // Generate 2-4 records per day
+                const recordsPerDay = Math.floor(Math.random() * 3) + 2;
+                
+                for (let j = 0; j < recordsPerDay; j++) {
+                    const startHour = Math.floor(Math.random() * 20); // Start between 0-19
+                    const startMinute = Math.floor(Math.random() * 60);
+                    const duration = Math.floor(Math.random() * 3) + 1; // 1-3 hours duration
+                    const endHour = startHour + duration;
+                    const endMinute = Math.floor(Math.random() * 60);
+                    
+                    const type = Math.random() > 0.3 ? 'discharge' : 'charge';
+                    const energy = type === 'discharge' ? 
+                        (Math.random() * 30 + 10).toFixed(1) : 
+                        (Math.random() * 20 + 5).toFixed(1);
+                    const price = type === 'discharge' ? 
+                        (Math.random() * 0.3 + 0.2) : 
+                        (Math.random() * 0.1 + 0.05);
+                    const amount = (energy * price).toFixed(2);
+                    
+                    // Track totals
+                    if (type === 'charge') {
+                        totalCharge += parseFloat(energy);
+                    } else {
+                        totalDischarge += parseFloat(energy);
+                    }
+                    
+                    const dateStr = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                    const startTime = `${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`;
+                    const endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+                    
+                    records.push({
+                        timeRange: `${dateStr} ${startTime}~${endTime}`,
+                        type: type,
+                        energy: energy,
+                        amount: amount
+                    });
+                }
+            }
+            
+            // Sort by time descending (newest first)
+            records.sort((a, b) => b.timeRange.localeCompare(a.timeRange));
+            
+            // Add totals to the records object
+            records.totalCharge = totalCharge.toFixed(1);
+            records.totalDischarge = totalDischarge.toFixed(1);
+            
+            return records;
+        }
+        
+        // Calculate total revenue from dispatch records
+        function calculateTotalRevenue(records) {
+            const total = records
+                .filter(r => r.type === 'discharge')
+                .reduce((sum, r) => sum + parseFloat(r.amount), 0);
+            return total.toFixed(2);
+        }
+        
+        // Calculate total cost from dispatch records
+        function calculateTotalCost(records) {
+            const total = records
+                .filter(r => r.type === 'charge')
+                .reduce((sum, r) => sum + parseFloat(r.amount), 0);
+            return total.toFixed(2);
         }
 
         // Drawer charts removed - only text information displayed
@@ -1929,22 +2194,263 @@
 
         function exportData() {
             console.log('Exporting data...');
-            alert(window.i18n ? window.i18n.getText('exportSuccess') : '导出成功');
+            const successMessage = window.i18n ? 
+                (window.i18n.getText('runningData.exportSuccess') || 
+                 window.i18n.getText('exportSuccess') || 
+                 '导出成功') : 
+                '导出成功';
+            alert(successMessage);
+        }
+
+        // Export detail data function
+        function exportDetailData() {
+            // Create and show date selection modal
+            showExportDetailModal();
+        }
+        
+        // Show export detail modal with date selection
+        function showExportDetailModal() {
+            // Remove existing modal if any
+            const existingModal = document.getElementById('exportDetailModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Get today's date in YYYY-MM-DD format
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.id = 'exportDetailModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: var(--color-bg-card, #1a1a1a);
+                border-radius: 12px;
+                padding: 24px;
+                width: 400px;
+                max-width: 90%;
+                border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+                animation: slideUp 0.3s ease;
+            `;
+            
+            modalContent.innerHTML = `
+                <style>
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                    @keyframes slideUp {
+                        from { transform: translateY(20px); opacity: 0; }
+                        to { transform: translateY(0); opacity: 1; }
+                    }
+                    #exportDetailModal .modal-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 20px;
+                    }
+                    #exportDetailModal .modal-title {
+                        font-size: 20px;
+                        font-weight: 600;
+                        color: var(--color-text, #fff);
+                    }
+                    #exportDetailModal .modal-close {
+                        background: transparent;
+                        border: none;
+                        color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+                        font-size: 24px;
+                        cursor: pointer;
+                        padding: 0;
+                        width: 32px;
+                        height: 32px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 4px;
+                        transition: all 0.3s;
+                    }
+                    #exportDetailModal .modal-close:hover {
+                        background: rgba(255, 255, 255, 0.1);
+                        color: #fff;
+                    }
+                    #exportDetailModal .modal-body {
+                        margin-bottom: 24px;
+                    }
+                    #exportDetailModal .date-input-group {
+                        margin-bottom: 16px;
+                    }
+                    #exportDetailModal .date-label {
+                        display: block;
+                        color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+                        font-size: 14px;
+                        margin-bottom: 8px;
+                        font-weight: 500;
+                    }
+                    #exportDetailModal .date-input {
+                        width: 100%;
+                        padding: 10px 12px;
+                        background: var(--color-bg, #000);
+                        border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+                        border-radius: 8px;
+                        color: var(--color-text, #fff);
+                        font-size: 14px;
+                        transition: all 0.3s;
+                    }
+                    #exportDetailModal .date-input:focus {
+                        outline: none;
+                        border-color: #00ff88;
+                        background: rgba(0, 255, 136, 0.05);
+                    }
+                    #exportDetailModal .modal-hint {
+                        color: var(--color-text-secondary, rgba(255, 255, 255, 0.5));
+                        font-size: 12px;
+                        margin-top: 8px;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                    }
+                    #exportDetailModal .modal-actions {
+                        display: flex;
+                        gap: 12px;
+                        justify-content: flex-end;
+                    }
+                    #exportDetailModal .btn {
+                        padding: 10px 20px;
+                        border-radius: 8px;
+                        font-size: 14px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s;
+                        border: 1px solid transparent;
+                    }
+                    #exportDetailModal .btn-cancel {
+                        background: rgba(255, 255, 255, 0.05);
+                        border-color: rgba(255, 255, 255, 0.1);
+                        color: rgba(255, 255, 255, 0.8);
+                    }
+                    #exportDetailModal .btn-cancel:hover {
+                        background: rgba(255, 255, 255, 0.1);
+                        color: #fff;
+                    }
+                    #exportDetailModal .btn-export {
+                        background: #00ff88;
+                        color: #000;
+                    }
+                    #exportDetailModal .btn-export:hover {
+                        background: #00e67a;
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+                    }
+                    #exportDetailModal .btn-export:disabled {
+                        opacity: 0.5;
+                        cursor: not-allowed;
+                    }
+                </style>
+                <div class="modal-header">
+                    <h3 class="modal-title">${window.i18n ? window.i18n.getText('family.exportDetail.title') : '导出明细'}</h3>
+                    <button class="modal-close" onclick="closeExportDetailModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="date-input-group">
+                        <label class="date-label">${window.i18n ? window.i18n.getText('family.exportDetail.selectDate') : '选择日期'}</label>
+                        <input type="date" 
+                               id="exportDate" 
+                               class="date-input" 
+                               value="${todayStr}"
+                               max="${todayStr}"
+                               required>
+                        <div class="modal-hint">
+                            <span>ℹ️</span>
+                            <span>${window.i18n ? window.i18n.getText('family.exportDetail.hint') : '只能选择单个日期的数据进行导出'}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-cancel" onclick="closeExportDetailModal()">
+                        ${window.i18n ? window.i18n.getText('common.cancel') : '取消'}
+                    </button>
+                    <button class="btn btn-export" onclick="confirmExportDetail()">
+                        ${window.i18n ? window.i18n.getText('family.exportDetail.confirmExport') : '确认导出'}
+                    </button>
+                </div>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Focus on date input
+            setTimeout(() => {
+                document.getElementById('exportDate').focus();
+            }, 100);
+        }
+        
+        // Close export detail modal
+        function closeExportDetailModal() {
+            const modal = document.getElementById('exportDetailModal');
+            if (modal) {
+                modal.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
+        
+        // Confirm and execute export
+        function confirmExportDetail() {
+            const dateInput = document.getElementById('exportDate');
+            const selectedDate = dateInput.value;
+            
+            if (!selectedDate) {
+                alert(window.i18n ? window.i18n.getText('family.exportDetail.selectDateError') : '请选择日期');
+                return;
+            }
+            
+            // Close modal
+            closeExportDetailModal();
+            
+            // Simulate export process
+            console.log('Exporting data for date:', selectedDate);
+            
+            // Here you would implement the actual export logic
+            // For now, we'll just show a success message
+            setTimeout(() => {
+                const successMessage = window.i18n ? 
+                    window.i18n.getText('family.exportDetail.exportSuccess') : 
+                    `${selectedDate} 的明细数据导出成功`;
+                alert(successMessage);
+            }, 500);
         }
 
         // View running data
         function viewRunningData(familyId, meterNumber) {
-            // Open running data page in new tab with meter number
-            window.open(`running-data.html?meter=${meterNumber}`, '_blank');
+            // Find the family data to get the name
+            const family = window.familyData.find(f => f.id === familyId);
+            const familyName = family ? family.name : '未知';
+            
+            // Open running data page in new tab with meter number and family name
+            window.open(`running-data.html?meter=${meterNumber}&family=${encodeURIComponent(familyName)}`, '_blank');
         }
 
         // Make all functions globally accessible
         window.viewFamilyDetails = viewFamilyDetails;
         window.viewRunningData = viewRunningData;
         window.closeFamilyDrawer = closeFamilyDrawer;
-        window.saveFamilyChanges = saveFamilyChanges;
-        window.deleteFamilyRecord = deleteFamilyRecord;
+        window.confirmFamilyDetails = confirmFamilyDetails;
         window.switchDrawerTab = switchDrawerTab;
+        window.changeDispatchPage = changeDispatchPage;
         window.handleSearch = handleSearch;
         window.handleMeterSearch = handleMeterSearch;
         window.handleActivityFilter = handleActivityFilter;
@@ -1954,32 +2460,94 @@
         window.applyFilters = applyFilters;
         window.resetFilters = resetFilters;
         window.exportData = exportData;
+        window.exportDetailData = exportDetailData;
+        window.showExportDetailModal = showExportDetailModal;
+        window.closeExportDetailModal = closeExportDetailModal;
+        window.confirmExportDetail = confirmExportDetail;
         window.refreshData = refreshData;
         window.loadFamilyCards = loadFamilyCards;
 
+        // Track current view mode
+        let currentProfitView = 'day';
+        
         // Initialize profit chart
-        function initProfitChart() {
+        function initProfitChart(viewMode = 'day') {
             const chartDom = document.getElementById('profitChart');
             if (!chartDom) return;
             
+            currentProfitView = viewMode;
             const chart = echarts.init(chartDom);
+            
+            // Generate x-axis data based on view mode
+            let xAxisData = [];
+            let seriesData1 = [];
+            let seriesData2 = [];
+            
+            if (viewMode === 'day') {
+                // Day view: show 24 hours
+                for (let i = 0; i < 24; i++) {
+                    xAxisData.push(`${i}:00`);
+                    seriesData1.push(Math.floor(Math.random() * 50 + 10));
+                    seriesData2.push(Math.floor(Math.random() * 60 + 20));
+                }
+            } else if (viewMode === 'month') {
+                // Month view: show days of month
+                const date = document.getElementById('profitDatePicker')?.value;
+                const selectedDate = date ? new Date(date) : new Date();
+                const year = selectedDate.getFullYear();
+                const month = selectedDate.getMonth();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                for (let i = 1; i <= daysInMonth; i++) {
+                    xAxisData.push(`${i}`);
+                    seriesData1.push(Math.floor(Math.random() * 200 + 50));
+                    seriesData2.push(Math.floor(Math.random() * 250 + 100));
+                }
+            } else if (viewMode === 'year') {
+                // Year view: show 12 months
+                const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+                xAxisData = months;
+                for (let i = 0; i < 12; i++) {
+                    seriesData1.push(Math.floor(Math.random() * 3000 + 1000));
+                    seriesData2.push(Math.floor(Math.random() * 3500 + 1500));
+                }
+            }
+            
             const option = {
+                legend: {
+                    data: [
+                        window.i18n ? window.i18n.getText('family.drawer.revenue') : '收益',
+                        window.i18n ? window.i18n.getText('family.drawer.discharge') : '放电量'
+                    ],
+                    top: 5,
+                    textStyle: {
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        fontSize: 12
+                    },
+                    itemWidth: 20,
+                    itemHeight: 10,
+                    itemGap: 20
+                },
                 grid: {
-                    top: 20,
+                    top: 40,
                     right: 20,
                     bottom: 30,
                     left: 50
                 },
                 xAxis: {
                     type: 'category',
-                    data: ['1', '2', '3', '4', '5'],
+                    data: xAxisData,
                     axisLine: {
+                        show: true,
                         lineStyle: {
-                            color: 'var(--color-border)'
+                            color: 'rgba(255, 255, 255, 0.2)'
                         }
                     },
                     axisLabel: {
-                        color: 'var(--color-text-secondary)'
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontSize: 11,
+                        rotate: viewMode === 'day' ? 45 : 0,
+                        interval: viewMode === 'day' ? 2 : 'auto'
                     }
                 },
                 yAxis: [{
@@ -1989,15 +2557,16 @@
                     axisLine: {
                         show: true,
                         lineStyle: {
-                            color: 'var(--color-border)'
+                            color: 'rgba(255, 255, 255, 0.2)'
                         }
                     },
                     axisLabel: {
-                        color: 'var(--color-text-secondary)'
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontSize: 12
                     },
                     splitLine: {
                         lineStyle: {
-                            color: 'var(--color-border)',
+                            color: 'rgba(255, 255, 255, 0.1)',
                             type: 'dashed'
                         }
                     }
@@ -2008,32 +2577,33 @@
                     axisLine: {
                         show: true,
                         lineStyle: {
-                            color: 'var(--color-border)'
+                            color: 'rgba(255, 255, 255, 0.2)'
                         }
                     },
                     axisLabel: {
-                        color: 'var(--color-text-secondary)'
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontSize: 12
                     },
                     splitLine: {
                         show: false
                     }
                 }],
                 series: [{
-                    name: '收益',
+                    name: window.i18n ? window.i18n.getText('family.drawer.revenue') : '收益',
                     type: 'bar',
-                    data: [100, 180, 230, 100, 130],
+                    data: seriesData1,
                     itemStyle: {
                         color: '#5B8FF9'
                     },
-                    barWidth: '40%'
+                    barWidth: viewMode === 'day' ? '30%' : '40%'
                 }, {
-                    name: '趋势',
+                    name: window.i18n ? window.i18n.getText('family.drawer.discharge') : '放电量',
                     type: 'line',
                     yAxisIndex: 1,
-                    data: [150, 200, 240, 150, 180],
+                    data: seriesData2,
                     smooth: true,
                     symbol: 'circle',
-                    symbolSize: 8,
+                    symbolSize: viewMode === 'day' ? 4 : 8,
                     itemStyle: {
                         color: '#5AD8A6'
                     },
@@ -2054,6 +2624,13 @@
             if (!chartDom) return;
             
             const chart = echarts.init(chartDom);
+            
+            // Generate 24 hours for today
+            const hours = [];
+            for (let i = 0; i < 24; i++) {
+                hours.push(i + ':00');
+            }
+            
             const option = {
                 grid: {
                     top: 40,
@@ -2063,14 +2640,15 @@
                 },
                 xAxis: {
                     type: 'category',
-                    data: ['0', '6', '12', '18', '24', '30', '36'],
+                    data: hours,
                     axisLine: {
+                        show: true,
                         lineStyle: {
-                            color: '#666'
+                            color: 'rgba(255, 255, 255, 0.2)'
                         }
                     },
                     axisLabel: {
-                        color: '#999',
+                        color: 'rgba(255, 255, 255, 0.6)',
                         fontSize: 12
                     }
                 },
@@ -2082,16 +2660,16 @@
                     axisLine: {
                         show: true,
                         lineStyle: {
-                            color: '#666'
+                            color: 'rgba(255, 255, 255, 0.2)'
                         }
                     },
                     axisLabel: {
-                        color: '#999',
+                        color: 'rgba(255, 255, 255, 0.6)',
                         fontSize: 12
                     },
                     splitLine: {
                         lineStyle: {
-                            color: '#333',
+                            color: 'rgba(255, 255, 255, 0.1)',
                             type: 'solid'
                         }
                     }
@@ -2099,7 +2677,11 @@
                 series: [{
                     name: 'SOC',
                     type: 'line',
-                    data: [65, 83, 88, 95, 88, 60, 75, 30, 35, 65],
+                    // Generate data for 24 hours
+                    data: [
+                        65, 68, 70, 75, 80, 85, 88, 90, 95, 93, 90, 87,
+                        85, 80, 75, 70, 65, 60, 55, 50, 45, 48, 52, 60
+                    ],
                     smooth: true,
                     symbol: 'circle',
                     symbolSize: 8,
@@ -2124,7 +2706,7 @@
                         symbolSize: [60, 25],
                         data: [
                             {
-                                coord: [1, 88],
+                                coord: [6, 88],
                                 value: window.i18n ? window.i18n.getText('family.drawer.charging') : '充电',
                                 itemStyle: {
                                     color: '#5AD8A6'
@@ -2136,7 +2718,7 @@
                                 }
                             },
                             {
-                                coord: [3, 95],
+                                coord: [8, 95],
                                 value: window.i18n ? window.i18n.getText('family.drawer.stopCharging') : '停止充电',
                                 itemStyle: {
                                     color: '#FFC107'
@@ -2148,7 +2730,7 @@
                                 }
                             },
                             {
-                                coord: [5, 75],
+                                coord: [14, 75],
                                 value: window.i18n ? window.i18n.getText('family.drawer.discharging') : '放电',
                                 itemStyle: {
                                     color: '#1E7FFF'
@@ -2160,7 +2742,7 @@
                                 }
                             },
                             {
-                                coord: [7, 35],
+                                coord: [19, 50],
                                 value: window.i18n ? window.i18n.getText('family.drawer.stopDischarging') : '停止放电',
                                 itemStyle: {
                                     color: '#FF6B6B'
@@ -2181,15 +2763,45 @@
         }
         
         // Update profit chart time range
-        function updateProfitChart(range, element) {
+        function updateProfitChart(viewMode, element) {
             // Update active state
             document.querySelectorAll('.drawer-chart-control').forEach(btn => {
                 btn.classList.remove('active');
             });
             element.classList.add('active');
             
-            // Reinitialize chart with new data based on range
-            initProfitChart();
+            // Update current view mode
+            currentProfitView = viewMode;
+            
+            // Update date picker based on view mode
+            const datePicker = document.querySelector('.drawer-chart-date-picker');
+            if (datePicker) {
+                const today = new Date();
+                if (viewMode === 'day') {
+                    datePicker.type = 'date';
+                    datePicker.value = today.toISOString().split('T')[0];
+                } else if (viewMode === 'month') {
+                    datePicker.type = 'month';
+                    datePicker.value = today.toISOString().slice(0, 7);
+                } else if (viewMode === 'year') {
+                    datePicker.type = 'number';
+                    datePicker.min = '2020';
+                    datePicker.max = '2030';
+                    datePicker.value = today.getFullYear();
+                }
+            }
+            
+            // Reinitialize chart with new view mode
+            initProfitChart(viewMode);
+        }
+        
+        // Handle profit chart date change
+        function onProfitDateChange(event) {
+            const selectedDate = event.target.value;
+            if (selectedDate) {
+                // Refresh chart with selected date
+                initProfitChart(currentProfitView);
+            }
         }
     </script>
     <script src="components/global-notifications.js"></script>

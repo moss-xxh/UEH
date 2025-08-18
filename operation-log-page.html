@@ -36,7 +36,7 @@
             height: 100vh;
             margin: 0 auto;
             box-sizing: border-box;
-            padding: 80px 24px 40px;
+            padding: 20px 24px 40px;  /* Further reduced from 30px to 20px (10px up) */
             display: flex;
             flex-direction: column;
         }
@@ -44,10 +44,70 @@
         /* Fixed Header Area */
         .fixed-header {
             position: sticky;
-            top: 60px;  /* 从80px改为60px，上移20px */
+            top: 20px;  /* Moved up 10px more from 30px */
             background: #000;
             z-index: 100;
-            padding-bottom: 0;  /* 从20px改为0 */
+            padding-bottom: 0;
+            padding-top: 0;  /* Removed top padding */
+        }
+        
+        /* Tabs Styles */
+        .tabs-container {
+            margin: 0 0 20px 0;  /* Removed top margin */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0;
+        }
+        
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 12px 24px;
+            font-size: 28px;  /* Changed from 15px to match push-strategy page */
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab-btn:hover {
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .tab-btn.active {
+            color: #00ff88;
+            border-bottom-color: #00ff88;
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            animation: tabGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes tabGlow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
         
         /* Scrollable Content Area */
@@ -100,24 +160,6 @@
         }
         .table-header {
             border-bottom: 1px solid var(--color-border);
-        }
-        .page-header {
-            margin-bottom: -44px; /* 从-24px改为-44px，上移20px */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: -20px; /* 向上移动20px */
-            border-bottom: none !important; /* 去掉分割线 */
-        }
-        .page-title {
-            font-size: 48px;
-            font-weight: 500;
-            color: var(--color-text);
-            margin: 0;
-            letter-spacing: -2px;
-            background: none;
-            -webkit-text-fill-color: unset;
-            margin-bottom: 0 !important; /* 移除底部间距 */
         }
         .header {
             background: var(--color-bg);
@@ -757,9 +799,62 @@
         
         /* Table Wrapper */
         .table-wrapper {
-            overflow-x: auto;
+            position: relative;
+            overflow: hidden;
             border-radius: var(--radius);
             border: 1px solid var(--color-border);
+        }
+        
+        /* Scrollable container */
+        .table-scrollable {
+            overflow-x: auto;
+            width: 100%;
+            position: relative;
+        }
+        
+        /* Custom scrollbar */
+        .table-scrollable::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .table-scrollable::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        
+        .table-scrollable::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        
+        .table-scrollable::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Task table specific - with fixed action column */
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            position: relative;
+            min-width: 1800px; /* Further increased for better spacing */
+        }
+        
+        /* Fixed action column styles */
+        .task-table th:last-child,
+        .task-table td:last-child {
+            position: sticky;
+            right: 0;
+            background: var(--color-bg-card);
+            z-index: 2;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .task-table th:last-child {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .task-table tbody tr:hover td:last-child {
+            background: rgba(255, 255, 255, 0.03);
         }
 
         /* Data Table */
@@ -881,6 +976,214 @@
         .action-link:hover {
             background: rgba(0, 255, 136, 0.1);
             border-color: rgba(0, 255, 136, 0.3);
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        
+        /* Task Type Badge */
+        .task-type-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(100, 100, 255, 0.1);
+            color: #6464ff;
+            border: 1px solid rgba(100, 100, 255, 0.2);
+        }
+        
+        /* Discharge Type Badge */
+        .discharge-type-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .discharge-type-badge.auto {
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+        
+        .discharge-type-badge.manual {
+            background: rgba(255, 184, 0, 0.1);
+            color: #ffb800;
+            border: 1px solid rgba(255, 184, 0, 0.2);
+        }
+        
+        /* Profit styles */
+        .profit-positive {
+            color: #00ff88;
+            font-weight: 600;
+        }
+        
+        /* Participation Rate styles */
+        .participation-rate {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .participation-rate.high {
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+        
+        .participation-rate.medium {
+            background: rgba(255, 184, 0, 0.1);
+            color: #ffb800;
+            border: 1px solid rgba(255, 184, 0, 0.2);
+        }
+        
+        .participation-rate.low {
+            background: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.2);
+        }
+        
+        /* Sort buttons - matching family page style */
+        .sort-buttons {
+            margin-left: 6px;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            vertical-align: middle;
+            position: relative;
+            top: -2px;
+        }
+        
+        /* Table header cells - ensure horizontal layout */
+        .task-table th {
+            white-space: nowrap;
+            padding: 15px 20px;
+            min-width: 120px;
+        }
+        
+        /* Specific column widths for better layout */
+        .task-table th:nth-child(1) { min-width: 160px; } /* 时间 */
+        .task-table th:nth-child(2) { min-width: 80px; } /* 地区 */
+        .task-table th:nth-child(3) { min-width: 100px; } /* 放电类型 */
+        .task-table th:nth-child(4) { min-width: 100px; } /* 下发任务 */
+        .task-table th:nth-child(5) { min-width: 130px; } /* 下发任务数 */
+        .task-table th:nth-child(6) { min-width: 120px; } /* 参与人数 */
+        .task-table th:nth-child(7) { min-width: 100px; } /* 参与率 */
+        .task-table th:nth-child(8) { min-width: 140px; } /* 放电量 */
+        .task-table th:nth-child(9) { min-width: 120px; } /* 净利润 */
+        .task-table th:nth-child(10) { min-width: 180px; } /* 每度电净利润 */
+        .task-table th:nth-child(11) { min-width: 100px; } /* 操作 */
+        
+        /* Table data cells */
+        .task-table td {
+            white-space: nowrap;
+            padding: 15px 20px;
+        }
+        
+        /* Header content container for sortable columns */
+        .header-content {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        
+        .header-content > span:first-child {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        /* Ensure sort buttons stay inline */
+        .sortable-header .sort-buttons {
+            display: inline-flex !important;
+            margin-left: 4px !important;
+        }
+
+        .sort-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            width: 16px;
+            height: 14px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            padding: 0;
+            margin: 0;
+            line-height: 1;
+            opacity: 0.8;
+        }
+
+        .sort-btn:hover {
+            color: rgba(255, 255, 255, 0.8);
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .sort-btn.active {
+            color: var(--color-primary);
+            opacity: 1;
+            text-shadow: 0 0 8px rgba(0, 255, 136, 0.6);
+        }
+        
+        /* Modal styles removed - details now shown on separate page */
+        
+        /* Task Status Badges */
+        .status-running {
+            background: rgba(0, 122, 255, 0.15);
+            color: #007aff;
+            border: 1px solid rgba(0, 122, 255, 0.3);
+        }
+        
+        .status-running::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-success {
+            background: rgba(52, 199, 89, 0.15);
+            color: #34c759;
+            border: 1px solid rgba(52, 199, 89, 0.3);
+        }
+        
+        .status-pending {
+            background: rgba(255, 149, 0, 0.15);
+            color: #ff9500;
+            border: 1px solid rgba(255, 149, 0, 0.3);
+        }
+        
+        .status-cancelled {
+            background: rgba(255, 59, 48, 0.15);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.3);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         /* Pagination */
@@ -1376,9 +1679,16 @@
     <div class="container">
         <!-- Fixed Header Area -->
         <div class="fixed-header">
-            <!-- Page Header -->
-            <div class="page-header">
-                <h1 class="page-title" data-i18n="operationLog.title">操作记录</h1>
+            <!-- Tabs -->
+            <div class="tabs-container">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="task" onclick="switchTab('task')">
+                        <span data-i18n="operationLog.tabs.task">任务记录</span>
+                    </button>
+                    <button class="tab-btn" data-tab="operation" onclick="switchTab('operation')">
+                        <span data-i18n="operationLog.tabs.operation">操作记录</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Search and Filter Section -->
@@ -1428,8 +1738,98 @@
             </div>
         </div>
 
-        <!-- Scrollable Content Area -->
-        <div class="scrollable-content">
+        <!-- Tab Contents -->
+        <!-- Task Records Tab -->
+        <div id="taskTab" class="tab-content active">
+            <div class="scrollable-content">
+                <!-- Task Records Table -->
+                <div class="table-card">
+                    <div class="table-actions-header">
+                        <button class="filter-btn export" onclick="exportTaskLogs()">
+                            <span>📥</span>
+                            <span data-i18n="operationLog.buttons.export">导出</span>
+                        </button>
+                    </div>
+                    <div class="table-wrapper">
+                        <div class="table-scrollable">
+                            <table class="data-table task-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="operationLog.table.time">时间</th>
+                                <th data-i18n="operationLog.table.region">地区</th>
+                                <th data-i18n="operationLog.table.dischargeType">放电类型</th>
+                                <th data-i18n="operationLog.table.taskIssuer">下发任务</th>
+                                <th class="sortable-header">
+                                    <div class="header-content">
+                                        <span data-i18n="operationLog.table.taskCount">下发任务数</span>
+                                        <span class="sort-buttons">
+                                            <button class="sort-btn sort-asc" onclick="sortTaskTable('taskCount', 'asc', this)" title="升序">▲</button>
+                                            <button class="sort-btn sort-desc" onclick="sortTaskTable('taskCount', 'desc', this)" title="降序">▼</button>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="sortable-header">
+                                    <div class="header-content">
+                                        <span data-i18n="operationLog.table.participants">参与人数</span>
+                                        <span class="sort-buttons">
+                                            <button class="sort-btn sort-asc" onclick="sortTaskTable('participants', 'asc', this)" title="升序">▲</button>
+                                            <button class="sort-btn sort-desc" onclick="sortTaskTable('participants', 'desc', this)" title="降序">▼</button>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="sortable-header">
+                                    <div class="header-content">
+                                        <span data-i18n="operationLog.table.participationRate">参与率</span>
+                                        <span class="sort-buttons">
+                                            <button class="sort-btn sort-asc" onclick="sortTaskTable('participationRate', 'asc', this)" title="升序">▲</button>
+                                            <button class="sort-btn sort-desc" onclick="sortTaskTable('participationRate', 'desc', this)" title="降序">▼</button>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="sortable-header">
+                                    <div class="header-content">
+                                        <span data-i18n="operationLog.table.dischargeAmount">放电量(kWh)</span>
+                                        <span class="sort-buttons">
+                                            <button class="sort-btn sort-asc" onclick="sortTaskTable('dischargeAmount', 'asc', this)" title="升序">▲</button>
+                                            <button class="sort-btn sort-desc" onclick="sortTaskTable('dischargeAmount', 'desc', this)" title="降序">▼</button>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="sortable-header">
+                                    <div class="header-content">
+                                        <span data-i18n="operationLog.table.netProfit">净利润($)</span>
+                                        <span class="sort-buttons">
+                                            <button class="sort-btn sort-asc" onclick="sortTaskTable('netProfit', 'asc', this)" title="升序">▲</button>
+                                            <button class="sort-btn sort-desc" onclick="sortTaskTable('netProfit', 'desc', this)" title="降序">▼</button>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="sortable-header">
+                                    <div class="header-content">
+                                        <span data-i18n="operationLog.table.profitPerKwh">每度电净利润($/kWh)</span>
+                                        <span class="sort-buttons">
+                                            <button class="sort-btn sort-asc" onclick="sortTaskTable('profitPerKwh', 'asc', this)" title="升序">▲</button>
+                                            <button class="sort-btn sort-desc" onclick="sortTaskTable('profitPerKwh', 'desc', this)" title="降序">▼</button>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th data-i18n="operationLog.table.action">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskTableBody">
+                            <!-- Task records will be loaded here -->
+                        </tbody>
+                    </table>
+                        </div>
+                    </div>
+                    <div id="taskPagination"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Operation Records Tab -->
+        <div id="operationTab" class="tab-content">
+            <div class="scrollable-content">
             <!-- Table Card -->
             <div class="table-card">
                 <!-- Table Actions Header -->
@@ -1468,6 +1868,7 @@
 
             <!-- Pagination -->
             <div id="operationLogPaginationContainer"></div>
+            </div>
         </div>
     </div>
 
@@ -1481,6 +1882,7 @@
         let pageSize = 20;
         let totalRecords = 243;
         let totalPages = Math.ceil(totalRecords / pageSize);
+        let currentTab = 'task';  // Default tab
         let filteredData = [];
         let pagination = null;
         
@@ -2179,6 +2581,407 @@
             closeDatePicker();
         }
 
+        // Tab switching function
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.tab === tabName) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            if (tabName === 'task') {
+                document.getElementById('taskTab').classList.add('active');
+                loadTaskRecords();
+            } else {
+                document.getElementById('operationTab').classList.add('active');
+                loadOperationLogs();
+            }
+        }
+        
+        // Task sorting state
+        let taskSortColumn = null;
+        let taskSortDirection = 'asc';
+        let sortedTaskRecords = [];
+        
+        // Task records data
+        const taskRecords = [
+            { 
+                id: 'F-NSW-202403151945',
+                region: 'NSW',
+                time: '2024-03-15 19:45:00', 
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 450,
+                participants: 425,
+                participationRate: 94.4, 
+                dischargeAmount: 12580.6, 
+                netProfit: 2012.90, 
+                profitPerKwh: 0.16,
+                userDetails: [
+                    { userName: '陈建国', discharged: 125.3, earnings: 20.05, status: '已完成' },
+                    { userName: '刘晓明', discharged: 98.7, earnings: 15.79, status: '已完成' },
+                    { userName: '王秀英', discharged: 112.4, earnings: 17.98, status: '已完成' },
+                    { userName: '张伟', discharged: 87.6, earnings: 14.02, status: '放电中' },
+                    { userName: '李娜', discharged: 95.2, earnings: 15.23, status: '已完成' },
+                    { userName: '赵强', discharged: 108.9, earnings: 17.42, status: '已完成' },
+                    { userName: '孙丽', discharged: 0, earnings: 0, status: '未参与' },
+                    { userName: '周涛', discharged: 89.3, earnings: 14.29, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-VIC-202403151830',
+                region: 'VIC',
+                time: '2024-03-15 18:30:00', 
+                dischargeType: '手动', 
+                taskIssuer: '放电', 
+                taskCount: 280,
+                participants: 256,
+                participationRate: 91.4, 
+                dischargeAmount: 6789.2, 
+                netProfit: 1357.84, 
+                profitPerKwh: 0.20,
+                userDetails: [
+                    { userName: '马腾飞', discharged: 145.8, earnings: 29.16, status: '已完成' },
+                    { userName: '杨帆', discharged: 132.6, earnings: 26.52, status: '放电中' },
+                    { userName: '黄鑫', discharged: 119.7, earnings: 23.94, status: '已完成' },
+                    { userName: '林静', discharged: 0, earnings: 0, status: '未参与' },
+                    { userName: '吴昊', discharged: 107.3, earnings: 21.46, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-QLD-202403151715',
+                region: 'QLD',
+                time: '2024-03-15 17:15:00', 
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 420,
+                participants: 387,
+                participationRate: 92.1, 
+                dischargeAmount: 9876.5, 
+                netProfit: 1678.01, 
+                profitPerKwh: 0.17,
+                userDetails: [
+                    { userName: '徐明远', discharged: 156.2, earnings: 26.55, status: '已完成' },
+                    { userName: '朱雨晴', discharged: 143.8, earnings: 24.45, status: '已完成' },
+                    { userName: '唐磊', discharged: 128.5, earnings: 21.85, status: '已完成' },
+                    { userName: '韩雪', discharged: 117.9, earnings: 20.04, status: '已完成' },
+                    { userName: '郭涛', discharged: 136.7, earnings: 23.24, status: '已完成' },
+                    { userName: '梁超', discharged: 124.3, earnings: 21.13, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-SA-202403151600',
+                region: 'SA',
+                time: '2024-03-15 16:00:00', 
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 550,
+                participants: 512,
+                participationRate: 93.1, 
+                dischargeAmount: 15678.3, 
+                netProfit: 2351.75, 
+                profitPerKwh: 0.15,
+                userDetails: [
+                    { userName: '邱志伟', discharged: 189.4, earnings: 28.41, status: '已完成' },
+                    { userName: '范文博', discharged: 176.8, earnings: 26.52, status: '已完成' },
+                    { userName: '汪小芳', discharged: 165.2, earnings: 24.78, status: '已完成' },
+                    { userName: '贾鹏飞', discharged: 158.7, earnings: 23.81, status: '已完成' },
+                    { userName: '沈阳', discharged: 147.9, earnings: 22.19, status: '已完成' },
+                    { userName: '钟楠', discharged: 139.6, earnings: 20.94, status: '已完成' },
+                    { userName: '魏强', discharged: 152.3, earnings: 22.85, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-WA-202403151445',
+                region: 'WA',
+                time: '2024-03-15 14:45:00', 
+                dischargeType: '手动', 
+                taskIssuer: '放电', 
+                taskCount: 320,
+                participants: 298,
+                participationRate: 93.1, 
+                dischargeAmount: 7234.9, 
+                netProfit: 1302.28, 
+                profitPerKwh: 0.18,
+                userDetails: [
+                    { userName: '蒋海波', discharged: 134.7, earnings: 24.25, status: '已完成' },
+                    { userName: '秦丽华', discharged: 128.3, earnings: 23.09, status: '已完成' },
+                    { userName: '尤明', discharged: 115.6, earnings: 20.81, status: '已完成' },
+                    { userName: '许志刚', discharged: 142.8, earnings: 25.70, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-NSW-202403151330',
+                region: 'NSW',
+                time: '2024-03-15 13:30:00', 
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 480,
+                participants: 445,
+                participationRate: 92.7, 
+                dischargeAmount: 13456.7, 
+                netProfit: 2018.51, 
+                profitPerKwh: 0.15,
+                userDetails: [
+                    { userName: '何晓军', discharged: 167.9, earnings: 25.19, status: '已完成' },
+                    { userName: '吕春梅', discharged: 154.2, earnings: 23.13, status: '已完成' },
+                    { userName: '施伟', discharged: 148.6, earnings: 22.29, status: '已完成' },
+                    { userName: '陶然', discharged: 139.8, earnings: 20.97, status: '已完成' },
+                    { userName: '曹磊', discharged: 161.5, earnings: 24.23, status: '已完成' },
+                    { userName: '严莉', discharged: 125.7, earnings: 18.86, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-TAS-202403151215',
+                region: 'TAS',
+                time: '2024-03-15 12:15:00', 
+                dischargeType: '手动', 
+                taskIssuer: '放电', 
+                taskCount: 210,
+                participants: 189,
+                participationRate: 90.0, 
+                dischargeAmount: 4567.8, 
+                netProfit: 868.88, 
+                profitPerKwh: 0.19,
+                userDetails: [
+                    { userName: '金峰', discharged: 112.3, earnings: 21.34, status: '已完成' },
+                    { userName: '魏娜', discharged: 98.7, earnings: 18.75, status: '已完成' },
+                    { userName: '董明辉', discharged: 105.4, earnings: 20.03, status: '已完成' },
+                    { userName: '石敏', discharged: 89.6, earnings: 17.02, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-VIC-202403151100',
+                region: 'VIC',
+                time: '2024-03-15 11:00:00', 
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 400,
+                participants: 367,
+                participationRate: 91.8, 
+                dischargeAmount: 10234.5, 
+                netProfit: 1637.52, 
+                profitPerKwh: 0.16,
+                userDetails: [
+                    { userName: '龚志远', discharged: 145.6, earnings: 23.30, status: '已完成' },
+                    { userName: '邹晓红', discharged: 132.8, earnings: 21.25, status: '已完成' },
+                    { userName: '熊伟', discharged: 128.4, earnings: 20.54, status: '已完成' },
+                    { userName: '廖芳', discharged: 119.7, earnings: 19.15, status: '已完成' },
+                    { userName: '薛强', discharged: 137.9, earnings: 22.06, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-QLD-202403150945',
+                region: 'QLD',
+                time: '2024-03-15 09:45:00', 
+                dischargeType: '手动', 
+                taskIssuer: '放电', 
+                taskCount: 300,
+                participants: 278,
+                participationRate: 92.7, 
+                dischargeAmount: 6789.3, 
+                netProfit: 1221.47, 
+                profitPerKwh: 0.18,
+                userDetails: [
+                    { userName: '姚建军', discharged: 156.8, earnings: 28.22, status: '已完成' },
+                    { userName: '谢丽丽', discharged: 142.3, earnings: 25.61, status: '已完成' },
+                    { userName: '邓超', discharged: 134.5, earnings: 24.21, status: '已完成' },
+                    { userName: '潘静', discharged: 125.9, earnings: 22.66, status: '已完成' },
+                    { userName: '戴峰', discharged: 118.6, earnings: 21.35, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-NSW-202403150830',
+                region: 'NSW',
+                time: '2024-03-15 08:30:00', 
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 560,
+                participants: 523,
+                participationRate: 93.4, 
+                dischargeAmount: 16789.4, 
+                netProfit: 2686.30, 
+                profitPerKwh: 0.16,
+                userDetails: [
+                    { userName: '蔡文斌', discharged: 198.7, earnings: 31.79, status: '已完成' },
+                    { userName: '田雨', discharged: 185.4, earnings: 29.66, status: '已完成' },
+                    { userName: '夏明', discharged: 176.8, earnings: 28.29, status: '已完成' },
+                    { userName: '于洋', discharged: 168.2, earnings: 26.91, status: '已完成' },
+                    { userName: '冯娟', discharged: 159.6, earnings: 25.54, status: '已完成' },
+                    { userName: '顾鹏', discharged: 151.3, earnings: 24.21, status: '已完成' },
+                    { userName: '卢晓峰', discharged: 143.7, earnings: 22.99, status: '已完成' },
+                    { userName: '汤敏', discharged: 135.8, earnings: 21.73, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-SA-202403150715',
+                region: 'SA',
+                time: '2024-03-15 07:15:00', 
+                dischargeType: '手动', 
+                taskIssuer: '放电', 
+                taskCount: 380,
+                participants: 342,
+                participationRate: 90.0, 
+                dischargeAmount: 8976.5, 
+                netProfit: 1615.77, 
+                profitPerKwh: 0.18,
+                userDetails: [
+                    { userName: '任志强', discharged: 167.3, earnings: 30.11, status: '已完成' },
+                    { userName: '史丽萍', discharged: 154.8, earnings: 27.86, status: '已完成' },
+                    { userName: '方明', discharged: 146.2, earnings: 26.32, status: '已完成' },
+                    { userName: '毛晓东', discharged: 138.5, earnings: 24.93, status: '已完成' },
+                    { userName: '倪雨', discharged: 129.7, earnings: 23.35, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-ACT-202403150600',
+                region: 'ACT',
+                time: '2024-03-15 06:00:00', 
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 500,
+                participants: 456,
+                participationRate: 91.2, 
+                dischargeAmount: 14567.8, 
+                netProfit: 2185.17, 
+                profitPerKwh: 0.15,
+                userDetails: [
+                    { userName: '孟祥云', discharged: 189.6, earnings: 28.44, status: '已完成' },
+                    { userName: '常丽', discharged: 176.3, earnings: 26.45, status: '已完成' },
+                    { userName: '程浩', discharged: 168.7, earnings: 25.31, status: '已完成' },
+                    { userName: '康明', discharged: 159.4, earnings: 23.91, status: '已完成' },
+                    { userName: '鲍晓芳', discharged: 151.8, earnings: 22.77, status: '已完成' },
+                    { userName: '成龙', discharged: 143.2, earnings: 21.48, status: '已完成' }
+                ]
+            }
+        ];
+        
+        // Sort task table - matching family page logic
+        function sortTaskTable(column, direction, element) {
+            console.log('sortTaskTable called:', column, direction);
+            
+            // Check if data is available
+            if (!taskRecords || taskRecords.length === 0) {
+                console.error('No data to sort');
+                return;
+            }
+            
+            // Check if clicking the same sort button
+            const isCurrentSort = taskSortColumn === column && taskSortDirection === direction;
+            
+            // Remove active class from all sort buttons
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (isCurrentSort) {
+                // Cancel sort - restore original order
+                taskSortColumn = null;
+                taskSortDirection = null;
+                sortedTaskRecords = [];
+                
+                // Reload original data
+                loadTaskRecords(false);
+                console.log('Sort cancelled, restored original order');
+                return;
+            }
+            
+            // Set active state
+            element.classList.add('active');
+            taskSortColumn = column;
+            taskSortDirection = direction;
+            
+            // Sort the records
+            sortedTaskRecords = [...taskRecords].sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+                
+                // Handle numeric comparisons
+                if (typeof aVal === 'number' && typeof bVal === 'number') {
+                    return direction === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+                
+                // Handle string comparisons
+                return direction === 'asc' 
+                    ? String(aVal).localeCompare(String(bVal))
+                    : String(bVal).localeCompare(String(aVal));
+            });
+            
+            console.log(`Sorted by ${column} (${direction})`);
+            
+            // Reload table with sorted data
+            loadTaskRecords(true);
+        }
+        
+        // Load task records
+        function loadTaskRecords(useSorted = false) {
+            const tbody = document.getElementById('taskTableBody');
+            if (!tbody) return;
+            
+            // Use sorted records if available and requested, otherwise use original
+            const dataToDisplay = (useSorted && sortedTaskRecords.length > 0) ? sortedTaskRecords : taskRecords;
+            
+            tbody.innerHTML = dataToDisplay.map(task => `
+                <tr>
+                    <td>${task.time}</td>
+                    <td>${task.region}</td>
+                    <td>
+                        <span class="discharge-type-badge ${task.dischargeType === '自动' ? 'auto' : 'manual'}">
+                            ${task.dischargeType}
+                        </span>
+                    </td>
+                    <td>${task.taskIssuer}</td>
+                    <td>${task.taskCount}</td>
+                    <td>${task.participants}</td>
+                    <td>${task.participationRate.toFixed(1)}%</td>
+                    <td>${task.dischargeAmount.toFixed(1)}</td>
+                    <td class="profit-positive">$${task.netProfit.toFixed(2)}</td>
+                    <td>$${task.profitPerKwh.toFixed(3)}</td>
+                    <td>
+                        <a href="#" class="action-link" onclick="viewTaskDetails('${task.id}'); return false;">
+                            ${window.i18n ? window.i18n.getText('operationLog.viewDetails') : '查看详情'}
+                        </a>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // View task details - navigates to detail page
+        function viewTaskDetails(taskId) {
+            const task = taskRecords.find(t => t.id === taskId);
+            if (!task) return;
+            
+            // Store task data in localStorage and navigate to detail page
+            localStorage.setItem('taskDetailData', JSON.stringify(task));
+            window.location.href = `task-detail.html?id=${taskId}`;
+        }
+        
+        // Export task logs
+        function exportTaskLogs() {
+            const csv = '时间,地区,放电类型,下发任务,下发任务数,参与人数,参与率(%),放电量(kWh),净利润($),每度电净利润($/kWh)\n' +
+                taskRecords.map(task => `${task.time},${task.region},${task.dischargeType},${task.taskIssuer},${task.taskCount},${task.participants},${task.participationRate.toFixed(1)},${task.dischargeAmount.toFixed(1)},${task.netProfit.toFixed(2)},${task.profitPerKwh.toFixed(3)}`).join('\n');
+            
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `放电任务记录_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showSuccessToast('导出成功', `已导出 ${taskRecords.length} 条放电任务记录`);
+        }
+        
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize HeaderNav component
@@ -2204,6 +3007,9 @@
                 }
             });
             
+            // Load task records first since it's the default active tab
+            loadTaskRecords();
+            
             updateTableDisplay();
             updatePaginationDisplay();
             initDatePicker();
@@ -2225,6 +3031,9 @@
                 });
             }
 
+            // Load initial tab content
+            loadTaskRecords();
+            
             console.log('操作记录页面初始化完成');
         });
     </script>

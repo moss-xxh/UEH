@@ -652,17 +652,17 @@
                                     </span>
                                 </th>
                                 <th>
-                                    <span data-i18n="profit.table.profit">获利 ($)</span>
-                                    <span class="sort-buttons">
-                                        <button class="sort-btn sort-asc" onclick="sortTable('profit', 'asc', this)" title="升序">▲</button>
-                                        <button class="sort-btn sort-desc" onclick="sortTable('profit', 'desc', this)" title="降序">▼</button>
-                                    </span>
-                                </th>
-                                <th>
                                     <span data-i18n="profit.table.profitPerKwh">每kWh获利 ($)</span>
                                     <span class="sort-buttons">
                                         <button class="sort-btn sort-asc" onclick="sortTable('profitPerKwh', 'asc', this)" title="升序">▲</button>
                                         <button class="sort-btn sort-desc" onclick="sortTable('profitPerKwh', 'desc', this)" title="降序">▼</button>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span data-i18n="profit.table.profit">获利 ($)</span>
+                                    <span class="sort-buttons">
+                                        <button class="sort-btn sort-asc" onclick="sortTable('profit', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('profit', 'desc', this)" title="降序">▼</button>
                                     </span>
                                 </th>
                                 <th data-i18n="profit.table.dailyAvg" id="avgHeader">日均
@@ -1059,66 +1059,138 @@
             const chartDom = document.getElementById('revenueDistributionChart');
             const chart = echarts.init(chartDom);
             
-            // 生成散点数据
-            const scatterData = [];
-            for (let i = 0; i < 50; i++) {
-                scatterData.push([
-                    Math.random() * 100,
-                    20 + Math.random() * 100
-                ]);
-            }
+            // 获取当前语言
+            const currentLang = window.i18n ? window.i18n.currentLanguage : 'zh';
+            
+            // 生成用户收益分布数据 - 适合大量用户的分组柱状图
+            const revenueRanges = ['<$0', '$0-10', '$10-20', '$20-30', '$30-40', '$40-50', '$50-60', '$60-70', '$70-80', '$80-90', '$90-100', '>$100'];
+            
+            // 模拟大量用户的收益分布数据（正态分布偏左，符合实际情况）
+            const userCounts = [
+                320,   // <$0 (亏损用户)
+                2850,  // $0-10
+                3420,  // $10-20
+                2680,  // $20-30
+                1950,  // $30-40
+                1420,  // $40-50
+                980,   // $50-60
+                650,   // $60-70
+                420,   // $70-80
+                280,   // $80-90
+                180,   // $90-100
+                150    // >$100
+            ];
+            
+            // 计算总数
+            const total = userCounts.reduce((a, b) => a + b, 0);
+            
+            // 多语言文本
+            const labels = {
+                zh: {
+                    userCount: '用户数',
+                    users: '人',
+                    percentage: '占比'
+                },
+                en: {
+                    userCount: 'User Count',
+                    users: 'users',
+                    percentage: 'Percentage'
+                }
+            };
             
             const option = {
                 tooltip: {
-                    trigger: 'item',
+                    trigger: 'axis',
                     backgroundColor: 'rgba(0,0,0,0.9)',
                     borderColor: 'rgba(255,255,255,0.1)',
                     textStyle: { color: '#fff' },
                     formatter: function(params) {
-                        return `用户: ${params.data[0].toFixed(0)}<br/>收益: $${params.data[1].toFixed(0)}`;
+                        const bar = params[0];
+                        const percentage = ((bar.value / total) * 100).toFixed(1);
+                        return `${bar.name}<br/>` +
+                               `${labels[currentLang].userCount}: ${bar.value.toLocaleString()} ${labels[currentLang].users}<br/>` +
+                               `${labels[currentLang].percentage}: ${percentage}%`;
+                    },
+                    axisPointer: {
+                        type: 'shadow'
                     }
                 },
                 grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    top: '3%',
+                    left: '10%',
+                    right: '10%',
+                    bottom: '15%',
+                    top: '10%',
                     containLabel: true
                 },
                 xAxis: {
-                    type: 'value',
-                    name: '用户',
-                    nameLocation: 'end',
-                    nameTextStyle: { color: 'rgba(255, 255, 255, 0.6)', fontSize: 12 },
-                    axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.08)' } },
-                    axisLabel: { color: 'rgba(255, 255, 255, 0.6)' },
-                    splitLine: { 
-                        lineStyle: { color: 'rgba(255, 255, 255, 0.08)', type: 'dashed' } 
+                    type: 'category',
+                    data: revenueRanges,
+                    axisLine: {
+                        lineStyle: { color: 'rgba(255,255,255,0.2)' }
+                    },
+                    axisLabel: {
+                        color: 'rgba(255,255,255,0.7)',
+                        fontSize: 11,
+                        rotate: 45,
+                        interval: 0
+                    },
+                    axisTick: {
+                        alignWithLabel: true
                     }
                 },
                 yAxis: {
                     type: 'value',
-                    name: '$',
-                    nameLocation: 'end',
-                    nameTextStyle: { color: 'rgba(255, 255, 255, 0.6)', fontSize: 12 },
-                    axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.08)' } },
-                    axisLabel: { color: 'rgba(255, 255, 255, 0.6)', formatter: '{value}' },
-                    splitLine: { 
-                        lineStyle: { color: 'rgba(255, 255, 255, 0.08)', type: 'dashed' } 
+                    name: labels[currentLang].userCount,
+                    nameTextStyle: {
+                        color: 'rgba(255,255,255,0.7)',
+                        fontSize: 12
+                    },
+                    axisLine: {
+                        show: true,
+                        lineStyle: { color: 'rgba(255,255,255,0.2)' }
+                    },
+                    axisLabel: {
+                        color: 'rgba(255,255,255,0.7)',
+                        fontSize: 11,
+                        formatter: '{value}'
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: 'rgba(255,255,255,0.1)'
+                        }
                     }
                 },
                 series: [{
-                    name: '收益分布',
-                    type: 'scatter',
-                    data: scatterData,
-                    symbolSize: 8,
-                    itemStyle: { color: '#00ff88', opacity: 0.8 },
+                    name: labels[currentLang].userCount,
+                    type: 'bar',
+                    data: userCounts,
+                    itemStyle: {
+                        color: function(params) {
+                            // 根据收益区间设置不同颜色
+                            if (params.dataIndex === 0) return '#ff6b6b'; // 亏损 - 红色
+                            if (params.dataIndex <= 2) return '#ffd93d'; // 低收益 - 黄色
+                            if (params.dataIndex <= 5) return '#6bcf7f'; // 中收益 - 绿色
+                            if (params.dataIndex <= 8) return '#00ff88'; // 高收益 - 亮绿色
+                            return '#00ccff'; // 超高收益 - 蓝色
+                        },
+                        borderRadius: [4, 4, 0, 0]
+                    },
                     emphasis: {
-                        scale: 1.5,
                         itemStyle: {
-                            color: '#00ff88',
                             shadowBlur: 10,
                             shadowColor: 'rgba(0, 255, 136, 0.5)'
+                        }
+                    },
+                    label: {
+                        show: true,
+                        position: 'top',
+                        color: 'rgba(255,255,255,0.7)',
+                        fontSize: 10,
+                        formatter: function(params) {
+                            if (params.value > 1000) {
+                                return (params.value / 1000).toFixed(1) + 'k';
+                            }
+                            return params.value;
                         }
                     }
                 }]
@@ -1244,12 +1316,15 @@
                     { value: 3420, name: userNames[4] }
                 ]
                 : [
-                    { value: 280, name: userNames[5] },
-                    { value: 250, name: userNames[6] },
-                    { value: 220, name: userNames[7] },
+                    { value: 150, name: userNames[9] },
                     { value: 180, name: userNames[8] },
-                    { value: 150, name: userNames[9] }
+                    { value: 220, name: userNames[7] },
+                    { value: 250, name: userNames[6] },
+                    { value: 280, name: userNames[5] }
                 ];
+            
+            // 反转数据顺序，使最高值/最低值在顶部
+            data.reverse();
 
             const option = {
                 tooltip: {
@@ -1263,25 +1338,13 @@
                     }
                 },
                 grid: {
-                    left: '3%',
+                    left: '5%',
                     right: '15%',
-                    bottom: '3%',
-                    top: '3%',
+                    bottom: '5%',
+                    top: '5%',
                     containLabel: true
                 },
                 xAxis: {
-                    type: 'category',
-                    data: data.map(item => item.name),
-                    axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.08)' } },
-                    axisLabel: { 
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        interval: 0,
-                        rotate: -45,
-                        fontSize: 12,
-                        margin: 8
-                    }
-                },
-                yAxis: {
                     type: 'value',
                     axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.08)' } },
                     axisLabel: { 
@@ -1292,21 +1355,54 @@
                         lineStyle: { color: 'rgba(255, 255, 255, 0.08)', type: 'dashed' } 
                     }
                 },
+                yAxis: {
+                    type: 'category',
+                    data: data.map(item => item.name),
+                    axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.08)' } },
+                    axisLabel: { 
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontSize: 12
+                    },
+                    axisTick: {
+                        show: false
+                    }
+                },
                 series: [{
                     name: '获利 ($)',
                     type: 'bar',
                     data: data.map(item => item.value),
                     label: {
                         show: true,
-                        position: 'top',
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        formatter: function(params) { return '$' + params.value; }
+                        position: 'right',
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        formatter: function(params) { return '$' + params.value; },
+                        fontSize: 11
                     },
                     itemStyle: {
-                        color: isTop5 ? '#00ff88' : '#ff6b6b',
-                        borderRadius: [4, 4, 0, 0]
+                        color: function(params) {
+                            if (isTop5) {
+                                // 前五名使用渐变绿色
+                                return new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                                    { offset: 0, color: 'rgba(0, 255, 136, 0.3)' },
+                                    { offset: 1, color: '#00ff88' }
+                                ]);
+                            } else {
+                                // 后五名使用渐变红色
+                                return new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                                    { offset: 0, color: 'rgba(255, 107, 107, 0.3)' },
+                                    { offset: 1, color: '#ff6b6b' }
+                                ]);
+                            }
+                        },
+                        borderRadius: [0, 4, 4, 0]
                     },
-                    barWidth: '50%'
+                    barWidth: '60%',
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowColor: isTop5 ? 'rgba(0, 255, 136, 0.5)' : 'rgba(255, 107, 107, 0.5)'
+                        }
+                    }
                 }]
             };
 
@@ -1546,8 +1642,8 @@
                         <td>${row.user}</td>
                         <td class="status-${row.status === 'notParticipating' ? 'not-participating' : row.status}">${getStatusText(row.status)}</td>
                         <td>${row.discharge.toFixed(1)}</td>
-                        <td class="${row.profit > 0 ? 'profit-positive' : 'profit-negative'}">${row.profit}</td>
                         <td class="${profitPerKwh > 0 ? 'profit-positive' : ''}">${profitPerKwh}</td>
+                        <td class="${row.profit > 0 ? 'profit-positive' : 'profit-negative'}">${row.profit}</td>
                         <td>${row.dailyAvg}</td>
                         <td class="${row.comparison >= 0 ? 'profit-positive' : 'profit-negative'}">${row.comparison >= 0 ? '+' : ''}${row.comparison}</td>
                     `;
@@ -1572,8 +1668,8 @@
                 totalRow.innerHTML = `
                     <td colspan="3" style="text-align: center; font-weight: 600; color: var(--color-primary);">${totalText}</td>
                     <td style="font-weight: 600;">${totalDischarge.toFixed(1)}</td>
-                    <td class="profit-positive" style="font-weight: 600;">${totalProfit}</td>
                     <td class="profit-positive" style="font-weight: 600;">${avgProfitPerKwh}</td>
+                    <td class="profit-positive" style="font-weight: 600;">${totalProfit}</td>
                     <td colspan="2"></td>
                 `;
                 tbody.appendChild(totalRow);

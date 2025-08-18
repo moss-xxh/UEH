@@ -4341,21 +4341,24 @@
                 </div>
                 
                 <!-- Bottom Stats Cards -->
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; height: 80px; flex-shrink: 0;">
-                    <div style="padding: 10px 8px; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%;">
-                        <div style="font-size: 18px; margin-bottom: 3px;">🏠</div>
-                        <div style="font-size: 9px; color: rgba(255,255,255,0.7); margin-bottom: 3px; font-weight: 500;" data-i18n="availableHomes">可放电家庭</div>
-                        <div style="font-size: 18px; font-weight: 700; color: #fff;" id="totalFamiliesCard">120</div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; height: auto; min-height: 100px; flex-shrink: 0;">
+                    <div style="padding: 12px 8px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; min-width: 0;">
+                        <div style="font-size: 22px; margin-bottom: 6px;">🏠</div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 6px; font-weight: 600; line-height: 1.2; height: 30px; display: flex; align-items: center;" data-i18n="availableHomes">可放电家庭</div>
+                        <div style="font-size: 20px; font-weight: 700; color: #fff;" id="totalFamiliesCard">120</div>
                     </div>
-                    <div style="padding: 10px 8px; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%;">
-                        <div style="font-size: 18px; margin-bottom: 3px;">⚡</div>
-                        <div style="font-size: 9px; color: rgba(255,255,255,0.7); margin-bottom: 3px; font-weight: 500;" data-i18n="availablePower">可放电量</div>
-                        <div style="font-size: 18px; font-weight: 700; color: #fff;" id="totalPowerCard">65kWh</div>
+                    <div style="padding: 12px 8px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; min-width: 0;">
+                        <div style="font-size: 22px; margin-bottom: 6px;">⚡</div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 6px; font-weight: 600; line-height: 1.2; height: 30px; display: flex; align-items: center;" data-i18n="availablePower">可放电量</div>
+                        <div style="font-size: 20px; font-weight: 700; color: #fff;" id="totalPowerCard">65kWh</div>
                     </div>
-                    <div style="padding: 10px 8px; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%;">
-                        <div style="font-size: 18px; margin-bottom: 3px;">💰</div>
-                        <div style="font-size: 9px; color: rgba(255,255,255,0.7); margin-bottom: 3px; font-weight: 500;" data-i18n="estimatedProfit">预计获利</div>
-                        <div style="font-size: 18px; font-weight: 700; color: #fff;">$3500</div>
+                    <div style="padding: 12px 8px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; min-width: 0;">
+                        <div style="font-size: 22px; margin-bottom: 6px;">💰</div>
+                        <div style="height: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 6px;">
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 600; line-height: 1.2;" data-i18n="estimatedRevenueMain">预计收益</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.6); line-height: 1.2;" data-i18n="estimatedRevenueSub">（不考虑成本）</div>
+                        </div>
+                        <div style="font-size: 20px; font-weight: 700; color: #fff;">$3500</div>
                     </div>
                 </div>
             </div>
@@ -4546,10 +4549,10 @@
                         <div style="font-size: 18px; font-weight: 700; color: #fff;">235MW</div>
                     </div>
                     
-                    <!-- 累计放电 -->
+                    <!-- 累计放电上网量 -->
                     <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                         <div style="font-size: 20px; margin-bottom: 6px;">⚡</div>
-                        <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 4px;" data-i18n="totalDischarge">累计放电</div>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 4px;" data-i18n="totalGridDischarge">累计放电上网量</div>
                         <div style="font-size: 18px; font-weight: 700; color: #fff;">234kwh</div>
                     </div>
                     
@@ -4646,7 +4649,7 @@
             
             <div class="overview-footer">
                 <div class="overview-item">
-                    <div class="overview-label">累计放电</div>
+                    <div class="overview-label" data-i18n="totalGridDischarge">累计放电上网量</div>
                     <div class="overview-value" id="totalDischargeOverview">445.2 MWh</div>
                 </div>
                 <div class="overview-item">
@@ -4672,7 +4675,7 @@
 
                 <div class="stat-overview-card">
                     <div class="stat-overview-icon">⚡</div>
-                    <div class="stat-overview-label">累计放电</div>
+                    <div class="stat-overview-label" data-i18n="totalGridDischarge">累计放电上网量</div>
                     <div class="stat-overview-value" id="totalDischarge">234kwh</div>
                 </div>
 
@@ -5107,8 +5110,8 @@
                 // 切换到自动模式时，显示确认弹窗
                 showAutoModeConfirmDialog();
             } else {
-                // 从自动模式切换到手动模式，直接切换
-                switchOperationMode('manual');
+                // 从自动模式切换到手动模式，也显示确认弹窗
+                showDisableAutoModeConfirmDialog();
             }
         }
         
@@ -5351,6 +5354,91 @@
         function confirmEnableAutoMode() {
             closeAutoModeConfirmDialog();
             switchOperationMode('auto');
+        }
+        
+        // 显示关闭自动模式确认弹窗
+        function showDisableAutoModeConfirmDialog() {
+            // 创建模态框
+            const modal = document.createElement('div');
+            modal.id = 'disableAutoModeConfirmModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: linear-gradient(135deg, rgba(26, 26, 26, 0.98) 0%, rgba(40, 40, 40, 0.98) 100%);
+                backdrop-filter: blur(20px);
+                border-radius: 16px;
+                width: 480px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                animation: slideUp 0.3s ease;
+                overflow: hidden;
+            `;
+            
+            modalContent.innerHTML = `
+                <div style="padding: 24px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255, 255, 255, 0.02);">
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #fff;">
+                        ${window.i18n ? window.i18n.getText('confirmDisableAutoMode') : '确认关闭自动模式'}
+                    </h3>
+                </div>
+                
+                <div style="padding: 24px 28px;">
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: rgba(255, 255, 255, 0.9); font-size: 14px; margin: 0 0 16px 0;">
+                            ${window.i18n ? window.i18n.getText('disableAutoModeDescription') : '关闭自动模式后，系统将停止自动充放电操作，您需要手动控制充放电。'}
+                        </p>
+                    </div>
+                    
+                    <!-- 警告提示 -->
+                    <div style="background: rgba(255, 184, 0, 0.1); border: 1px solid rgba(255, 184, 0, 0.3); border-radius: 8px; padding: 12px; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px;">
+                        <span style="font-size: 16px; margin-top: 2px;">⚠️</span>
+                        <div>
+                            <p style="font-size: 13px; color: rgba(255, 184, 0, 0.9); margin: 0 0 4px 0; font-weight: 600;">
+                                ${window.i18n ? window.i18n.getText('autoModeWarning') : '注意'}
+                            </p>
+                            <p style="font-size: 12px; color: rgba(255, 255, 255, 0.7); margin: 0;">
+                                ${window.i18n ? window.i18n.getText('disableAutoModeWarning') : '关闭自动模式后，您可能会错过最佳的充放电时机，影响收益。'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; gap: 12px; padding: 20px 28px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <button onclick="closeDisableAutoModeConfirmDialog()" style="background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        ${window.i18n ? window.i18n.getText('cancel') : '取消'}
+                    </button>
+                    <button onclick="confirmDisableAutoMode()" style="background: linear-gradient(135deg, #ff6b6b, #ff5252); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; border: none;">
+                        ${window.i18n ? window.i18n.getText('confirmDisable') : '确认关闭'}
+                    </button>
+                </div>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+        }
+        
+        function closeDisableAutoModeConfirmDialog() {
+            const modal = document.getElementById('disableAutoModeConfirmModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function confirmDisableAutoMode() {
+            closeDisableAutoModeConfirmDialog();
+            switchOperationMode('manual');
         }
         
         // 显示自动开关禁用提示

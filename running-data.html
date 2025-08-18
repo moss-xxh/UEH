@@ -301,6 +301,7 @@
                 <span>←</span>
                 <span data-i18n-key="common.back">返回</span>
             </button>
+            <span style="margin-left: 20px; color: #00ff88; font-size: 18px; font-weight: 600;" id="familyNameDisplay"></span>
         </div>
         
         <!-- Query Section -->
@@ -379,6 +380,16 @@
                 containerId: 'languageSelector',
                 defaultLanguage: localStorage.getItem('app_language') || 'zh'
             });
+            
+            // Add observer for language changes
+            window.i18n.addObserver(() => {
+                // Update family name display when language changes
+                const familyDisplay = document.getElementById('familyNameDisplay');
+                if (familyDisplay && window.familyName) {
+                    const runningDataText = window.i18n ? window.i18n.getText('runningData.title') : '运行数据';
+                    familyDisplay.textContent = `${window.familyName} - ${runningDataText}`;
+                }
+            });
 
             // Initialize header without back button
             setTimeout(() => {
@@ -395,9 +406,17 @@
                 }
             }, 100);
 
-            // Get meter number from URL and store it globally
+            // Get meter number and family name from URL and store them globally
             const urlParams = new URLSearchParams(window.location.search);
             window.meterNumber = urlParams.get('meter') || 'METER-001';
+            window.familyName = decodeURIComponent(urlParams.get('family') || '张明');
+            
+            // Display family name in header
+            const familyDisplay = document.getElementById('familyNameDisplay');
+            if (familyDisplay) {
+                const runningDataText = window.i18n ? window.i18n.getText('runningData.title') : '运行数据';
+                familyDisplay.textContent = `${window.familyName} - ${runningDataText}`;
+            }
 
             // Set default dates (last 7 days)
             const today = new Date();
@@ -450,9 +469,12 @@
             const currentTime = new Date(startDate);
             const endTime = new Date(endDate);
             endTime.setHours(23, 59, 59);
+            
+            // Use the family name from URL parameter
+            const familyName = window.familyName;
 
             while (currentTime <= endTime) {
-                // Generate data every 5 minutes
+                // Generate data every 30 minutes
                 const gridUsage = (Math.random() * 10 + 5).toFixed(2);
                 const feedIn = (Math.random() * 8).toFixed(2);
                 const price = (Math.random() * 0.3 + 0.1).toFixed(3);
@@ -463,11 +485,11 @@
                     gridUsage: parseFloat(gridUsage),
                     feedIn: parseFloat(feedIn),
                     price: parseFloat(price),
-                    family: (window.i18n && window.i18n.getCurrentLanguage() === 'en' ? 'Family #' : '家庭 #') + Math.floor(Math.random() * 10 + 1)
+                    family: familyName
                 });
 
-                // Add 5 minutes
-                currentTime.setMinutes(currentTime.getMinutes() + 5);
+                // Add 30 minutes
+                currentTime.setMinutes(currentTime.getMinutes() + 30);
             }
 
             totalRecords = tableData.length;
@@ -548,6 +570,7 @@
 
         function exportToCSV(startDate, endDate) {
             const meterNumber = window.meterNumber;
+            const familyName = window.familyName;
             
             // Generate export data
             const exportData = [];
@@ -567,11 +590,10 @@
                 const feedIn = (Math.random() * 8).toFixed(2);
                 const price = (Math.random() * 0.3 + 0.1).toFixed(3);
                 const region = window.i18n && window.i18n.getCurrentLanguage() === 'en' ? 'Sydney' : '悉尼';
-                const family = (window.i18n && window.i18n.getCurrentLanguage() === 'en' ? 'Family #' : '家庭 #') + Math.floor(Math.random() * 10 + 1);
                 
-                csv += `${meterNumber},${formatDateTime(currentTime)},${gridUsage},${feedIn},${price},${region},${family}\n`;
+                csv += `${meterNumber},${formatDateTime(currentTime)},${gridUsage},${feedIn},${price},${region},${familyName}\n`;
                 
-                currentTime.setMinutes(currentTime.getMinutes() + 5);
+                currentTime.setMinutes(currentTime.getMinutes() + 30);
             }
 
             // Download as Excel-compatible CSV
