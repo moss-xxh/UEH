@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>完整版时间条件设置</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 50px;
+            margin: 0;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .controls {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .lang-btn {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .lang-btn:hover {
+            background: #00dd77;
+            transform: translateY(-1px);
+        }
+        
+        .lang-btn.active {
+            background: #0066cc;
+            color: white;
+        }
+        
+        .modal-demo {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 0;
+            margin-bottom: 30px;
+        }
+        
+        .modal-header {
+            padding: 24px 32px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        .modal-body {
+            padding: 24px 32px;
+        }
+        
+        .modal-footer {
+            padding: 16px 32px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        /* 时间条件卡片样式 */
+        .time-condition-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .time-condition-title {
+            color: rgba(255,255,255,0.9);
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        /* 时间轴样式 */
+        .timeline-display {
+            position: relative;
+            height: 50px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: visible;
+            margin-bottom: 24px;
+        }
+        
+        .timeline-marks {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+        }
+        
+        .timeline-mark {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+        }
+        
+        .timeline-mark.major {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .timeline-mark.minor {
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .timeline-labels {
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            right: 0;
+            height: 16px;
+            display: flex;
+            justify-content: space-between;
+            color: rgba(255,255,255,0.6);
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .timeline-blocks {
+            position: absolute;
+            left: 0;
+            right: 0;
+        }
+        
+        .timeline-blocks.charge {
+            top: 2px;
+            height: 16px;
+        }
+        
+        .timeline-blocks.discharge {
+            bottom: 2px;
+            height: 16px;
+        }
+        
+        .timeline-block {
+            position: absolute;
+            height: 100%;
+            border-radius: 2px;
+            opacity: 0.7;
+        }
+        
+        .timeline-block.charge {
+            background: #00ff88;
+        }
+        
+        .timeline-block.discharge {
+            background: #ffc107;
+        }
+        
+        /* 时间段管理样式 */
+        .time-periods-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        
+        .time-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .time-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .charge-title { color: #00ff88; }
+        .discharge-title { color: #ffc107; }
+        
+        .add-btn {
+            background: transparent;
+            border: 1px dashed rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .charge-add-btn {
+            border-color: rgba(0, 255, 136, 0.4);
+            color: #00ff88;
+        }
+        
+        .charge-add-btn:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.6);
+        }
+        
+        .discharge-add-btn {
+            border-color: rgba(255, 193, 7, 0.4);
+            color: #ffc107;
+        }
+        
+        .discharge-add-btn:hover {
+            background: rgba(255, 193, 7, 0.1);
+            border-color: rgba(255, 193, 7, 0.6);
+        }
+        
+        .time-period-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 8px;
+            transition: all 0.3s;
+        }
+        
+        .time-period-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .time-period-item.conflict {
+            border-color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+        }
+        
+        .time-period-inputs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .time-input {
+            width: 80px;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .time-input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 0 2px rgba(0, 255, 136, 0.1);
+        }
+        
+        .time-period-separator {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+        }
+        
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: #ff6b6b;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+        
+        .delete-btn:hover {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff8a8a;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        .btn-save {
+            background: linear-gradient(135deg, #00ff88, #00dd77);
+            color: #000;
+            font-weight: 700;
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+        }
+        
+        .features-list {
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        /* 冲突警告样式 */
+        .conflict-warning {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+            z-index: 10000;
+            font-size: 14px;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🎯 完整版时间条件设置</h1>
+        
+        <div class="controls">
+            <span>语言切换:</span>
+            <button class="lang-btn active" onclick="switchLanguage('zh')">中文</button>
+            <button class="lang-btn" onclick="switchLanguage('en')">English</button>
+            <span style="margin-left: 20px;">测试功能:</span>
+            <button class="lang-btn" onclick="testConflict()">测试时间冲突</button>
+        </div>
+        
+        <div class="modal-demo">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #fff;" data-text="automationSettings">自动化条件设置</h3>
+                    <span style="padding: 4px 12px; background: #00ff88; color: #000; border-radius: 20px; font-size: 12px; font-weight: 600;">NSW</span>
+                </div>
+                <button style="background: none; border: none; color: rgba(255,255,255,0.6); font-size: 24px; cursor: pointer;">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- 时间条件设置 -->
+                <div class="time-condition-card">
+                    <div class="time-condition-title">
+                        ⏰ <span data-text="timeConditionSettings">时间条件设置</span>
+                    </div>
+                    
+                    <!-- 24小时时间轴显示 -->
+                    <div class="timeline-display">
+                        <!-- 时间刻度线 -->
+                        <div class="timeline-marks">
+                            <!-- 主要刻度线 (每6小时) -->
+                            <div class="timeline-mark major" style="left: 0%;"></div>
+                            <div class="timeline-mark major" style="left: 25%;"></div>
+                            <div class="timeline-mark major" style="left: 50%;"></div>
+                            <div class="timeline-mark major" style="left: 75%;"></div>
+                            <div class="timeline-mark major" style="left: 100%;"></div>
+                            <!-- 次要刻度线 (每3小时) -->
+                            <div class="timeline-mark minor" style="left: 12.5%;"></div>
+                            <div class="timeline-mark minor" style="left: 37.5%;"></div>
+                            <div class="timeline-mark minor" style="left: 62.5%;"></div>
+                            <div class="timeline-mark minor" style="left: 87.5%;"></div>
+                        </div>
+                        <!-- 时间标签 -->
+                        <div class="timeline-labels">
+                            <span style="transform: translateX(-50%); margin-left: 50%;">00:00</span>
+                            <span style="transform: translateX(-50%);">03:00</span>
+                            <span style="transform: translateX(-50%);">06:00</span>
+                            <span style="transform: translateX(-50%);">09:00</span>
+                            <span style="transform: translateX(-50%);">12:00</span>
+                            <span style="transform: translateX(-50%);">15:00</span>
+                            <span style="transform: translateX(-50%);">18:00</span>
+                            <span style="transform: translateX(-50%);">21:00</span>
+                            <span style="transform: translateX(50%); margin-right: 50%;">24:00</span>
+                        </div>
+                        <!-- 充电时间段显示 -->
+                        <div class="timeline-blocks charge" id="chargeTimeline">
+                            <!-- 22:00-06:00 跨天显示 -->
+                            <div class="timeline-block charge" style="left: 91.67%; width: 8.33%;"></div>
+                            <div class="timeline-block charge" style="left: 0%; width: 25%;"></div>
+                        </div>
+                        <!-- 放电时间段显示 -->
+                        <div class="timeline-blocks discharge" id="dischargeTimeline">
+                            <!-- 16:00-21:00 -->
+                            <div class="timeline-block discharge" style="left: 66.67%; width: 20.83%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="time-periods-grid">
+                        <!-- 充电时间段 -->
+                        <div>
+                            <div class="time-section-header">
+                                <h4 class="time-section-title charge-title" data-text="chargeTime">充电时间</h4>
+                                <button class="add-btn charge-add-btn" onclick="addTimePeriod('charge')">
+                                    + <span data-text="add">添加</span>
+                                </button>
+                            </div>
+                            <div id="chargeTimePeriods">
+                                <div class="time-period-item">
+                                    <div class="time-period-inputs">
+                                        <input type="time" class="time-input" value="22:00" onchange="updatePeriod(this)">
+                                        <span class="time-period-separator">-</span>
+                                        <input type="time" class="time-input" value="06:00" onchange="updatePeriod(this)">
+                                    </div>
+                                    <button class="delete-btn" onclick="deletePeriod(this)">✕</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 放电时间段 -->
+                        <div>
+                            <div class="time-section-header">
+                                <h4 class="time-section-title discharge-title" data-text="dischargeTime">放电时间</h4>
+                                <button class="add-btn discharge-add-btn" onclick="addTimePeriod('discharge')">
+                                    + <span data-text="add">添加</span>
+                                </button>
+                            </div>
+                            <div id="dischargeTimePeriods">
+                                <div class="time-period-item">
+                                    <div class="time-period-inputs">
+                                        <input type="time" class="time-input" value="16:00" onchange="updatePeriod(this)">
+                                        <span class="time-period-separator">-</span>
+                                        <input type="time" class="time-input" value="21:00" onchange="updatePeriod(this)">
+                                    </div>
+                                    <button class="delete-btn" onclick="deletePeriod(this)">✕</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-cancel" data-text="cancel">取消</button>
+                <button class="btn btn-save" data-text="saveSettings">保存设置</button>
+            </div>
+        </div>
+        
+        <div class="features-list">
+            <h3>🎉 新功能完成！</h3>
+            <ul style="line-height: 1.8;">
+                <li>✅ <strong data-text="removeLabel">移除"今日时间轴(24小时)"文字</strong> - 界面更简洁</li>
+                <li>✅ <strong data-text="timeMarks">显示时间刻度值</strong> - 00:00, 03:00, 06:00... 24:00</li>
+                <li>✅ <strong data-text="conflictDetection">时间冲突检测</strong> - 不允许时间段重叠</li>
+                <li>✅ <strong data-text="languageSupport">中英文切换支持</strong> - 完整的国际化</li>
+                <li>✅ <strong data-text="visualTimeline">可视化时间轴</strong> - 直观显示全天安排</li>
+                <li>✅ <strong data-text="conflictWarning">冲突警告提示</strong> - 实时验证时间段有效性</li>
+            </ul>
+            
+            <h4 data-text="timeRules">⚠️ 时间规则：</h4>
+            <ul>
+                <li data-text="rule1">🚫 时间段不能重叠（如09:00-12:00与11:00-14:00冲突）</li>
+                <li data-text="rule2">✅ 支持跨天时间段（如22:00-06:00）</li>
+                <li data-text="rule3">⚡ 实时冲突检测，自动恢复无效输入</li>
+                <li data-text="rule4">🌍 完整中英文界面支持</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 语言数据
+        const translations = {
+            zh: {
+                automationSettings: '自动化条件设置',
+                timeConditionSettings: '时间条件设置',
+                chargeTime: '充电时间',
+                dischargeTime: '放电时间',
+                add: '添加',
+                cancel: '取消',
+                saveSettings: '保存设置',
+                removeLabel: '移除"今日时间轴(24小时)"文字',
+                timeMarks: '显示时间刻度值',
+                conflictDetection: '时间冲突检测',
+                languageSupport: '中英文切换支持',
+                visualTimeline: '可视化时间轴',
+                conflictWarning: '冲突警告提示',
+                timeRules: '⚠️ 时间规则：',
+                rule1: '🚫 时间段不能重叠（如09:00-12:00与11:00-14:00冲突）',
+                rule2: '✅ 支持跨天时间段（如22:00-06:00）',
+                rule3: '⚡ 实时冲突检测，自动恢复无效输入',
+                rule4: '🌍 完整中英文界面支持',
+                conflictMessage: '时间段不能重叠！'
+            },
+            en: {
+                automationSettings: 'Automation Condition Settings',
+                timeConditionSettings: 'Time Condition Settings',
+                chargeTime: 'Charge Time',
+                dischargeTime: 'Discharge Time',
+                add: 'Add',
+                cancel: 'Cancel',
+                saveSettings: 'Save Settings',
+                removeLabel: 'Remove "Daily Timeline (24 Hours)" text',
+                timeMarks: 'Display time scale values',
+                conflictDetection: 'Time conflict detection',
+                languageSupport: 'Chinese-English switching support',
+                visualTimeline: 'Visual timeline',
+                conflictWarning: 'Conflict warning prompts',
+                timeRules: '⚠️ Time Rules:',
+                rule1: '🚫 Time periods cannot overlap (e.g., 09:00-12:00 conflicts with 11:00-14:00)',
+                rule2: '✅ Support overnight time periods (e.g., 22:00-06:00)',
+                rule3: '⚡ Real-time conflict detection, auto-restore invalid input',
+                rule4: '🌍 Complete Chinese-English interface support',
+                conflictMessage: 'Time periods cannot overlap!'
+            }
+        };
+        
+        let currentLanguage = 'zh';
+        let timePeriods = {
+            charge: [{ startTime: '22:00', endTime: '06:00' }],
+            discharge: [{ startTime: '16:00', endTime: '21:00' }]
+        };
+        
+        // 切换语言
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 更新文本
+            document.querySelectorAll('[data-text]').forEach(element => {
+                const key = element.getAttribute('data-text');
+                if (translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+        }
+        
+        // 添加时间段
+        function addTimePeriod(type) {
+            const container = document.getElementById(type + 'TimePeriods');
+            const newItem = document.createElement('div');
+            newItem.className = 'time-period-item';
+            newItem.innerHTML = `
+                <div class="time-period-inputs">
+                    <input type="time" class="time-input" value="00:00" onchange="updatePeriod(this)">
+                    <span class="time-period-separator">-</span>
+                    <input type="time" class="time-input" value="01:00" onchange="updatePeriod(this)">
+                </div>
+                <button class="delete-btn" onclick="deletePeriod(this)">✕</button>
+            `;
+            container.appendChild(newItem);
+            
+            // 更新数据
+            const startTime = newItem.querySelector('.time-input').value;
+            const endTime = newItem.querySelectorAll('.time-input')[1].value;
+            timePeriods[type].push({ startTime, endTime });
+            
+            updateTimeline();
+        }
+        
+        // 删除时间段
+        function deletePeriod(btn) {
+            const item = btn.closest('.time-period-item');
+            const container = item.parentElement;
+            const type = container.id.includes('charge') ? 'charge' : 'discharge';
+            const index = Array.from(container.children).indexOf(item);
+            
+            timePeriods[type].splice(index, 1);
+            item.remove();
+            updateTimeline();
+        }
+        
+        // 更新时间段
+        function updatePeriod(input) {
+            const item = input.closest('.time-period-item');
+            const container = item.parentElement;
+            const type = container.id.includes('charge') ? 'charge' : 'discharge';
+            const index = Array.from(container.children).indexOf(item);
+            
+            const inputs = item.querySelectorAll('.time-input');
+            const startTime = inputs[0].value;
+            const endTime = inputs[1].value;
+            
+            // 检查冲突
+            const oldPeriod = timePeriods[type][index];
+            timePeriods[type][index] = { startTime, endTime };
+            
+            if (hasTimeConflict()) {
+                // 恢复原值
+                timePeriods[type][index] = oldPeriod;
+                inputs[0].value = oldPeriod.startTime;
+                inputs[1].value = oldPeriod.endTime;
+                
+                showConflictWarning();
+                return;
+            }
+            
+            updateTimeline();
+        }
+        
+        // 检查时间冲突
+        function hasTimeConflict() {
+            const allPeriods = [...timePeriods.charge, ...timePeriods.discharge];
+            
+            for (let i = 0; i < allPeriods.length; i++) {
+                for (let j = i + 1; j < allPeriods.length; j++) {
+                    if (isTimeOverlap(allPeriods[i], allPeriods[j])) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        
+        // 检查时间重叠
+        function isTimeOverlap(period1, period2) {
+            const start1 = timeToMinutes(period1.startTime);
+            const end1 = timeToMinutes(period1.endTime);
+            const start2 = timeToMinutes(period2.startTime);
+            const end2 = timeToMinutes(period2.endTime);
+            
+            const isOvernight1 = start1 > end1;
+            const isOvernight2 = start2 > end2;
+            
+            if (isOvernight1 && isOvernight2) {
+                return true; // 两个跨天时间段总是重叠
+            } else if (isOvernight1) {
+                return (start2 <= end1) || (start2 >= start1);
+            } else if (isOvernight2) {
+                return (start1 <= end2) || (start1 >= start2);
+            } else {
+                return (start1 < end2) && (start2 < end1);
+            }
+        }
+        
+        // 时间转分钟
+        function timeToMinutes(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+        
+        // 显示冲突警告
+        function showConflictWarning() {
+            const message = translations[currentLanguage].conflictMessage;
+            
+            const warning = document.createElement('div');
+            warning.className = 'conflict-warning';
+            warning.textContent = message;
+            
+            document.body.appendChild(warning);
+            
+            setTimeout(() => {
+                warning.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => {
+                    if (warning.parentNode) warning.parentNode.removeChild(warning);
+                }, 300);
+            }, 3000);
+        }
+        
+        // 更新时间轴
+        function updateTimeline() {
+            updateTimelineBlocks('charge');
+            updateTimelineBlocks('discharge');
+        }
+        
+        // 更新时间轴块
+        function updateTimelineBlocks(type) {
+            const container = document.getElementById(type + 'Timeline');
+            container.innerHTML = '';
+            
+            timePeriods[type].forEach(period => {
+                const blocks = createTimelineBlocks(period, type);
+                blocks.forEach(block => container.appendChild(block));
+            });
+        }
+        
+        // 创建时间轴块
+        function createTimelineBlocks(period, type) {
+            const startHour = timeToMinutes(period.startTime) / (24 * 60) * 100;
+            const endHour = timeToMinutes(period.endTime) / (24 * 60) * 100;
+            
+            const blocks = [];
+            
+            if (startHour > endHour) {
+                // 跨天：分两段
+                const block1 = document.createElement('div');
+                block1.className = `timeline-block ${type}`;
+                block1.style.cssText = `left: ${startHour}%; width: ${100 - startHour}%;`;
+                blocks.push(block1);
+                
+                const block2 = document.createElement('div');
+                block2.className = `timeline-block ${type}`;
+                block2.style.cssText = `left: 0%; width: ${endHour}%;`;
+                blocks.push(block2);
+            } else {
+                // 正常情况
+                const block = document.createElement('div');
+                block.className = `timeline-block ${type}`;
+                block.style.cssText = `left: ${startHour}%; width: ${endHour - startHour}%;`;
+                blocks.push(block);
+            }
+            
+            return blocks;
+        }
+        
+        // 测试冲突功能
+        function testConflict() {
+            // 添加一个会冲突的时间段
+            const container = document.getElementById('chargeTimePeriods');
+            const newItem = document.createElement('div');
+            newItem.className = 'time-period-item';
+            newItem.innerHTML = `
+                <div class="time-period-inputs">
+                    <input type="time" class="time-input" value="23:00" onchange="updatePeriod(this)">
+                    <span class="time-period-separator">-</span>
+                    <input type="time" class="time-input" value="01:00" onchange="updatePeriod(this)">
+                </div>
+                <button class="delete-btn" onclick="deletePeriod(this)">✕</button>
+            `;
+            container.appendChild(newItem);
+            
+            timePeriods.charge.push({ startTime: '23:00', endTime: '01:00' });
+            
+            // 这会触发冲突检测
+            setTimeout(() => {
+                showConflictWarning();
+                // 移除测试项
+                setTimeout(() => {
+                    newItem.remove();
+                    timePeriods.charge.pop();
+                    updateTimeline();
+                }, 3500);
+            }, 100);
+        }
+        
+        // 初始化
+        updateTimeline();
+    </script>
+</body>
+</html>

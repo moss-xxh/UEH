@@ -1,0 +1,206 @@
+<!-- 用户管理页面 -->
+<div class="users-page">
+    <!-- 用户统计卡片 -->
+    <div class="user-stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-details">
+                <h3>总用户数</h3>
+                <div class="stat-value">18,934</div>
+                <div class="stat-change positive">+156 今日</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🟢</div>
+            <div class="stat-details">
+                <h3>活跃用户</h3>
+                <div class="stat-value">12,567</div>
+                <div class="stat-change positive">+89 今日</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💳</div>
+            <div class="stat-details">
+                <h3>VIP用户</h3>
+                <div class="stat-value">2,145</div>
+                <div class="stat-change positive">+23 今日</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🔒</div>
+            <div class="stat-details">
+                <h3>黑名单用户</h3>
+                <div class="stat-value">48</div>
+                <div class="stat-change neutral">无变化</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <input type="text" class="search-box" placeholder="搜索手机号、姓名、邮箱...">
+            <select class="filter-select">
+                <option value="">全部状态</option>
+                <option value="active">活跃</option>
+                <option value="inactive">非活跃</option>
+                <option value="vip">VIP</option>
+                <option value="blacklist">黑名单</option>
+            </select>
+            <select class="filter-select">
+                <option value="">注册时间</option>
+                <option value="today">今日</option>
+                <option value="week">本周</option>
+                <option value="month">本月</option>
+                <option value="year">今年</option>
+            </select>
+        </div>
+        <div class="toolbar-right">
+            <button class="btn-secondary">
+                <i class="icon">📤</i>
+                导出用户
+            </button>
+            <button class="btn-secondary">
+                <i class="icon">📊</i>
+                用户分析
+            </button>
+            <button class="btn-primary">
+                <i class="icon">➕</i>
+                添加用户
+            </button>
+        </div>
+    </div>
+
+    <!-- 用户数据表格 -->
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>用户ID</th>
+                    <th>头像</th>
+                    <th>姓名</th>
+                    <th>手机号</th>
+                    <th>邮箱</th>
+                    <th>注册时间</th>
+                    <th>最后登录</th>
+                    <th>累计充电</th>
+                    <th>消费金额</th>
+                    <th>用户等级</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>U001234</td>
+                    <td>
+                        <div class="user-avatar">张</div>
+                    </td>
+                    <td>张先生</td>
+                    <td>138****8888</td>
+                    <td>zhang***@qq.com</td>
+                    <td>2024-01-15</td>
+                    <td>2024-12-22 09:30</td>
+                    <td>1,245.6 kWh</td>
+                    <td>¥1,868.40</td>
+                    <td><span class="level vip">VIP</span></td>
+                    <td><span class="status active">活跃</span></td>
+                    <td>
+                        <button class="btn-text">查看</button>
+                        <button class="btn-text">编辑</button>
+                        <button class="btn-text danger">禁用</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>U001235</td>
+                    <td>
+                        <div class="user-avatar">李</div>
+                    </td>
+                    <td>李女士</td>
+                    <td>139****6666</td>
+                    <td>li***@gmail.com</td>
+                    <td>2024-03-22</td>
+                    <td>2024-12-22 08:45</td>
+                    <td>856.3 kWh</td>
+                    <td>¥1,284.45</td>
+                    <td><span class="level gold">金卡</span></td>
+                    <td><span class="status active">活跃</span></td>
+                    <td>
+                        <button class="btn-text">查看</button>
+                        <button class="btn-text">编辑</button>
+                        <button class="btn-text danger">禁用</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>U001236</td>
+                    <td>
+                        <div class="user-avatar">王</div>
+                    </td>
+                    <td>王先生</td>
+                    <td>136****1234</td>
+                    <td>wang***@163.com</td>
+                    <td>2024-02-08</td>
+                    <td>2024-12-21 16:20</td>
+                    <td>692.1 kWh</td>
+                    <td>¥1,038.15</td>
+                    <td><span class="level silver">银卡</span></td>
+                    <td><span class="status active">活跃</span></td>
+                    <td>
+                        <button class="btn-text">查看</button>
+                        <button class="btn-text">编辑</button>
+                        <button class="btn-text danger">禁用</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>U001237</td>
+                    <td>
+                        <div class="user-avatar">陈</div>
+                    </td>
+                    <td>陈女士</td>
+                    <td>158****9999</td>
+                    <td>chen***@qq.com</td>
+                    <td>2024-05-10</td>
+                    <td>2024-12-20 14:30</td>
+                    <td>234.5 kWh</td>
+                    <td>¥351.75</td>
+                    <td><span class="level normal">普通</span></td>
+                    <td><span class="status inactive">非活跃</span></td>
+                    <td>
+                        <button class="btn-text">查看</button>
+                        <button class="btn-text">编辑</button>
+                        <button class="btn-text">激活</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>U001238</td>
+                    <td>
+                        <div class="user-avatar">赵</div>
+                    </td>
+                    <td>赵先生</td>
+                    <td>177****5555</td>
+                    <td>zhao***@sina.com</td>
+                    <td>2024-11-02</td>
+                    <td>2024-12-01 10:15</td>
+                    <td>89.2 kWh</td>
+                    <td>¥133.80</td>
+                    <td><span class="level normal">普通</span></td>
+                    <td><span class="status blacklist">黑名单</span></td>
+                    <td>
+                        <button class="btn-text">查看</button>
+                        <button class="btn-text">编辑</button>
+                        <button class="btn-text success">解封</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 分页控件 -->
+    <div class="pagination-wrapper">
+        <div class="pagination">
+            <button class="page-btn" disabled>← 上一页</button>
+            <span class="page-info">第 1 页 / 共 189 页</span>
+            <button class="page-btn">下一页 →</button>
+        </div>
+    </div>
+</div>

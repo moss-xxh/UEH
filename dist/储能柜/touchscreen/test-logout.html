@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试退出功能</title>
+    <link rel="stylesheet" href="common-header-styles.css">
+    <style>
+        body {
+            background: #0a0e1a;
+            color: white;
+            padding: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h1>测试退出功能</h1>
+    <button class="logout-btn" onclick="logout()" style="width: 100px; height: 40px; background: red; color: white;">
+        退出测试
+    </button>
+    
+    <!-- 退出确认弹窗 -->
+    <div id="logoutModal" class="logout-modal">
+        <div class="logout-content">
+            <div class="logout-icon">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <h2 class="logout-title" id="logoutTitle">确认退出</h2>
+            <p class="logout-message" id="logoutMessage">您确定要退出系统吗？</p>
+            <div class="logout-buttons">
+                <button class="logout-btn-action cancel" onclick="closeLogoutModal()">
+                    取消
+                </button>
+                <button class="logout-btn-action confirm" onclick="confirmLogout()">
+                    退出
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="common-header-scripts.js"></script>
+    <script>
+        // 调试输出
+        console.log('logout function:', typeof logout);
+        console.log('closeLogoutModal function:', typeof closeLogoutModal);
+        console.log('confirmLogout function:', typeof confirmLogout);
+    </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>触摸屏测试 - 已修复</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #28a745;
+        }
+        .info ul {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>触摸屏数据页面测试</h1>
+        
+        <button onclick="window.open('touchscreen-display.html', '_blank')">
+            打开触摸屏展示页面
+        </button>
+        
+        <button onclick="window.open('data.html', '_blank')">
+            直接打开数据页面
+        </button>
+        
+        <div class="info">
+            <h3>✅ 已修复的功能：</h3>
+            <ul>
+                <li>零部件切换（整机概览、EMS、PCS、BMS等）</li>
+                <li>实时数据/历史数据标签切换</li>
+                <li>自定义设置按钮</li>
+                <li>数据自动更新（每2秒）</li>
+                <li>初始化时默认显示第一个组件</li>
+            </ul>
+            
+            <h3>修复方法：</h3>
+            <ul>
+                <li>修正了 switchSubTab 函数的事件处理</li>
+                <li>添加了事件委托以确保动态内容的事件绑定</li>
+                <li>将所有函数暴露到全局作用域</li>
+                <li>增加了错误处理和调试日志</li>
+                <li>确保页面加载时有默认激活的标签</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

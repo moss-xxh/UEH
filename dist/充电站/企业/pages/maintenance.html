@@ -1,0 +1,257 @@
+<!-- 维护管理页面 -->
+<div class="maintenance-page">
+    <!-- 维护概览卡片 -->
+    <div class="maintenance-overview">
+        <div class="stat-card">
+            <div class="stat-icon">🔧</div>
+            <div class="stat-details">
+                <h3>待处理任务</h3>
+                <div class="stat-value">23</div>
+                <div class="stat-change warning">需要关注</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-details">
+                <h3>紧急任务</h3>
+                <div class="stat-value">5</div>
+                <div class="stat-change negative">立即处理</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-details">
+                <h3>今日完成</h3>
+                <div class="stat-value">12</div>
+                <div class="stat-change positive">+3 vs 昨日</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👨‍🔧</div>
+            <div class="stat-details">
+                <h3>维护人员</h3>
+                <div class="stat-value">8</div>
+                <div class="stat-change positive">全员在岗</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 维护任务工具栏 -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <input type="text" class="search-box" placeholder="搜索设备编号、电站、故障描述...">
+            <select class="filter-select">
+                <option value="">全部状态</option>
+                <option value="pending">待处理</option>
+                <option value="processing">处理中</option>
+                <option value="completed">已完成</option>
+                <option value="urgent">紧急</option>
+            </select>
+            <select class="filter-select">
+                <option value="">全部类型</option>
+                <option value="routine">例行维护</option>
+                <option value="repair">故障维修</option>
+                <option value="upgrade">设备升级</option>
+                <option value="inspection">安全检查</option>
+            </select>
+        </div>
+        <div class="toolbar-right">
+            <button class="btn-secondary">
+                <i class="icon">📊</i>
+                维护报告
+            </button>
+            <button class="btn-primary">
+                <i class="icon">➕</i>
+                新建任务
+            </button>
+        </div>
+    </div>
+
+    <!-- 维护任务列表 -->
+    <div class="maintenance-tasks">
+        <div class="task-card urgent">
+            <div class="task-header">
+                <div class="task-info">
+                    <h3>设备故障维修</h3>
+                    <span class="task-id">TASK-2024122201</span>
+                </div>
+                <div class="task-status urgent">
+                    <span class="status-dot"></span>
+                    紧急
+                </div>
+            </div>
+            <div class="task-details">
+                <div class="detail-item">
+                    <span class="label">故障设备:</span>
+                    <span class="value">DEV008-G1 (深圳南山充电站)</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">故障描述:</span>
+                    <span class="value">充电枪接口损坏，无法正常充电</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">报告时间:</span>
+                    <span class="value">2024-12-22 08:30</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">负责人员:</span>
+                    <span class="value">李工程师 (已派遣)</span>
+                </div>
+            </div>
+            <div class="task-actions">
+                <button class="btn-text">查看详情</button>
+                <button class="btn-text">更新状态</button>
+                <button class="btn-text success">完成任务</button>
+            </div>
+        </div>
+
+        <div class="task-card processing">
+            <div class="task-header">
+                <div class="task-info">
+                    <h3>例行维护检查</h3>
+                    <span class="task-id">TASK-2024122202</span>
+                </div>
+                <div class="task-status processing">
+                    <span class="status-dot"></span>
+                    处理中
+                </div>
+            </div>
+            <div class="task-details">
+                <div class="detail-item">
+                    <span class="label">维护设备:</span>
+                    <span class="value">北京朝阳充电站 - 全站设备</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">维护内容:</span>
+                    <span class="value">月度安全检查、清洁保养、性能测试</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">开始时间:</span>
+                    <span class="value">2024-12-22 06:00</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">负责人员:</span>
+                    <span class="value">王技师、张技师</span>
+                </div>
+            </div>
+            <div class="task-actions">
+                <button class="btn-text">查看详情</button>
+                <button class="btn-text">更新进度</button>
+                <button class="btn-text warning">暂停任务</button>
+            </div>
+        </div>
+
+        <div class="task-card pending">
+            <div class="task-header">
+                <div class="task-info">
+                    <h3>软件系统升级</h3>
+                    <span class="task-id">TASK-2024122203</span>
+                </div>
+                <div class="task-status pending">
+                    <span class="status-dot"></span>
+                    待处理
+                </div>
+            </div>
+            <div class="task-details">
+                <div class="detail-item">
+                    <span class="label">升级设备:</span>
+                    <span class="value">上海浦东充电站 - DEV015系列</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">升级内容:</span>
+                    <span class="value">固件版本升级至 v2.1.5</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">计划时间:</span>
+                    <span class="value">2024-12-22 23:00</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">负责人员:</span>
+                    <span class="value">待分配</span>
+                </div>
+            </div>
+            <div class="task-actions">
+                <button class="btn-text">查看详情</button>
+                <button class="btn-text">分配人员</button>
+                <button class="btn-text primary">开始任务</button>
+            </div>
+        </div>
+
+        <div class="task-card completed">
+            <div class="task-header">
+                <div class="task-info">
+                    <h3>设备清洁保养</h3>
+                    <span class="task-id">TASK-2024122204</span>
+                </div>
+                <div class="task-status completed">
+                    <span class="status-dot"></span>
+                    已完成
+                </div>
+            </div>
+            <div class="task-details">
+                <div class="detail-item">
+                    <span class="label">维护设备:</span>
+                    <span class="value">杭州西湖充电站 - DEV012系列</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">维护内容:</span>
+                    <span class="value">设备外壳清洁、接口检查、散热系统维护</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">完成时间:</span>
+                    <span class="value">2024-12-22 11:30</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">负责人员:</span>
+                    <span class="value">陈技师</span>
+                </div>
+            </div>
+            <div class="task-actions">
+                <button class="btn-text">查看详情</button>
+                <button class="btn-text">查看报告</button>
+                <button class="btn-text">评价反馈</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 维护统计图表 -->
+    <div class="maintenance-charts">
+        <div class="chart-card">
+            <h3>维护任务趋势</h3>
+            <div class="chart-placeholder">
+                <p>维护任务数量趋势图</p>
+                <small>显示近30天的维护任务分布情况</small>
+            </div>
+        </div>
+        <div class="chart-card">
+            <h3>设备健康度分布</h3>
+            <div class="health-distribution">
+                <div class="health-item excellent">
+                    <div class="health-bar" style="width: 78%;"></div>
+                    <span class="health-label">优秀 (78%)</span>
+                </div>
+                <div class="health-item good">
+                    <div class="health-bar" style="width: 15%;"></div>
+                    <span class="health-label">良好 (15%)</span>
+                </div>
+                <div class="health-item warning">
+                    <div class="health-bar" style="width: 5%;"></div>
+                    <span class="health-label">警告 (5%)</span>
+                </div>
+                <div class="health-item critical">
+                    <div class="health-bar" style="width: 2%;"></div>
+                    <span class="health-label">严重 (2%)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分页控件 -->
+    <div class="pagination-wrapper">
+        <div class="pagination">
+            <button class="page-btn" disabled>← 上一页</button>
+            <span class="page-info">第 1 页 / 共 8 页</span>
+            <button class="page-btn">下一页 →</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,90 @@
+<!-- 设备统计 -->
+<div class="stats-grid animated-entrance">
+    <div class="stat-card">
+        <div class="stat-label">总设备数</div>
+        <div class="stat-value">186</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-label">在线设备</div>
+        <div class="stat-value">172</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-label">故障设备</div>
+        <div class="stat-value">8</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-label">维护中</div>
+        <div class="stat-value">6</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">平均利用率</div>
+        <div class="stat-value">73.2%</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">今日收入</div>
+        <div class="stat-value">¥45,680</div>
+    </div>
+</div>
+
+<!-- 实时监控 -->
+<div class="data-section animated-entrance" style="animation-delay: 0.1s;">
+    <div class="section-header">
+        <h2 class="section-title">实时监控</h2>
+        <div class="section-actions">
+            <select class="form-select" id="station-filter">
+                <option value="">全部电站</option>
+                <option value="ST001">北京朝阳充电站</option>
+                <option value="ST002">上海浦东充电站</option>
+                <option value="ST003">深圳南山充电站</option>
+                <option value="ST004">广州天河充电站</option>
+            </select>
+            <select class="form-select" id="status-filter">
+                <option value="">全部状态</option>
+                <option value="online">在线</option>
+                <option value="charging">充电中</option>
+                <option value="idle">空闲</option>
+                <option value="fault">故障</option>
+                <option value="maintenance">维护</option>
+            </select>
+            <select class="form-select" id="type-filter">
+                <option value="">全部类型</option>
+                <option value="slow">慢充</option>
+                <option value="fast">快充</option>
+                <option value="super">超充</option>
+            </select>
+            <button class="btn btn-secondary" onclick="system.refreshDeviceData()">刷新</button>
+            <button class="btn btn-primary" onclick="system.showAddDeviceModal()">+ 添加设备</button>
+        </div>
+    </div>
+    
+    <div class="minimal-table">
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>充电枪编号</th>
+                        <th>充电桩状态</th>
+                        <th>当前电流(A)</th>
+                        <th>当前电压(V)</th>
+                        <th>当前功率(kW)</th>
+                        <th>实时充电量(kWh)</th>
+                        <th>充电时长(时)</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="devices-tbody">
+                    <!-- 设备数据行将通过 JavaScript 动态生成 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="pagination">
+        <button class="page-btn" disabled>← 上一页</button>
+        <span class="page-info">第 1 页 / 共 12 页</span>
+        <button class="page-btn">下一页 →</button>
+    </div>
+</div>

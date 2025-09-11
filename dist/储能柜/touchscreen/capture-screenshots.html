@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>触摸屏页面截图工具</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .info {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .page-list {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .page-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .page-item:last-child {
+            border-bottom: none;
+        }
+        .page-name {
+            font-weight: 500;
+            color: #333;
+        }
+        .page-url {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .capture-btn {
+            padding: 8px 16px;
+            background: #0096ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .capture-btn:hover {
+            background: #0080e6;
+        }
+        .capture-all-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #0096ff, #00d4ff);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .capture-all-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 150, 255, 0.4);
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #666;
+        }
+        .preview-iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        .instructions {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+        .instructions ol {
+            margin-bottom: 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 8px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <h1>🖥️ 触摸屏页面截图工具</h1>
+    
+    <div class="instructions">
+        <h3>📌 使用说明</h3>
+        <ol>
+            <li><strong>手动截图方法：</strong></li>
+            <ul>
+                <li>点击下方每个页面的"打开页面"按钮，在新标签页中打开</li>
+                <li>等待页面完全加载后，使用浏览器的截图功能：
+                    <ul>
+                        <li>Chrome/Edge: 按 F12 打开开发者工具 → Ctrl+Shift+P → 输入 "screenshot" → 选择 "Capture full size screenshot"</li>
+                        <li>Firefox: 按 F12 打开开发者工具 → 点击相机图标 → 选择 "Save full page"</li>
+                        <li>Safari: 开发 → 显示网页检查器 → 元素 → 右键点击 html 标签 → 捕获截屏</li>
+                    </ul>
+                </li>
+                <li>将截图保存到对应的文件夹中</li>
+            </ul>
+            <li><strong>批量处理：</strong>可以使用专业的网页截图工具如 Puppeteer、Playwright 或截图扩展</li>
+            <li><strong>推荐尺寸：</strong>1920x1080 (标准触摸屏分辨率)</li>
+        </ol>
+    </div>
+
+    <div class="info">
+        <h2>页面列表</h2>
+        <p>以下是所有需要截图的触摸屏页面：</p>
+    </div>
+
+    <div class="page-list">
+        <div class="page-item">
+            <div>
+                <div class="page-name">01. 登录页面</div>
+                <div class="page-url">login.html</div>
+            </div>
+            <button class="capture-btn" onclick="window.open('login.html', '_blank')">打开页面</button>
+        </div>
+        
+        <div class="page-item">
+            <div>
+                <div class="page-name">02. 登录加载页面</div>
+                <div class="page-url">login-loading.html</div>
+            </div>
+            <button class="capture-btn" onclick="window.open('login-loading.html', '_blank')">打开页面</button>
+        </div>
+        
+        <div class="page-item">
+            <div>
+                <div class="page-name">03. 首页</div>
+                <div class="page-url">home.html</div>
+            </div>
+            <button class="capture-btn" onclick="window.open('home.html', '_blank')">打开页面</button>
+        </div>
+        
+        <div class="page-item">
+            <div>
+                <div class="page-name">04. 数据页面</div>
+                <div class="page-url">data.html</div>
+            </div>
+            <button class="capture-btn" onclick="window.open('data.html', '_blank')">打开页面</button>
+        </div>
+        
+        <div class="page-item">
+            <div>
+                <div class="page-name">05. 控制页面</div>
+                <div class="page-url">control.html</div>
+            </div>
+            <button class="capture-btn" onclick="window.open('control.html', '_blank')">打开页面</button>
+        </div>
+        
+        <div class="page-item">
+            <div>
+                <div class="page-name">06. 告警页面</div>
+                <div class="page-url">alarm.html</div>
+            </div>
+            <button class="capture-btn" onclick="window.open('alarm.html', '_blank')">打开页面</button>
+        </div>
+        
+        <div class="page-item">
+            <div>
+                <div class="page-name">07. 历史页面</div>
+                <div class="page-url">history.html</div>
+            </div>
+            <button class="capture-btn" onclick="window.open('history.html', '_blank')">打开页面</button>
+        </div>
+        
+        <div class="page-item">
+            <div>
+                <div class="page-name">08. 日志页面</div>
+                <div class="page-url">logs.html</div>
+            </div>
+            <button class="capture-btn" onclick="window.open('logs.html', '_blank')">打开页面</button>
+        </div>
+        
+        <div class="page-item">
+            <div>
+                <div class="page-name">09. 设置页面</div>
+                <div class="page-url">settings.html</div>
+            </div>
+            <button class="capture-btn" onclick="window.open('settings.html', '_blank')">打开页面</button>
+        </div>
+        
+        <div class="page-item">
+            <div>
+                <div class="page-name">10. 触摸屏显示页面</div>
+                <div class="page-url">touchscreen-display.html</div>
+            </div>
+            <button class="capture-btn" onclick="window.open('touchscreen-display.html', '_blank')">打开页面</button>
+        </div>
+    </div>
+
+    <div class="info" style="margin-top: 20px;">
+        <h3>📁 文件保存位置</h3>
+        <p>请将截图保存到以下对应文件夹：</p>
+        <ul>
+            <li><strong>登录页面：</strong> touchscreen-design-slices/01-login/</li>
+            <li><strong>首页：</strong> touchscreen-design-slices/02-home/</li>
+            <li><strong>数据页面：</strong> touchscreen-design-slices/03-data/</li>
+            <li><strong>控制页面：</strong> touchscreen-design-slices/04-control/</li>
+            <li><strong>告警页面：</strong> touchscreen-design-slices/05-alarm/</li>
+            <li><strong>历史页面：</strong> touchscreen-design-slices/06-history/</li>
+            <li><strong>日志页面：</strong> touchscreen-design-slices/07-logs/</li>
+            <li><strong>设置页面：</strong> touchscreen-design-slices/08-settings/</li>
+        </ul>
+    </div>
+
+    <div class="info" style="margin-top: 20px;">
+        <h3>💡 额外提示</h3>
+        <ul>
+            <li>建议在截图前将浏览器设置为全屏模式 (F11)</li>
+            <li>确保页面中的所有动画和数据加载完成后再截图</li>
+            <li>对于包含弹窗的页面，可以分别截图主页面和弹窗状态</li>
+            <li>命名建议：page-name-full.png (完整页面)、page-name-modal.png (带弹窗状态)</li>
+        </ul>
+    </div>
+</body>
+</html>

@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设备控制 - 储能柜管理系统</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+            color: #e2e8f0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 顶部导航 */
+        .header {
+            height: 60px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 150, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+
+        .nav-item {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: #00d4ff;
+            background: rgba(0, 150, 255, 0.1);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .current-time {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .user-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* 主内容区 */
+        .detail-container {
+            display: flex;
+            height: calc(100vh - 60px);
+            margin-top: 60px;
+        }
+
+        /* 3D可视化区域 */
+        .cabinet-3d-container {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .cabinet-image {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 组件标注系统 */
+        .component-annotations {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .annotation {
+            position: absolute;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            white-space: nowrap;
+            pointer-events: auto;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+        }
+
+        .annotation:hover {
+            background: rgba(0, 150, 255, 0.2);
+            transform: scale(1.05);
+            border-color: #00d4ff;
+        }
+
+        /* 闪烁标记点 */
+        .blinking-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #00d4ff;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.7);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(0, 212, 255, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(0, 212, 255, 0);
+            }
+        }
+
+        /* 返回按钮 */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            padding: 12px 20px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #e2e8f0;
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 150, 255, 0.1);
+            border-color: #00d4ff;
+            transform: translateY(-2px);
+        }
+
+        /* 数据面板 */
+        .data-panel {
+            width: 600px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(0, 150, 255, 0.3);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 组件标签页 */
+        .component-tabs {
+            display: flex;
+            background: rgba(30, 41, 59, 0.8);
+            border-bottom: 1px solid rgba(0, 150, 255, 0.2);
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+
+        .component-tab {
+            flex: 1;
+            min-width: fit-content;
+            padding: 15px 20px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .component-tab:hover {
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 150, 255, 0.1);
+        }
+
+        .component-tab.active {
+            color: #00d4ff;
+            background: rgba(0, 150, 255, 0.1);
+            border-bottom-color: #00d4ff;
+        }
+
+        /* 数据类型标签页 */
+        .data-type-tabs {
+            display: flex;
+            background: rgba(20, 30, 48, 0.8);
+            border-bottom: 1px solid rgba(0, 150, 255, 0.2);
+            flex-shrink: 0;
+        }
+
+        .data-type-tab {
+            flex: 1;
+            padding: 12px 16px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .data-type-tab:hover {
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 150, 255, 0.1);
+        }
+
+        .data-type-tab.active {
+            color: #00d4ff;
+            background: rgba(0, 150, 255, 0.1);
+            border-bottom-color: #00d4ff;
+        }
+
+        /* 数据面板内容 */
+        .panel-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* 数据网格 */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .data-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(0, 150, 255, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .data-card:hover {
+            border-color: rgba(0, 150, 255, 0.4);
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        .card-title {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .card-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .card-unit {
+            font-size: 12px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .card-status {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .card-status.normal {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .card-status.good {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .card-status.warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .card-status.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        /* 控制面板样式 */
+        .control-panel {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(0, 150, 255, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .control-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-section-title::before {
+            content: '';
+            width: 3px;
+            height: 16px;
+            background: linear-gradient(45deg, #0096ff, #00d4ff);
+            border-radius: 2px;
+        }
+
+        .control-group {
+            margin-bottom: 24px;
+        }
+
+        .control-group-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.2);
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .control-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .control-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        .control-input {
+            flex: 1;
+            height: 36px;
+            padding: 0 12px;
+            background: rgba(15, 25, 42, 0.8);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .control-input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+        }
+
+        .control-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .control-select {
+            flex: 1;
+            height: 36px;
+            padding: 0 12px;
+            background: rgba(15, 25, 42, 0.8);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-select:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+        }
+
+        .control-select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 运行模式控制 */
+        .mode-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            flex: 1;
+            min-width: 120px;
+            height: 44px;
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.6);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .mode-btn:hover {
+            border-color: #00d4ff;
+            background: rgba(0, 150, 255, 0.1);
+        }
+
+        .mode-btn.active {
+            background: rgba(0, 150, 255, 0.2);
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        .mode-btn.charge {
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+        .mode-btn.charge.active {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .mode-btn.discharge {
+            border-color: rgba(249, 115, 22, 0.5);
+        }
+
+        .mode-btn.discharge.active {
+            background: rgba(249, 115, 22, 0.2);
+            border-color: #f97316;
+            color: #f97316;
+        }
+
+        .mode-btn.stop {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .mode-btn.stop.active {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        /* 峰谷套利时间轴 */
+        .time-axis {
+            background: rgba(20, 30, 48, 0.8);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .time-axis-title {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 12px;
+        }
+
+        .time-blocks {
+            display: flex;
+            height: 40px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .time-block {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .time-block.peak {
+            background: #ef4444;
+        }
+
+        .time-block.valley {
+            background: #3b82f6;
+        }
+
+        .time-block.flat {
+            background: #6b7280;
+        }
+
+        .time-block:hover {
+            opacity: 0.8;
+            transform: scaleY(1.1);
+        }
+
+        .time-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 12px;
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        /* 编辑模式控制 */
+        .edit-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .edit-btn {
+            height: 44px;
+            padding: 0 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .edit-btn.primary {
+            background: #00d4ff;
+            color: #0a0e1a;
+        }
+
+        .edit-btn.primary:hover {
+            background: #0096ff;
+            transform: translateY(-2px);
+        }
+
+        .edit-btn.secondary {
+            background: rgba(107, 114, 128, 0.8);
+            color: white;
+            border: 1px solid rgba(107, 114, 128, 0.5);
+        }
+
+        .edit-btn.secondary:hover {
+            background: rgba(107, 114, 128, 1);
+        }
+
+        .edit-btn.success {
+            background: #10b981;
+            color: white;
+        }
+
+        .edit-btn.success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .edit-btn.danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .edit-btn.danger:hover {
+            background: #dc2626;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .detail-container {
+                flex-direction: column;
+            }
+
+            .cabinet-3d-container {
+                height: 50vh;
+            }
+
+            .data-panel {
+                width: 100%;
+                height: 50vh;
+            }
+
+            .edit-controls {
+                position: relative;
+                bottom: auto;
+                right: auto;
+                justify-content: center;
+                margin: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .component-tabs {
+                font-size: 12px;
+            }
+
+            .component-tab {
+                padding: 12px 16px;
+            }
+
+            .data-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 12px;
+            }
+
+            .control-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .control-item {
+                min-width: auto;
+            }
+
+            .mode-controls {
+                flex-direction: column;
+            }
+
+            .mode-btn {
+                min-width: auto;
+            }
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 150, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 150, 255, 0.5);
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(0, 150, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-title::before {
+            content: '';
+            width: 3px;
+            height: 16px;
+            background: linear-gradient(45deg, #0096ff, #00d4ff);
+            border-radius: 2px;
+        }
+
+        .chart-wrapper {
+            height: 300px;
+            position: relative;
+        }
+
+        /* 数据显示样式 */
+        .data-container {
+            padding: 20px;
+        }
+
+        .data-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .data-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .data-card:hover {
+            border-color: rgba(0, 212, 255, 0.6);
+            box-shadow: 0 4px 12px rgba(0, 150, 255, 0.2);
+        }
+
+        .data-label {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .data-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 8px;
+        }
+
+        .data-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .data-status.normal {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+
+        .data-status.warning {
+            background: rgba(255, 165, 0, 0.2);
+            color: #ffa500;
+            border: 1px solid rgba(255, 165, 0, 0.3);
+        }
+
+        .data-status.error {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+
+        /* 状态指示器样式 */
+        .status-indicator {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 500;
+            margin-left: 8px;
+            display: inline-block;
+        }
+        
+        .status-indicator.normal {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-indicator.warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .status-indicator.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* 历史数据样式 */
+        .history-controls {
+            margin-bottom: 20px;
+        }
+
+        .history-controls select {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            color: #e2e8f0;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">储能柜管理系统</div>
+            <a href="index.html" class="nav-item">首页</a>
+            <a href="data.html" class="nav-item">数据监控</a>
+            <a href="control.html" class="nav-item active">设备控制</a>
+            <a href="alarm.html" class="nav-item">告警管理</a>
+            <a href="logs.html" class="nav-item">日志管理</a>
+            <a href="settings.html" class="nav-item">系统设置</a>
+        </div>
+        <div class="header-right">
+            <div class="current-time" id="currentTime"></div>
+            <div class="user-menu">
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="detail-container">
+        <!-- 3D可视化区域 -->
+        <div class="cabinet-3d-container">
+            <button class="back-button" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i>
+                返回
+            </button>
+
+            <img src="柜子打开.png" alt="储能柜内部结构" class="cabinet-image">
+
+            <!-- 组件标注系统 -->
+            <div class="component-annotations">
+                <div class="blinking-marker" style="top: 15%; left: 50%; margin-left: -6px; margin-top: -6px;"></div>
+                <div class="annotation" style="top: 13%; left: 52%;" onclick="switchComponent('ems')">EMS控制器</div>
+
+                <div class="blinking-marker" style="top: 35%; left: 20%; margin-left: -6px; margin-top: -6px;"></div>
+                <div class="annotation" style="top: 33%; left: 22%;" onclick="switchComponent('pcs')">逆变器PCS</div>
+
+                <div class="blinking-marker" style="top: 45%; left: 45%; margin-left: -6px; margin-top: -6px;"></div>
+                <div class="annotation" style="top: 43%; left: 47%;" onclick="switchComponent('bms')">BMS系统</div>
+
+                <div class="blinking-marker" style="top: 65%; left: 30%; margin-left: -6px; margin-top: -6px;"></div>
+                <div class="annotation" style="top: 63%; left: 32%;" onclick="switchComponent('battery')">电池模组</div>
+
+                <div class="blinking-marker" style="top: 38%; left: 65%; margin-left: -6px; margin-top: -6px;"></div>
+                <div class="annotation" style="top: 36%; left: 67%;" onclick="switchComponent('thermal')">温度监测</div>
+
+                <div class="blinking-marker" style="top: 85%; left: 50%; margin-left: -6px; margin-top: -6px;"></div>
+                <div class="annotation" style="top: 83%; left: 52%;" onclick="switchComponent('fire')">消防系统</div>
+            </div>
+        </div>
+
+        <!-- 数据面板 -->
+        <div class="data-panel">
+            <!-- 组件选择标签 -->
+            <div class="component-tabs">
+                <div class="component-tab active" data-component="overall" onclick="switchComponent('overall')">整机</div>
+                <div class="component-tab" data-component="ems" onclick="switchComponent('ems')">EMS</div>
+                <div class="component-tab" data-component="pcs" onclick="switchComponent('pcs')">逆变器</div>
+                <div class="component-tab" data-component="bms" onclick="switchComponent('bms')">BMS</div>
+                <div class="component-tab" data-component="battery" onclick="switchComponent('battery')">电池</div>
+                <div class="component-tab" data-component="meter" onclick="switchComponent('meter')">电表</div>
+                <div class="component-tab" data-component="thermal" onclick="switchComponent('thermal')">温度</div>
+                <div class="component-tab" data-component="fire" onclick="switchComponent('fire')">消防</div>
+            </div>
+
+            <!-- 数据类型标签 -->
+            <div class="data-type-tabs">
+                <div class="data-type-tab" onclick="switchDataType('realtime', event)">实时数据</div>
+                <div class="data-type-tab" onclick="switchDataType('history', event)">历史数据</div>
+                <div class="data-type-tab active" onclick="switchDataType('control', event)">控制</div>
+            </div>
+
+            <!-- 面板内容 -->
+            <div class="panel-content" id="panelContent">
+                <!-- 控制面板内容将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑控制按钮 -->
+    <div class="edit-controls" id="editControls">
+        <button class="edit-btn primary" id="editModeBtn" onclick="toggleControlEdit()">
+            <i class="fas fa-edit"></i>
+            编辑
+        </button>
+    </div>
+
+    <script>
+        let currentComponent = 'overall';
+        let currentDataType = 'control';
+        let isEditMode = false;
+        let originalSettings = {};
+
+        // 页面初始化
+        window.onload = function() {
+            // 检查登录状态
+            const user = localStorage.getItem('touchscreen_user') || sessionStorage.getItem('touchscreen_user');
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 更新时间
+            updateTime();
+            setInterval(updateTime, 1000);
+
+            // 显示控制面板
+            showControlPanel();
+        };
+
+        // 更新时间显示
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+
+        // 切换组件
+        function switchComponent(component) {
+            currentComponent = component;
+            
+            // 更新标签状态
+            const tabs = document.querySelectorAll('.component-tab');
+            tabs.forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.component === component);
+            });
+
+            // 显示对应组件的控制面板
+            showControlPanel();
+        }
+
+        // 切换数据类型
+        function switchDataType(type, evt) {
+            // 使用传入的事件对象，避免使用全局event
+            const clickEvent = evt || window.event;
+            currentDataType = type;
+            
+            // 更新标签状态
+            const tabs = document.querySelectorAll('.data-type-tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 如果有事件对象，更新点击的标签
+            if (clickEvent && clickEvent.target) {
+                clickEvent.target.classList.add('active');
+            } else {
+                // 如果没有事件对象，根据type找到对应标签
+                tabs.forEach(tab => {
+                    if (tab.textContent.includes(type === 'control' ? '控制' : 
+                                                type === 'realtime' ? '实时数据' : '历史数据')) {
+                        tab.classList.add('active');
+                    }
+                });
+            }
+
+            // 清空面板内容，防止残留
+            const container = document.getElementById('panelContent');
+            container.innerHTML = '';
+
+            if (type === 'control') {
+                showControlPanel();
+            } else if (type === 'realtime') {
+                showRealtimeData();
+            } else if (type === 'history') {
+                showHistoryData();
+            }
+        }
+
+        // 显示控制面板
+        function showControlPanel() {
+            const container = document.getElementById('panelContent');
+            if (!container) {
+                console.error('找不到panelContent容器');
+                return;
+            }
+            
+            let html = '';
+
+            if (currentComponent === 'overall') {
+                html = generateOverallControlPanel();
+            } else if (currentComponent === 'ems') {
+                html = generateEMSControlPanel();
+            } else if (currentComponent === 'pcs') {
+                html = generatePCSControlPanel();
+            } else if (currentComponent === 'bms') {
+                html = generateBMSControlPanel();
+            } else if (currentComponent === 'battery') {
+                html = generateBatteryControlPanel();
+            } else if (currentComponent === 'meter') {
+                html = generateMeterControlPanel();
+            } else if (currentComponent === 'thermal' || currentComponent === 'hvac') {
+                html = generateThermalControlPanel();
+            } else if (currentComponent === 'fire') {
+                html = generateFireControlPanel();
+            }
+
+            // 确保HTML不为空
+            if (!html) {
+                html = '<div class="control-panel"><div class="control-section-title">暂无控制面板</div></div>';
+            }
+
+            container.innerHTML = html;
+
+            // 初始化控件状态
+            updateControlsState();
+            
+            // 如果有图表，初始化图表
+            initializeCharts();
+        }
+
+        // 生成整机控制面板
+        function generateOverallControlPanel() {
+            return `
+                <!-- 运行模式控制 -->
+                <div class="control-panel">
+                    <div class="control-section-title">运行模式控制</div>
+                    <div class="mode-controls">
+                        <button class="mode-btn" id="autoModeBtn" onclick="setOperationMode('auto')">
+                            <i class="fas fa-magic"></i>
+                            自动模式
+                        </button>
+                        <button class="mode-btn charge" id="chargeModeBtn" onclick="setOperationMode('charge')">
+                            <i class="fas fa-battery-three-quarters"></i>
+                            充电模式 (250kW)
+                        </button>
+                        <button class="mode-btn discharge" id="dischargeModeBtn" onclick="setOperationMode('discharge')">
+                            <i class="fas fa-bolt"></i>
+                            放电模式 (250kW)
+                        </button>
+                        <button class="mode-btn stop" id="stopModeBtn" onclick="setOperationMode('stop')">
+                            <i class="fas fa-stop"></i>
+                            停止
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 峰谷套利时间轴 -->
+                <div class="control-panel">
+                    <div class="control-section-title">峰谷套利时间轴</div>
+                    <div class="time-axis">
+                        <div class="time-axis-title">24小时时间轴配置</div>
+                        <div class="time-blocks">
+                            ${generateTimeBlocks()}
+                        </div>
+                        <div class="time-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #ef4444;"></div>
+                                <span>峰值时段</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #3b82f6;"></div>
+                                <span>谷值时段</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #6b7280;"></div>
+                                <span>平价时段</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 电池参数设置 -->
+                <div class="control-panel">
+                    <div class="control-section-title">电池参数设置</div>
+                    <div class="control-group">
+                        <div class="control-group-title">充电参数</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">充电停止SOC</label>
+                                <input type="number" class="control-input" id="chargeStopSOC" value="95" min="0" max="100" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">%</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">充电功率</label>
+                                <input type="number" class="control-input" id="chargePower" value="250" min="0" max="500" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">kW</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-group-title">放电参数</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">放电停止SOC</label>
+                                <input type="number" class="control-input" id="dischargeStopSOC" value="10" min="0" max="100" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">%</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">放电功率</label>
+                                <input type="number" class="control-input" id="dischargePower" value="250" min="0" max="500" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">kW</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-group-title">控制选项</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">均衡控制</label>
+                                <select class="control-select" id="balanceControl" disabled>
+                                    <option value="active">主动均衡</option>
+                                    <option value="passive">被动均衡</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">风扇控制</label>
+                                <select class="control-select" id="fanControl" disabled>
+                                    <option value="auto">自动</option>
+                                    <option value="on">开启</option>
+                                    <option value="off">关闭</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成EMS控制面板
+        function generateEMSControlPanel() {
+            return `
+                <div class="control-panel">
+                    <div class="control-section-title">EMS控制器设置</div>
+                    <div class="control-group">
+                        <div class="control-group-title">系统控制</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">控制模式</label>
+                                <select class="control-select" id="emsControlMode" disabled>
+                                    <option value="auto">自动模式</option>
+                                    <option value="manual">手动模式</option>
+                                    <option value="scheduled">计划模式</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">运行策略</label>
+                                <select class="control-select" id="emsStrategy" disabled>
+                                    <option value="peak_valley">峰谷套利</option>
+                                    <option value="demand_response">需求响应</option>
+                                    <option value="backup">应急备用</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">目标SOC</label>
+                                <input type="number" class="control-input" id="emsTargetSOC" value="85" min="0" max="100" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">%</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">目标功率</label>
+                                <input type="number" class="control-input" id="emsTargetPower" value="120" min="-500" max="500" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">kW</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-group-title">保护参数</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">最大充电功率</label>
+                                <input type="number" class="control-input" id="emsMaxChargePower" value="500" min="0" max="1000" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">kW</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">最大放电功率</label>
+                                <input type="number" class="control-input" id="emsMaxDischargePower" value="500" min="0" max="1000" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">kW</span>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">SOC上限</label>
+                                <input type="number" class="control-input" id="emsSOCUpperLimit" value="95" min="50" max="100" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">%</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">SOC下限</label>
+                                <input type="number" class="control-input" id="emsSOCLowerLimit" value="10" min="0" max="50" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成PCS控制面板
+        function generatePCSControlPanel() {
+            return `
+                <div class="control-panel">
+                    <div class="control-section-title">PCS逆变器控制</div>
+                    <div class="control-group">
+                        <div class="control-group-title">运行控制</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">运行模式</label>
+                                <select class="control-select" id="pcsOperationMode" disabled>
+                                    <option value="standby">待机模式</option>
+                                    <option value="charge">充电模式</option>
+                                    <option value="discharge">放电模式</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">启停控制</label>
+                                <select class="control-select" id="pcsStartStop" disabled>
+                                    <option value="start">启动</option>
+                                    <option value="stop">停止</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">有功功率设定</label>
+                                <input type="number" class="control-input" id="pcsActivePower" value="120" min="-500" max="500" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">kW</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">无功功率设定</label>
+                                <input type="number" class="control-input" id="pcsReactivePower" value="15" min="-200" max="200" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">kVar</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-group-title">保护设置</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">过压保护</label>
+                                <input type="number" class="control-input" id="pcsOverVoltage" value="825" min="700" max="900" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">V</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">欠压保护</label>
+                                <input type="number" class="control-input" id="pcsUnderVoltage" value="650" min="500" max="700" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">V</span>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">过流保护</label>
+                                <input type="number" class="control-input" id="pcsOverCurrent" value="200" min="100" max="300" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">A</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">过温保护</label>
+                                <input type="number" class="control-input" id="pcsOverTemp" value="75" min="60" max="90" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">℃</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成BMS控制面板
+        function generateBMSControlPanel() {
+            return `
+                <div class="control-panel">
+                    <div class="control-section-title">BMS系统控制</div>
+                    <div class="control-group">
+                        <div class="control-group-title">均衡控制</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">均衡模式</label>
+                                <select class="control-select" id="bmsBalanceMode" disabled>
+                                    <option value="auto">自动均衡</option>
+                                    <option value="manual">手动均衡</option>
+                                    <option value="disabled">禁用均衡</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">均衡阈值</label>
+                                <input type="number" class="control-input" id="bmsBalanceThreshold" value="0.05" min="0.01" max="0.2" step="0.01" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">V</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-group-title">保护参数</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">单体过压保护</label>
+                                <input type="number" class="control-input" id="bmsCellOverVoltage" value="3.65" min="3.5" max="4.0" step="0.01" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">V</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">单体欠压保护</label>
+                                <input type="number" class="control-input" id="bmsCellUnderVoltage" value="2.5" min="2.0" max="3.0" step="0.01" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">V</span>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">过温保护</label>
+                                <input type="number" class="control-input" id="bmsOverTemp" value="45" min="40" max="60" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">℃</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">低温保护</label>
+                                <input type="number" class="control-input" id="bmsUnderTemp" value="-10" min="-20" max="0" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">℃</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-group-title">通讯设置</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">通讯间隔</label>
+                                <input type="number" class="control-input" id="bmsCommInterval" value="1000" min="100" max="5000" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">ms</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">超时时间</label>
+                                <input type="number" class="control-input" id="bmsCommTimeout" value="5000" min="1000" max="10000" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">ms</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成电池控制面板
+        function generateBatteryControlPanel() {
+            return `
+                <div class="control-panel">
+                    <div class="control-section-title">电池模组控制</div>
+                    <div class="control-group">
+                        <div class="control-group-title">模组管理</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">工作模组数</label>
+                                <input type="number" class="control-input" id="batteryWorkingModules" value="16" min="1" max="16" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">个</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">预热控制</label>
+                                <select class="control-select" id="batteryPreheating" disabled>
+                                    <option value="auto">自动预热</option>
+                                    <option value="manual">手动预热</option>
+                                    <option value="disabled">禁用预热</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-group-title">均衡设置</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">模组间均衡</label>
+                                <select class="control-select" id="batteryModuleBalance" disabled>
+                                    <option value="enabled">启用</option>
+                                    <option value="disabled">禁用</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">均衡电流</label>
+                                <input type="number" class="control-input" id="batteryBalanceCurrent" value="5" min="1" max="10" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">A</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-group-title">容量管理</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">容量校准</label>
+                                <button class="mode-btn" onclick="calibrateBatteryCapacity()" disabled>
+                                    <i class="fas fa-sync"></i>
+                                    校准容量
+                                </button>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">容量重置</label>
+                                <button class="mode-btn danger" onclick="resetBatteryCapacity()" disabled>
+                                    <i class="fas fa-redo"></i>
+                                    重置容量
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成温控控制面板
+        function generateMeterControlPanel() {
+            return `
+                <div class="control-panel">
+                    <div class="control-section-title">电表系统监控</div>
+                    <div class="control-group">
+                        <div class="control-group-title">电能计量</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">总有功功率</label>
+                                <input type="text" class="control-input" value="125.6 kW" readonly>
+                                <span class="status-indicator normal">正常</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">总无功功率</label>
+                                <input type="text" class="control-input" value="18.2 kVar" readonly>
+                                <span class="status-indicator normal">正常</span>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">频率</label>
+                                <input type="text" class="control-input" value="50.02 Hz" readonly>
+                                <span class="status-indicator normal">稳定</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">功率因数</label>
+                                <input type="text" class="control-input" value="0.98" readonly>
+                                <span class="status-indicator normal">良好</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-group-title">三相电压</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">A相电压</label>
+                                <input type="text" class="control-input" value="380.5 V" readonly>
+                                <span class="status-indicator normal">正常</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">B相电压</label>
+                                <input type="text" class="control-input" value="379.8 V" readonly>
+                                <span class="status-indicator normal">正常</span>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">C相电压</label>
+                                <input type="text" class="control-input" value="380.2 V" readonly>
+                                <span class="status-indicator normal">正常</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-group-title">三相电流</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">A相电流</label>
+                                <input type="text" class="control-input" value="191.2 A" readonly>
+                                <span class="status-indicator normal">正常</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">B相电流</label>
+                                <input type="text" class="control-input" value="190.8 A" readonly>
+                                <span class="status-indicator normal">正常</span>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">C相电流</label>
+                                <input type="text" class="control-input" value="191.5 A" readonly>
+                                <span class="status-indicator normal">正常</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-group-title">电能统计</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">日有功电量</label>
+                                <input type="text" class="control-input" value="2856.4 kWh" readonly>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">累计有功电量</label>
+                                <input type="text" class="control-input" value="15.6 MWh" readonly>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">电表状态</label>
+                                <select class="control-select" disabled>
+                                    <option value="normal">正常运行</option>
+                                    <option value="error">通信异常</option>
+                                    <option value="offline">离线</option>
+                                </select>
+                                <span class="status-indicator normal">在线</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateThermalControlPanel() {
+            return `
+                <div class="control-panel">
+                    <div class="control-section-title">温控系统控制</div>
+                    <div class="control-group">
+                        <div class="control-group-title">空调控制</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">空调1</label>
+                                <select class="control-select" id="thermalAC1" disabled>
+                                    <option value="auto">自动</option>
+                                    <option value="cooling">制冷</option>
+                                    <option value="heating">制热</option>
+                                    <option value="off">关闭</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">空调2</label>
+                                <select class="control-select" id="thermalAC2" disabled>
+                                    <option value="auto">自动</option>
+                                    <option value="cooling">制冷</option>
+                                    <option value="heating">制热</option>
+                                    <option value="off">关闭</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">目标温度</label>
+                                <input type="number" class="control-input" id="thermalTargetTemp" value="25" min="15" max="35" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">℃</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">温度容差</label>
+                                <input type="number" class="control-input" id="thermalTempTolerance" value="2" min="1" max="5" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">℃</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-group-title">风扇控制</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">风扇1转速</label>
+                                <input type="number" class="control-input" id="thermalFan1Speed" value="1200" min="0" max="3000" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">rpm</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">风扇2转速</label>
+                                <input type="number" class="control-input" id="thermalFan2Speed" value="1150" min="0" max="3000" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">rpm</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-group-title">保护设置</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">高温告警</label>
+                                <input type="number" class="control-input" id="thermalHighTempAlarm" value="40" min="30" max="50" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">℃</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">低温告警</label>
+                                <input type="number" class="control-input" id="thermalLowTempAlarm" value="5" min="-10" max="15" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">℃</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成消防控制面板
+        function generateFireControlPanel() {
+            return `
+                <div class="control-panel">
+                    <div class="control-section-title">消防系统控制</div>
+                    <div class="control-group">
+                        <div class="control-group-title">灭火控制</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">灭火启动</label>
+                                <select class="control-select" id="fireExtinguisherStart" disabled>
+                                    <option value="auto">自动启动</option>
+                                    <option value="manual">手动启动</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">灭火剂类型</label>
+                                <select class="control-select" id="fireExtinguisherType" disabled>
+                                    <option value="perfluorohexanone">全氟己酮</option>
+                                    <option value="heptafluoropropane">七氟丙烷</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">喷射延时</label>
+                                <input type="number" class="control-input" id="fireSprayDelay" value="30" min="10" max="120" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">秒</span>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">喷射时间</label>
+                                <input type="number" class="control-input" id="fireSprayDuration" value="60" min="30" max="300" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">秒</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-group-title">报警设置</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">声光报警</label>
+                                <select class="control-select" id="fireAlarmSound" disabled>
+                                    <option value="enabled">启用</option>
+                                    <option value="disabled">禁用</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">烟雾阈值</label>
+                                <input type="number" class="control-input" id="fireSmokeThreshold" value="50" min="10" max="100" disabled>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 12px;">ppm</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-group-title">联动控制</div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">紧急断电</label>
+                                <select class="control-select" id="fireEmergencyPowerOff" disabled>
+                                    <option value="auto">自动</option>
+                                    <option value="manual">手动</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">通风控制</label>
+                                <select class="control-select" id="fireVentilationControl" disabled>
+                                    <option value="auto">自动控制</option>
+                                    <option value="force_on">强制开启</option>
+                                    <option value="force_off">强制关闭</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-item">
+                                <label class="control-label">应急照明</label>
+                                <select class="control-select" id="fireEmergencyLighting" disabled>
+                                    <option value="auto">自动</option>
+                                    <option value="always_on">常开</option>
+                                    <option value="off">关闭</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label class="control-label">疏散警报</label>
+                                <select class="control-select" id="fireEvacuationAlarm" disabled>
+                                    <option value="enabled">启用</option>
+                                    <option value="disabled">禁用</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成时间块
+        function generateTimeBlocks() {
+            const timeConfig = [
+                'valley', 'valley', 'valley', 'valley', 'valley', 'valley', // 0-5 谷时
+                'flat', 'flat', // 6-7 平时
+                'peak', 'peak', 'peak', 'peak', // 8-11 峰时
+                'flat', 'flat', 'flat', 'flat', 'flat', // 12-16 平时
+                'peak', 'peak', 'peak', 'peak', // 17-20 峰时
+                'flat', 'flat', 'valley' // 21-23 平时+谷时
+            ];
+
+            return timeConfig.map((type, index) => {
+                return `<div class="time-block ${type}" data-hour="${index}" onclick="editTimeBlock(${index})" title="${index}:00-${index+1}:00">${index}</div>`;
+            }).join('');
+        }
+
+        // 编辑时间块
+        function editTimeBlock(hour) {
+            if (!isEditMode) return;
+            
+            const block = document.querySelector(`[data-hour="${hour}"]`);
+            const currentType = block.classList.contains('peak') ? 'peak' : 
+                              block.classList.contains('valley') ? 'valley' : 'flat';
+            
+            let newType;
+            if (currentType === 'peak') {
+                newType = 'valley';
+            } else if (currentType === 'valley') {
+                newType = 'flat';
+            } else {
+                newType = 'peak';
+            }
+            
+            block.className = `time-block ${newType}`;
+        }
+
+        // 设置运行模式
+        function setOperationMode(mode) {
+            if (!isEditMode) return;
+            
+            // 更新按钮状态
+            const buttons = document.querySelectorAll('.mode-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            if (mode === 'auto') {
+                document.getElementById('autoModeBtn').classList.add('active');
+            } else if (mode === 'charge') {
+                document.getElementById('chargeModeBtn').classList.add('active');
+            } else if (mode === 'discharge') {
+                document.getElementById('dischargeModeBtn').classList.add('active');
+            } else if (mode === 'stop') {
+                document.getElementById('stopModeBtn').classList.add('active');
+            }
+        }
+
+        // 切换编辑模式
+        function toggleControlEdit() {
+            isEditMode = !isEditMode;
+            
+            const editBtn = document.getElementById('editModeBtn');
+            const editControls = document.getElementById('editControls');
+            
+            if (isEditMode) {
+                // 进入编辑模式
+                editBtn.innerHTML = '<i class="fas fa-times"></i>取消';
+                editBtn.className = 'edit-btn secondary';
+                
+                // 添加保存按钮
+                const saveBtn = document.createElement('button');
+                saveBtn.className = 'edit-btn success';
+                saveBtn.id = 'saveBtn';
+                saveBtn.innerHTML = '<i class="fas fa-save"></i>保存';
+                saveBtn.onclick = saveControlSettings;
+                editControls.appendChild(saveBtn);
+                
+                // 保存原始设置
+                saveOriginalSettings();
+                
+            } else {
+                // 退出编辑模式
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>编辑';
+                editBtn.className = 'edit-btn primary';
+                
+                // 移除保存按钮
+                const saveBtn = document.getElementById('saveBtn');
+                if (saveBtn) {
+                    saveBtn.remove();
+                }
+                
+                // 恢复原始设置
+                restoreOriginalSettings();
+            }
+            
+            // 更新所有控件状态
+            updateControlsState();
+        }
+
+        // 更新控件状态
+        function updateControlsState() {
+            const inputs = document.querySelectorAll('.control-input, .control-select');
+            const buttons = document.querySelectorAll('.mode-btn');
+            
+            inputs.forEach(input => {
+                input.disabled = !isEditMode;
+            });
+            
+            buttons.forEach(button => {
+                if (!button.onclick || button.onclick.toString().includes('setOperationMode') || 
+                    button.onclick.toString().includes('editTimeBlock')) {
+                    button.style.pointerEvents = isEditMode ? 'auto' : 'none';
+                    button.style.opacity = isEditMode ? '1' : '0.6';
+                }
+            });
+        }
+
+        // 保存原始设置
+        function saveOriginalSettings() {
+            originalSettings = {};
+            
+            const inputs = document.querySelectorAll('.control-input, .control-select');
+            inputs.forEach(input => {
+                originalSettings[input.id] = input.value;
+            });
+        }
+
+        // 恢复原始设置
+        function restoreOriginalSettings() {
+            Object.keys(originalSettings).forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.value = originalSettings[id];
+                }
+            });
+        }
+
+        // 保存控制设置
+        function saveControlSettings() {
+            // 收集所有设置
+            const settings = {};
+            const inputs = document.querySelectorAll('.control-input, .control-select');
+            
+            inputs.forEach(input => {
+                settings[input.id] = input.value;
+            });
+            
+            // 收集时间轴设置
+            const timeBlocks = document.querySelectorAll('.time-block');
+            settings.timeAxis = Array.from(timeBlocks).map(block => {
+                return block.classList.contains('peak') ? 'peak' : 
+                       block.classList.contains('valley') ? 'valley' : 'flat';
+            });
+            
+            // 保存到localStorage
+            localStorage.setItem('controlSettings', JSON.stringify(settings));
+            
+            // 显示保存成功消息
+            showNotification('设置保存成功', 'success');
+            
+            // 退出编辑模式
+            toggleControlEdit();
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                padding: 12px 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                border-radius: 6px;
+                font-size: 14px;
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // 校准电池容量
+        function calibrateBatteryCapacity() {
+            if (!isEditMode) return;
+            showNotification('开始校准电池容量...', 'info');
+        }
+
+        // 重置电池容量
+        function resetBatteryCapacity() {
+            if (!isEditMode) return;
+            if (confirm('确定要重置电池容量吗？此操作不可恢复。')) {
+                showNotification('电池容量已重置', 'success');
+            }
+        }
+
+        // 显示实时数据
+        function showRealtimeData() {
+            const container = document.getElementById('panelContent');
+            
+            // 根据当前组件获取实时数据配置
+            const dataConfig = getComponentRealtimeData(currentComponent);
+            
+            let html = '<div class="data-container">';
+            html += '<h3 class="data-title">实时数据监控</h3>';
+            html += '<div class="data-grid">';
+            
+            for (const item of dataConfig) {
+                html += `
+                    <div class="data-card">
+                        <div class="data-label">${item.label}</div>
+                        <div class="data-value">${item.value}</div>
+                        <div class="data-status ${item.status}">${item.statusText}</div>
+                    </div>
+                `;
+            }
+            
+            html += '</div></div>';
+            container.innerHTML = html;
+        }
+
+        // 显示历史数据
+        function showHistoryData() {
+            const container = document.getElementById('panelContent');
+            
+            let html = '<div class="data-container">';
+            html += '<h3 class="data-title">历史数据分析</h3>';
+            
+            // 时间选择器
+            html += `
+                <div class="history-controls">
+                    <select id="historyTimeRange" onchange="updateHistoryData()">
+                        <option value="24h">最近24小时</option>
+                        <option value="7d">最近7天</option>
+                        <option value="30d">最近30天</option>
+                    </select>
+                </div>
+            `;
+            
+            // 图表容器
+            html += '<div class="chart-wrapper"><canvas id="historyChart"></canvas></div>';
+            
+            // 统计数据
+            html += `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">平均功率</div>
+                        <div class="stat-value">165.3 kW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">最大功率</div>
+                        <div class="stat-value">198.7 kW</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">运行时长</div>
+                        <div class="stat-value">23.5 h</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">充放电次数</div>
+                        <div class="stat-value">12 次</div>
+                    </div>
+                </div>
+            `;
+            
+            html += '</div>';
+            container.innerHTML = html;
+            
+            // 初始化历史数据图表
+            setTimeout(() => initHistoryChart(), 100);
+        }
+
+        // 获取组件实时数据
+        function getComponentRealtimeData(component) {
+            const dataMap = {
+                overall: [
+                    { label: '系统功率', value: '156.8 kW', status: 'normal', statusText: '正常' },
+                    { label: '系统电压', value: '687.3 V', status: 'normal', statusText: '正常' },
+                    { label: '系统电流', value: '228.1 A', status: 'normal', statusText: '正常' },
+                    { label: '电池SOC', value: '78.5%', status: 'normal', statusText: '健康' },
+                    { label: '系统温度', value: '23.8°C', status: 'normal', statusText: '正常' },
+                    { label: '运行状态', value: '充电模式', status: 'normal', statusText: '运行中' }
+                ],
+                ems: [
+                    { label: 'EMS状态', value: '在线', status: 'normal', statusText: '正常' },
+                    { label: '通信状态', value: '正常', status: 'normal', statusText: '连接' },
+                    { label: '控制模式', value: '自动', status: 'normal', statusText: '运行' },
+                    { label: '策略执行', value: '峰谷套利', status: 'normal', statusText: '执行中' }
+                ],
+                pcs: [
+                    { label: 'PCS功率', value: '156.8 kW', status: 'normal', statusText: '正常' },
+                    { label: '转换效率', value: '98.2%', status: 'normal', statusText: '高效' },
+                    { label: 'AC电压', value: '380 V', status: 'normal', statusText: '正常' },
+                    { label: 'DC电压', value: '687.3 V', status: 'normal', statusText: '正常' }
+                ],
+                bms: [
+                    { label: '电池SOC', value: '78.5%', status: 'normal', statusText: '正常' },
+                    { label: '电池SOH', value: '98.3%', status: 'normal', statusText: '健康' },
+                    { label: '充电功率', value: '156.8 kW', status: 'normal', statusText: '充电中' },
+                    { label: '电池温度', value: '25.3°C', status: 'normal', statusText: '正常' }
+                ],
+                battery: [
+                    { label: '模组数量', value: '16 个', status: 'normal', statusText: '全部在线' },
+                    { label: '最高电压', value: '3.65 V', status: 'normal', statusText: '正常' },
+                    { label: '最低电压', value: '3.58 V', status: 'normal', statusText: '正常' },
+                    { label: '压差', value: '70 mV', status: 'normal', statusText: '均衡' }
+                ],
+                hvac: [
+                    { label: '环境温度', value: '23.8°C', status: 'normal', statusText: '正常' },
+                    { label: '目标温度', value: '25.0°C', status: 'normal', statusText: '设定' },
+                    { label: '空调状态', value: '制冷', status: 'normal', statusText: '运行' },
+                    { label: '风机转速', value: '1200 RPM', status: 'normal', statusText: '中速' }
+                ],
+                fire: [
+                    { label: '系统状态', value: '正常', status: 'normal', statusText: '安全' },
+                    { label: '烟雾检测', value: '无', status: 'normal', statusText: '正常' },
+                    { label: '温度检测', value: '23.8°C', status: 'normal', statusText: '正常' },
+                    { label: '灭火装置', value: '就绪', status: 'normal', statusText: '待命' }
+                ]
+            };
+            
+            return dataMap[component] || dataMap.overall;
+        }
+
+        // 初始化历史数据图表
+        function initHistoryChart() {
+            const ctx = document.getElementById('historyChart');
+            if (!ctx) return;
+            
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                    datasets: [{
+                        label: '功率 (kW)',
+                        data: Array.from({length: 24}, () => Math.random() * 50 + 150),
+                        borderColor: '#00d4ff',
+                        backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#666'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                color: '#666'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                color: '#666'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 更新历史数据
+        function updateHistoryData() {
+            showNotification('正在更新历史数据...', 'info');
+            setTimeout(() => initHistoryChart(), 500);
+        }
+
+        // 初始化图表（如果需要）
+        function initializeCharts() {
+            // 如果有图表需要初始化，在这里添加代码
+        }
+
+        // 添加动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

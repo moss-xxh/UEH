@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网关告警 - 工控数据管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
+            font-size: 14px;
+            color: #444;
+        }
+        
+        .container {
+            display: flex;
+            width: 1100px;
+            height: 600px;
+            margin: 20px auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        /* 左侧菜单 - 复用原有样式 */
+        .sidebar {
+            width: 210px;
+            background: linear-gradient(180deg, #5DD5E1 0%, #4ECAE3 100%);
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .logo {
+            height: 104px;
+            display: flex;
+            align-items: center;
+            padding: 0 31px;
+        }
+        
+        .logo img {
+            width: 142px;
+            height: 42px;
+        }
+        
+        .menu-item {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            padding: 10px 29px;
+            cursor: pointer;
+            transition: all 0.3s;
+            gap: 10px;
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-item.active {
+            background: rgba(255, 255, 255, 1);
+            margin: 0 8px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.07);
+        }
+        
+        .menu-item.active span {
+            color: #4ECAE3 !important;
+        }
+        
+        .menu-item img {
+            width: 16px;
+            height: 14px;
+        }
+        
+        .menu-item span {
+            font-size: 14px;
+        }
+        
+        /* 右侧内容区 */
+        .main-content {
+            flex: 1;
+            background: #F0F9F9;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 顶部导航 */
+        .header {
+            height: 60px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 27px;
+            box-shadow: -2px 2px 5px 0px rgba(0,0,0,0.06);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .home-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            border: 1px solid #4ECAE3;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .home-btn:hover {
+            background: #4ECAE3;
+            color: white;
+        }
+        
+        .home-btn img {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .lang-switch {
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            height: 32px;
+            border: 1px solid #EBEBEB;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .lang-switch:hover {
+            border-color: #4ECAE3;
+        }
+        
+        .lang-switch img {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .lang-switch span {
+            margin: 0 5px;
+            color: #444;
+            font-size: 14px;
+        }
+        
+        /* 内容区域 */
+        .content {
+            flex: 1;
+            background: white;
+            margin: 5px 9px;
+            padding: 25px 25px 0 25px;
+            border-radius: 8px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .page-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        /* 表格容器 */
+        .table-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        /* 告警表格 */
+        .alert-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .alert-table th {
+            background: #E8EFF7;
+            color: #444;
+            font-weight: 500;
+            padding: 15px 20px;
+            text-align: left;
+        }
+        
+        .alert-table td {
+            padding: 15px 20px;
+            color: #666;
+        }
+        
+        .alert-table tr:hover {
+            background: #F9FAFB;
+        }
+        
+        .alert-level {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .alert-level.high {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+        
+        .alert-level.medium {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+        
+        .alert-level.low {
+            background: #DBEAFE;
+            color: #2563EB;
+        }
+        
+        .alert-code {
+            font-family: 'Courier New', monospace;
+            background: #F3F4F6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .alert-time {
+            font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* 查询区域 - 与首页保持一致 */
+        .group_6 {
+            width: 810px;
+            height: 39px;
+            margin: 0 0 0 16px;
+        }
+        
+        .text_1 {
+            width: 56px;
+            height: 14px;
+            overflow-wrap: break-word;
+            color: rgba(68, 68, 68, 1);
+            font-size: 14px;
+            font-family: SourceHanSansCN-Regular;
+            font-weight: normal;
+            text-align: left;
+            white-space: nowrap;
+            line-height: 21px;
+            margin-top: 12px;
+        }
+        
+        .block_2 {
+            background-color: rgba(255, 255, 255, 1);
+            border-radius: 3px;
+            width: 193px;
+            height: 38px;
+            border: 1px solid rgba(215, 215, 215, 1);
+            margin-left: 17px;
+        }
+        
+        .block_3 {
+            background-color: rgba(255, 255, 255, 1);
+            border-radius: 3px;
+            width: 240px;
+            height: 38px;
+            border: 1px solid rgba(215, 215, 215, 1);
+            margin-left: 18px;
+        }
+        
+        .text_2 {
+            width: 70px;
+            height: 14px;
+            overflow-wrap: break-word;
+            color: rgba(68, 68, 68, 1);
+            font-size: 14px;
+            font-family: SourceHanSansCN-Regular;
+            font-weight: normal;
+            text-align: left;
+            white-space: nowrap;
+            line-height: 21px;
+            margin: 12px 0 0 39px;
+        }
+        
+        .text-wrapper_1 {
+            height: 38px;
+            background: rgba(78, 202, 227, 1);
+            background-size: 100% 100%;
+            width: 101px;
+            margin: 1px 0 0 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .text-wrapper_1:hover {
+            background: rgba(68, 192, 217, 1);
+        }
+        
+        .text_3 {
+            width: auto;
+            height: auto;
+            overflow-wrap: break-word;
+            color: rgba(255, 255, 255, 1);
+            font-size: 14px;
+            font-family: SourceHanSansCN-Regular;
+            font-weight: normal;
+            text-align: center;
+            white-space: nowrap;
+            line-height: 1;
+            margin: 0;
+        }
+        
+        .text-wrapper_2 {
+            background-color: rgba(255, 255, 255, 1);
+            border-radius: 3px;
+            height: 38px;
+            border: 1px solid rgba(215, 215, 215, 1);
+            width: 101px;
+            margin: 1px 0 0 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .text-wrapper_2:hover {
+            border-color: rgba(78, 202, 227, 1);
+        }
+        
+        .text_4 {
+            width: auto;
+            height: auto;
+            overflow-wrap: break-word;
+            color: rgba(68, 68, 68, 1);
+            font-size: 14px;
+            font-family: SourceHanSansCN-Regular;
+            font-weight: normal;
+            text-align: center;
+            white-space: nowrap;
+            line-height: 1;
+            margin: 0;
+        }
+        
+        /* 输入框样式 */
+        input[type="text"], input[type="datetime-local"], input[type="date"] {
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            padding: 0 10px;
+            font-size: 14px;
+            background: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
+        }
+        
+        .block_3 input[type="date"] {
+            padding: 0 2px;
+            font-size: 11px;
+        }
+        
+        .block_3 input[type="date"]::-webkit-calendar-picker-indicator {
+            width: 12px;
+            height: 12px;
+            cursor: pointer;
+            margin: 0;
+            padding: 0;
+        }
+        
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            color: rgba(68, 68, 68, 1);
+            opacity: 1;
+        }
+        
+        select {
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            padding: 0 10px;
+            font-size: 14px;
+            background: transparent;
+        }
+        
+        /* flex样式 */
+        .flex-row {
+            display: flex;
+            flex-direction: row;
+        }
+        
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 分页样式 */
+        .pagination-area {
+            width: 100%;
+            height: auto;
+            display: flex;
+            justify-content: flex-end;
+            flex-shrink: 0;
+            background: white;
+            padding: 15px 16px 20px 0;
+            border-top: 1px solid #F0F0F0;
+        }
+        
+        .pagination-wrapper {
+            height: 49px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+        
+        .pagination-btn {
+            background-color: rgba(255, 255, 255, 1);
+            border-radius: 5px;
+            height: 32px;
+            border: 1px solid transparent;
+            min-width: 32px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+        }
+        
+        .pagination-btn:hover:not(.active) {
+            background-color: rgba(249, 249, 249, 1);
+        }
+        
+        .pagination-btn.active {
+            border: 1px solid rgba(74, 201, 227, 1);
+            background-color: rgba(255, 255, 255, 1);
+        }
+        
+        .pagination-btn.active span {
+            color: rgba(74, 201, 227, 1);
+        }
+        
+        .pagination-btn span {
+            width: auto;
+            height: auto;
+            overflow-wrap: break-word;
+            color: rgba(128, 128, 128, 1);
+            font-size: 13px;
+            font-family: SourceHanSansCN-Normal;
+            font-weight: normal;
+            text-align: center;
+            white-space: nowrap;
+            line-height: 1;
+            margin: 0;
+        }
+        
+        .pagination-dots {
+            color: #999;
+            padding: 0 10px;
+        }
+        
+        .page-size-selector {
+            margin-left: 20px;
+            color: rgba(128, 128, 128, 1);
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            height: 32px;
+            border: 1px solid rgba(215, 215, 215, 1);
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 1);
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            gap: 5px;
+        }
+        
+        .page-size-selector:hover {
+            border-color: rgba(74, 201, 227, 1);
+        }
+        
+        /* 自定义滚动条样式 */
+        .table-container::-webkit-scrollbar,
+        .content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .table-container::-webkit-scrollbar-track,
+        .content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .table-container::-webkit-scrollbar-thumb,
+        .content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .table-container::-webkit-scrollbar-thumb:hover,
+        .content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧菜单 -->
+        <div class="sidebar">
+            <div class="logo">
+                <div style="width: 142px; height: 42px; background-color: rgba(255, 255, 255, 0.2); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px;">工控系统</div>
+            </div>
+            
+            <div class="menu-item">
+                <div style="width: 16px; height: 14px; background: currentColor; mask: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"4\" y=\"4\" width=\"16\" height=\"12\" rx=\"2\"/><path d=\"m4 18 16-12\"/></svg>') no-repeat center; mask-size: contain;"></div>
+                <span data-lang="deviceManagement">设备管理</span>
+            </div>
+            
+            <div class="menu-item">
+                <div style="width: 16px; height: 14px; background: currentColor; mask: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"/><polyline points=\"14,2 14,8 20,8\"/><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"/><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"/><polyline points=\"10,9 9,9 8,9\"/></svg>') no-repeat center; mask-size: contain;"></div>
+                <span data-lang="data">数据</span>
+            </div>
+            
+            <div class="menu-item">
+                <div style="width: 16px; height: 14px; background: currentColor; mask: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"1\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"9\"/></svg>') no-repeat center; mask-size: contain;"></div>
+                <span data-lang="gatewayStatus">网关状态</span>
+            </div>
+            
+            <div class="menu-item">
+                <div style="width: 16px; height: 14px; background: currentColor; mask: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 12l2 2 4-4\"/><path d=\"M21 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z\"/><path d=\"M3 12c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z\"/><path d=\"M12 21c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z\"/><path d=\"M12 3c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z\"/></svg>') no-repeat center; mask-size: contain;"></div>
+                <span data-lang="commandConfig">指令配置</span>
+            </div>
+            
+            <div class="menu-item">
+                <div style="width: 16px; height: 14px; background: currentColor; mask: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\"/></svg>') no-repeat center; mask-size: contain;"></div>
+                <span data-lang="systemMaintenance">系统维护</span>
+            </div>
+            
+            <div class="menu-item">
+                <div style="width: 16px; height: 14px; background: currentColor; mask: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"m12 1 2.09 5.26L22 8l-3.74 3.25L19 20l-7-3.51L5 20l.74-8.75L2 8l7.91-1.74L12 1z\"/></svg>') no-repeat center; mask-size: contain;"></div>
+                <span data-lang="advancedSettings">高级设置</span>
+            </div>
+            
+            <div class="menu-item active">
+                <div style="width: 16px; height: 14px; background: currentColor; mask: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z\"/><line x1=\"12\" y1=\"9\" x2=\"12\" y2=\"13\"/><line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\"/></svg>') no-repeat center; mask-size: contain;"></div>
+                <span data-lang="alertInfo">网关告警</span>
+            </div>
+        </div>
+        
+        <!-- 右侧内容 -->
+        <div class="main-content">
+            <!-- 顶部导航 -->
+            <div class="header">
+                <div class="header-left">
+                    <button class="home-btn" onclick="window.location.href='restored_index.html'">
+                        <div style="width: 14px; height: 14px; background: currentColor; mask: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/><polyline points=\"9,22 9,12 15,12 15,22\"/></svg>') no-repeat center; mask-size: contain;"></div>
+                        <span data-lang="home">首页</span>
+                    </button>
+                </div>
+                <div class="header-right">
+                    <div style="width: 70px; height: 32px; background-color: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">LOGO</div>
+                    <div class="lang-switch" onclick="toggleLanguage()">
+                        <div style="width: 14px; height: 14px; background: currentColor; mask: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"2\" y1=\"12\" x2=\"22\" y2=\"12\"/><path d=\"m12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z\"/></svg>') no-repeat center; mask-size: contain;"></div>
+                        <span data-lang="langText">中文简体</span>
+                        <div style="width: 13px; height: 7px; background: currentColor; mask: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>') no-repeat center; mask-size: contain;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 内容区 -->
+            <div class="content">
+                <!-- 查询区域 -->
+                <div class="group_6 flex-row">
+                    <span class="text_1" data-lang="alertContentLabel">告警内容</span>
+                    <div class="block_2 flex-col">
+                        <input type="text" placeholder="请输入告警内容" data-lang-placeholder="alertContentPlaceholder" />
+                    </div>
+                    <span class="text_2" data-lang="queryDate">查询日期</span>
+                    <div class="block_3" style="display: flex; flex-direction: row; align-items: center; padding: 0 5px; gap: 3px;">
+                        <input type="date" value="2024-12-19" style="flex: 1; border: none; padding: 0 2px; font-size: 11px; min-width: 0;" />
+                        <span style="color: #999; font-size: 11px; flex-shrink: 0;">至</span>
+                        <input type="date" value="2024-12-19" style="flex: 1; border: none; padding: 0 2px; font-size: 11px; min-width: 0;" />
+                    </div>
+                    <div class="text-wrapper_1 flex-col">
+                        <span class="text_3" data-lang="search">搜索</span>
+                    </div>
+                    <div class="text-wrapper_2 flex-col">
+                        <span class="text_4" data-lang="reset">重置</span>
+                    </div>
+                </div>
+                
+                <!-- 表格容器 -->
+                <div class="table-container">
+                    <!-- 告警表格 -->
+                    <table class="alert-table">
+                        <thead>
+                            <tr>
+                                <th data-lang="alertContent">告警内容</th>
+                                <th data-lang="description">描述</th>
+                                <th data-lang="alertTime">告警时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td data-lang="diskSpaceAlert">磁盘空间不足告警</td>
+                            <td data-lang="diskSpaceDesc">磁盘空间（95%），超过标准值（85%）</td>
+                            <td><span class="alert-time">2024-12-19 14:25:32</span></td>
+                        </tr>
+                        <tr>
+                            <td data-lang="cpuUsageAlert">CPU使用率过高告警</td>
+                            <td data-lang="cpuUsageDesc">CPU使用率（92%），超过标准值（85%）</td>
+                            <td><span class="alert-time">2024-12-19 14:20:15</span></td>
+                        </tr>
+                        <tr>
+                            <td data-lang="memoryUsageAlert">内存占用过高告警</td>
+                            <td data-lang="memoryUsageDesc">内存使用率（94%），超过标准值（90%）</td>
+                            <td><span class="alert-time">2024-12-19 14:18:45</span></td>
+                        </tr>
+                        <tr>
+                            <td data-lang="temperatureAlert">开发板温度过高告警</td>
+                            <td data-lang="temperatureDesc">开发板温度（75°C），超过标准值（70°C）</td>
+                            <td><span class="alert-time">2024-12-19 14:10:08</span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 分页组件 -->
+                <div class="pagination-area">
+                    <div class="pagination-wrapper">
+                        <div class="pagination-btn" onclick="goToPage('<')">
+                            <span>&lt;</span>
+                        </div>
+                        <div class="pagination-btn" onclick="goToPage(1)">
+                            <span>1</span>
+                        </div>
+                        <div class="pagination-btn" onclick="goToPage(2)">
+                            <span>2</span>
+                        </div>
+                        <div class="pagination-btn active" onclick="goToPage(3)">
+                            <span>3</span>
+                        </div>
+                        <div class="pagination-btn" onclick="goToPage(4)">
+                            <span>4</span>
+                        </div>
+                        <div class="pagination-btn" onclick="goToPage(5)">
+                            <span>5</span>
+                        </div>
+                        <span class="pagination-dots">···</span>
+                        <div class="pagination-btn" onclick="goToPage(20)">
+                            <span>20</span>
+                        </div>
+                        <div class="pagination-btn" onclick="goToPage('>')">
+                            <span>&gt;</span>
+                        </div>
+                        <div class="page-size-selector">
+                            <span>10 <span data-lang="perPage">条/页</span></span>
+                            <div style="width: 10px; height: 6px; background: currentColor; color: #808080; mask: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>') no-repeat center; mask-size: contain;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 多语言配置
+        const translations = {
+            zh: {
+                deviceManagement: '设备管理',
+                data: '数据',
+                gatewayStatus: '网关状态',
+                commandConfig: '指令配置',
+                systemMaintenance: '系统维护',
+                advancedSettings: '高级设置',
+                alertInfo: '网关告警',
+                home: '首页',
+                langText: '中文简体',
+                alertContent: '告警内容',
+                description: '描述',
+                alertTime: '告警时间',
+                alertContentLabel: '告警内容',
+                alertContentPlaceholder: '请输入告警内容',
+                queryDate: '查询日期',
+                search: '搜索',
+                reset: '重置',
+                perPage: '条/页',
+                diskSpaceAlert: '磁盘空间不足告警',
+                diskSpaceDesc: '磁盘空间（95%），超过标准值（85%）',
+                cpuUsageAlert: 'CPU使用率过高告警',
+                cpuUsageDesc: 'CPU使用率（92%），超过标准值（85%）',
+                memoryUsageAlert: '内存占用过高告警',
+                memoryUsageDesc: '内存使用率（94%），超过标准值（90%）',
+                networkLatencyAlert: '网络延迟告警',
+                networkLatencyDesc: '网络延迟（250ms），超过标准值（200ms）',
+                temperatureAlert: '开发板温度过高告警',
+                temperatureDesc: '开发板温度（75°C），超过标准值（70°C）',
+            },
+            en: {
+                deviceManagement: 'Device Management',
+                data: 'Data',
+                gatewayStatus: 'Gateway Status',
+                commandConfig: 'Command Config',
+                systemMaintenance: 'System Maintenance',
+                advancedSettings: 'Advanced Settings',
+                alertInfo: 'Gateway Alert',
+                home: 'Home',
+                langText: 'English',
+                alertContent: 'Alert Content',
+                description: 'Description',
+                alertTime: 'Alert Time',
+                alertContentLabel: 'Alert Content',
+                alertContentPlaceholder: 'Enter alert content',
+                queryDate: 'Query Date',
+                search: 'Search',
+                reset: 'Reset',
+                perPage: 'per page',
+                diskSpaceAlert: 'Disk Space Alert',
+                diskSpaceDesc: 'Disk space (95%), exceeds standard (85%)',
+                cpuUsageAlert: 'CPU Usage Alert',
+                cpuUsageDesc: 'CPU usage (92%), exceeds standard (85%)',
+                memoryUsageAlert: 'Memory Usage Alert',
+                memoryUsageDesc: 'Memory usage (94%), exceeds standard (90%)',
+                networkLatencyAlert: 'Network Latency Alert',
+                networkLatencyDesc: 'Network latency (250ms), exceeds standard (200ms)',
+                temperatureAlert: 'Development Board Temperature Alert',
+                temperatureDesc: 'Development board temperature (75°C), exceeds standard (70°C)',
+            }
+        };
+        
+        let currentLang = 'zh';
+        
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            updateLanguage();
+        }
+        
+        function updateLanguage() {
+            document.querySelectorAll('[data-lang]').forEach(element => {
+                const key = element.getAttribute('data-lang');
+                if (translations[currentLang][key]) {
+                    element.textContent = translations[currentLang][key];
+                }
+            });
+            
+            // 更新placeholder
+            document.querySelectorAll('[data-lang-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-lang-placeholder');
+                if (translations[currentLang][key]) {
+                    element.placeholder = translations[currentLang][key];
+                }
+            });
+        }
+        
+        // 分页功能
+        function goToPage(page) {
+            if (page === '<' || page === '>') return;
+            
+            // 移除所有active类
+            document.querySelectorAll('.pagination-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 添加active类到当前页
+            event.currentTarget.classList.add('active');
+        }
+        
+        // 菜单点击事件
+        document.querySelectorAll('.menu-item').forEach((item, index) => {
+            item.addEventListener('click', function() {
+                // 根据索引导航到相应页面
+                const pages = [
+                    'restored_index.html',  // 设备管理
+                    'restored_index.html',  // 数据
+                    'gateway-status.html',  // 网关状态
+                    'restored_index.html',  // 指令配置
+                    'restored_index.html',  // 系统维护
+                    'restored_index.html',  // 高级设置
+                    'alert-info.html'       // 告警信息
+                ];
+                
+                if (pages[index] && pages[index] !== 'alert-info.html') {
+                    window.location.href = pages[index];
+                }
+            });
+        });
+    </script>
+</body>
+</html>

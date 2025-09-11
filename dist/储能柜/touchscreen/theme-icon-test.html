@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主题图标测试</title>
+    <link rel="stylesheet" href="theme.css">
+    <link rel="stylesheet" href="tech-ui-enhancement.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .test-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .theme-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+
+        .theme-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--surface-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .theme-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .test-section {
+            background: var(--surface-color);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .icon-examples {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .icon-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* 测试各种图标样式 */
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: #e3f2fd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e90ff;
+            font-size: 20px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .current-theme {
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .info-text {
+            color: var(--text-secondary-color);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>主题图标显示测试</h1>
+            <p class="current-theme">当前主题: <span id="currentThemeName">浅色</span></p>
+        </div>
+
+        <div class="theme-buttons">
+            <button class="theme-btn" onclick="setTestTheme('light')">浅色主题</button>
+            <button class="theme-btn" onclick="setTestTheme('dark')">深色主题</button>
+            <button class="theme-btn" onclick="setTestTheme('blue')">科技蓝</button>
+            <button class="theme-btn" onclick="setTestTheme('green')">自然绿</button>
+        </div>
+
+        <div class="test-grid">
+            <!-- Logo图标测试 -->
+            <div class="test-section">
+                <h2 class="section-title">Logo 图标</h2>
+                <div class="icon-examples">
+                    <div class="icon-row">
+                        <div class="logo-icon">
+                            <img src="logo.png" alt="Logo">
+                        </div>
+                        <div class="info-text">
+                            带图片的logo图标<br>
+                            深色背景下应保持白色背景
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section图标测试 -->
+            <div class="test-section">
+                <h2 class="section-title">Section 图标</h2>
+                <div class="icon-examples">
+                    <div class="icon-row">
+                        <div class="section-icon">⚡</div>
+                        <div class="section-icon">🔋</div>
+                        <div class="section-icon">⚙️</div>
+                        <div class="info-text">
+                            区块标题图标<br>
+                            深色背景下应保持白色背景
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card图标测试 -->
+            <div class="test-section">
+                <h2 class="section-title">Card 图标</h2>
+                <div class="icon-examples">
+                    <div class="icon-row">
+                        <div class="card-icon" style="background: #dbeafe; color: #3b82f6;">🔋</div>
+                        <div class="card-icon" style="background: #fef3c7; color: #f59e0b;">⚡</div>
+                        <div class="card-icon" style="background: #dcfce7; color: #22c55e;">🌡️</div>
+                        <div class="info-text">
+                            卡片内图标<br>
+                            深色背景下应保持白色背景
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 混合测试 -->
+            <div class="test-section">
+                <h2 class="section-title">综合展示</h2>
+                <div class="icon-examples">
+                    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                        <div class="logo-icon">
+                            <img src="logo.png" alt="Logo">
+                        </div>
+                        <div class="section-icon">🏠</div>
+                        <div class="section-icon">📊</div>
+                        <div class="section-icon">🎛️</div>
+                        <div class="card-icon" style="background: #ede9fe; color: #8b5cf6;">📊</div>
+                    </div>
+                    <p class="info-text" style="margin-top: 20px;">
+                        所有类型的图标在深色主题下都应该保持白色背景，确保图标内容清晰可见。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="section-title">主题效果说明</h2>
+            <div class="info-text">
+                <p>✅ 在浅色主题下，图标卡片正常显示各自的背景色</p>
+                <p>✅ 在深色主题（深色、科技蓝、自然绿）下，所有图标卡片自动切换为白色背景</p>
+                <p>✅ 图标内的图片和emoji在深色主题下保持正常显示，不受filter影响</p>
+                <p>✅ 确保在所有主题下图标内容都清晰可见</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="theme-manager.js"></script>
+    <script>
+        // 设置测试主题
+        function setTestTheme(theme) {
+            ThemeManager.setTheme(theme);
+            
+            // 更新按钮状态
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 更新当前主题名称
+            const themeNames = {
+                light: '浅色',
+                dark: '深色',
+                blue: '科技蓝',
+                green: '自然绿'
+            };
+            document.getElementById('currentThemeName').textContent = themeNames[theme];
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            const currentTheme = ThemeManager.getCurrentTheme();
+            
+            // 设置当前主题按钮状态
+            document.querySelectorAll('.theme-btn').forEach((btn, index) => {
+                const themes = ['light', 'dark', 'blue', 'green'];
+                if (themes[index] === currentTheme) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // 更新当前主题名称
+            const themeNames = {
+                light: '浅色',
+                dark: '深色',
+                blue: '科技蓝',
+                green: '自然绿'
+            };
+            document.getElementById('currentThemeName').textContent = themeNames[currentTheme];
+        });
+    </script>
+</body>
+</html>

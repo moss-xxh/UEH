@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史告警</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', sans-serif;
+            background: #f2f2f7;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            max-width: 430px;
+            margin: 0 auto;
+            background: #f2f2f7;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .status-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 8px 20px 0;
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            z-index: 1001;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 44px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 44px 20px 12px;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #007aff;
+            font-size: 17px;
+            font-weight: 400;
+            cursor: pointer;
+            padding: 8px;
+            margin: -8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .header-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1d1d1f;
+            text-align: center;
+            letter-spacing: -0.41px;
+        }
+        
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 140px 20px 100px 20px;
+            background: #f2f2f7;
+        }
+        
+        .detail-section {
+            background: #ffffff;
+            border-radius: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transition: all 0.15s ease;
+        }
+        
+        .alert-item {
+            padding: 20px 24px;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+        
+        .alert-item:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        
+        .alert-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            <div class="status-left">
+                <button style="background: none; border: none; color: #007aff; font-size: 14px; font-weight: 400; cursor: pointer; padding: 4px; margin: -4px; display: flex; align-items: center; gap: 2px; margin-top: 20px;" onclick="window.location.href='info.html'">
+                    <svg width="7" height="12" viewBox="0 0 7 12" fill="currentColor">
+                        <path d="M6.5 0.5L1.5 5.5C1.22386 5.77614 1.22386 6.22386 1.5 6.5L6.5 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                    </svg>
+                    返回
+                </button>
+                <span style="margin-left: 8px;">9:41</span>
+            </div>
+            <div class="status-right">
+                <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
+                    <path d="M2 1.5C2 0.671573 2.67157 0 3.5 0H12.5C13.3284 0 14 0.671573 14 1.5V8.5C14 9.32843 13.3284 10 12.5 10H3.5C2.67157 10 2 9.32843 2 8.5V1.5Z" fill="#1d1d1f"/>
+                    <path d="M0.75 3C0.335786 3 0 3.33579 0 3.75V6.25C0 6.66421 0.335786 7 0.75 7H1.5V3H0.75Z" fill="#1d1d1f"/>
+                    <rect x="3" y="2" width="8" height="6" rx="1" fill="#30d158"/>
+                </svg>
+                <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
+                    <path d="M2 2V10H16V2C16 0.895431 15.1046 0 14 0H4C2.89543 0 2 0.895431 2 2Z" fill="#1d1d1f"/>
+                    <path d="M0 3C0 2.44772 0.447715 2 1 2C1.55228 2 2 2.44772 2 3V9C2 9.55228 1.55228 10 1 10C0.447715 10 0 9.55228 0 9V3Z" fill="#1d1d1f"/>
+                    <path d="M16 3V9C16 9.55228 16.4477 10 17 10C17.5523 10 18 9.55228 18 9V3C18 2.44772 17.5523 2 17 2C16.4477 2 16 2.44772 16 3Z" fill="#1d1d1f"/>
+                    <rect x="3" y="2" width="10" height="8" rx="0.5" fill="#30d158"/>
+                </svg>
+                <span>100%</span>
+            </div>
+        </div>
+        
+        <!-- 顶部导航 -->
+        <div class="header">
+            <button class="back-button" onclick="window.location.href='info.html'">
+                <svg width="9" height="16" viewBox="0 0 9 16" fill="currentColor">
+                    <path d="M8.5 0.5L1.5 7.5C1.22386 7.77614 1.22386 8.22386 1.5 8.5L8.5 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+                </svg>
+                返回
+            </button>
+            <div class="header-title">历史告警</div>
+        </div>
+        
+        <!-- 主要内容 -->
+        <div class="main-content">
+            <!-- 筛选功能 -->
+            <div class="detail-section" style="margin-bottom: 16px;">
+                <div style="padding: 0 24px 24px;">
+                    <!-- 时间选择区域 -->
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: nowrap;">
+                        <div style="flex: 0 0 auto; min-width: 0;">
+                            <div onclick="showDatePicker('start')" id="startDateDisplay" style="padding: 8px 12px; background: #f8f9fa; border-radius: 8px; font-size: 14px; color: #1d1d1f; cursor: pointer; border: 1px solid transparent; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center; white-space: nowrap;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#f8f9fa'">
+                                <span>2024年8月1日</span>
+                            </div>
+                        </div>
+                        <div style="flex: 0 0 auto; min-width: 0;">
+                            <div onclick="showDatePicker('end')" id="endDateDisplay" style="padding: 8px 12px; background: #f8f9fa; border-radius: 8px; font-size: 14px; color: #1d1d1f; cursor: pointer; border: 1px solid transparent; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center; white-space: nowrap;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#f8f9fa'">
+                                <span>2024年8月31日</span>
+                            </div>
+                        </div>
+                        <button onclick="searchAlerts()" style="background: #007AFF; border: none; color: white; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25); transition: all 0.15s ease; white-space: nowrap; flex: 0 0 auto;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(0, 122, 255, 0.35)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 122, 255, 0.25)'">搜索</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 苹果风格时间选择器 -->
+            <div id="datePickerOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); z-index: 2000; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);" onclick="closeDatePicker()">
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: white; border-radius: 16px 16px 0 0; padding: 20px; max-width: 430px; margin: 0 auto; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);" onclick="event.stopPropagation()">
+                    <!-- 标题栏 -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                        <button onclick="closeDatePicker()" style="background: none; border: none; color: #007AFF; font-size: 17px; font-weight: 400; cursor: pointer;">取消</button>
+                        <div style="font-size: 17px; font-weight: 600; color: #1d1d1f;" id="pickerTitle">选择日期</div>
+                        <button onclick="confirmDateSelection()" style="background: none; border: none; color: #007AFF; font-size: 17px; font-weight: 600; cursor: pointer;">确定</button>
+                    </div>
+                    
+                    <!-- 滚动选择器 -->
+                    <div style="display: flex; height: 200px; overflow: hidden; position: relative;">
+                        <!-- 年份选择 -->
+                        <div style="flex: 1; position: relative;">
+                            <div style="text-align: center; font-size: 17px; font-weight: 600; color: #1d1d1f; margin-bottom: 10px;">年</div>
+                            <div id="yearPicker" style="height: 160px; overflow-y: scroll; scrollbar-width: none; -ms-overflow-style: none;" onscroll="updateSelection('year')">
+                                <!-- 年份选项将通过JS生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 月份选择 -->
+                        <div style="flex: 1; position: relative;">
+                            <div style="text-align: center; font-size: 17px; font-weight: 600; color: #1d1d1f; margin-bottom: 10px;">月</div>
+                            <div id="monthPicker" style="height: 160px; overflow-y: scroll; scrollbar-width: none; -ms-overflow-style: none;" onscroll="updateSelection('month')">
+                                <!-- 月份选项将通过JS生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 日期选择 -->
+                        <div style="flex: 1; position: relative;">
+                            <div style="text-align: center; font-size: 17px; font-weight: 600; color: #1d1d1f; margin-bottom: 10px;">日</div>
+                            <div id="dayPicker" style="height: 160px; overflow-y: scroll; scrollbar-width: none; -ms-overflow-style: none;" onscroll="updateSelection('day')">
+                                <!-- 日期选项将通过JS生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 选择指示线 -->
+                        <div style="position: absolute; top: 50%; left: 0; right: 0; height: 40px; transform: translateY(-50%); border-top: 1px solid #e5e5e7; border-bottom: 1px solid #e5e5e7; pointer-events: none; background: rgba(0, 122, 255, 0.05);"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 历史告警列表 -->
+            <div class="detail-section">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 16px;">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 6px; height: 18px; background: linear-gradient(135deg, #FF3B30, #FF1744); border-radius: 3px; margin-right: 12px;"></div>
+                        <div style="font-size: 17px; font-weight: 600; color: #1d1d1f;">告警记录</div>
+                    </div>
+                    <button onclick="exportAlerts()" style="background: #007AFF; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">导出</button>
+                </div>
+                
+                <!-- 表格样式的告警列表 -->
+                <div style="padding: 0; overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                        <thead>
+                            <tr style="background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">编号</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">日期</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">电压(V)</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">电流(A)</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">电量(%)</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">SOH(%)</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">FCC(Ah)</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">循环次数</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">告警</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">一级保护</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">二级保护</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">故障</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">系统温度(°C)</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">TempFET(°C)</th>
+                                <th style="padding: 8px 4px; text-align: left; font-weight: 600; color: #1d1d1f; white-space: nowrap;">环境温度(°C)</th>
+                                <th style="padding: 8px 4px; text-align: center; font-weight: 600; color: #1d1d1f; white-space: nowrap;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr onclick="showDetailedAlert(1)" style="border-bottom: 1px solid #f1f3f4; cursor: pointer; transition: background-color 0.15s ease;" onmouseover="this.style.background='rgba(0, 122, 255, 0.05)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 8px 4px; color: #1d1d1f;">001</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">2024-08-20</td>
+                                <td style="padding: 8px 4px; color: #FF3B30; font-weight: 500;">3.65</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">-15.2</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">85</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">98</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">95.2</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">256</td>
+                                <td style="padding: 8px 4px; color: #FF3B30; font-weight: 500;">电压过高</td>
+                                <td style="padding: 8px 4px; color: #30D158;">正常</td>
+                                <td style="padding: 8px 4px; color: #30D158;">正常</td>
+                                <td style="padding: 8px 4px; color: #30D158;">正常</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">35</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">42</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">28</td>
+                                <td style="padding: 8px 4px; text-align: center;"><button onclick="event.stopPropagation(); viewAlert(1)" style="background: none; border: 1px solid #007AFF; color: #007AFF; padding: 2px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-right: 4px;">查看</button></td>
+                            </tr>
+                            <tr onclick="showDetailedAlert(2)" style="border-bottom: 1px solid #f1f3f4; cursor: pointer; transition: background-color 0.15s ease;" onmouseover="this.style.background='rgba(0, 122, 255, 0.05)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 8px 4px; color: #1d1d1f;">002</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">2024-08-19</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">3.28</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">8.5</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">62</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">97</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">94.8</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">245</td>
+                                <td style="padding: 8px 4px; color: #FF9500; font-weight: 500;">温度异常</td>
+                                <td style="padding: 8px 4px; color: #30D158;">正常</td>
+                                <td style="padding: 8px 4px; color: #30D158;">正常</td>
+                                <td style="padding: 8px 4px; color: #30D158;">正常</td>
+                                <td style="padding: 8px 4px; color: #FF9500; font-weight: 500;">45</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">38</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">32</td>
+                                <td style="padding: 8px 4px; text-align: center;"><button onclick="event.stopPropagation(); viewAlert(2)" style="background: none; border: 1px solid #007AFF; color: #007AFF; padding: 2px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-right: 4px;">查看</button></td>
+                            </tr>
+                            <tr onclick="showDetailedAlert(3)" style="border-bottom: 1px solid #f1f3f4; cursor: pointer; transition: background-color 0.15s ease;" onmouseover="this.style.background='rgba(0, 122, 255, 0.05)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 8px 4px; color: #1d1d1f;">003</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">2024-08-18</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">3.31</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">0.0</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">78</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">96</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">94.1</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">238</td>
+                                <td style="padding: 8px 4px; color: #8E8E93;">通信超时</td>
+                                <td style="padding: 8px 4px; color: #30D158;">正常</td>
+                                <td style="padding: 8px 4px; color: #30D158;">正常</td>
+                                <td style="padding: 8px 4px; color: #FF9500; font-weight: 500;">通信故障</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">33</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">35</td>
+                                <td style="padding: 8px 4px; color: #1d1d1f;">29</td>
+                                <td style="padding: 8px 4px; text-align: center;"><button onclick="event.stopPropagation(); viewAlert(3)" style="background: none; border: 1px solid #007AFF; color: #007AFF; padding: 2px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-right: 4px;">查看</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 导出告警数据
+        function exportAlerts() {
+            const alertData = [
+                {
+                    编号: '001',
+                    日期: '2024-08-20',
+                    电压: '3.65V',
+                    电流: '-15.2A',
+                    电量: '85%',
+                    SOH: '98%',
+                    FCC: '95.2Ah',
+                    循环次数: '256',
+                    告警: '电压过高',
+                    一级保护: '正常',
+                    二级保护: '正常',
+                    故障: '正常',
+                    系统温度: '35°C',
+                    TempFET: '42°C',
+                    环境温度: '28°C'
+                },
+                {
+                    编号: '002',
+                    日期: '2024-08-19',
+                    电压: '3.28V',
+                    电流: '8.5A',
+                    电量: '62%',
+                    SOH: '97%',
+                    FCC: '94.8Ah',
+                    循环次数: '245',
+                    告警: '温度异常',
+                    一级保护: '正常',
+                    二级保护: '正常',
+                    故障: '正常',
+                    系统温度: '45°C',
+                    TempFET: '38°C',
+                    环境温度: '32°C'
+                },
+                {
+                    编号: '003',
+                    日期: '2024-08-18',
+                    电压: '3.31V',
+                    电流: '0.0A',
+                    电量: '78%',
+                    SOH: '96%',
+                    FCC: '94.1Ah',
+                    循环次数: '238',
+                    告警: '通信超时',
+                    一级保护: '正常',
+                    二级保护: '正常',
+                    故障: '通信故障',
+                    系统温度: '33°C',
+                    TempFET: '35°C',
+                    环境温度: '29°C'
+                }
+            ];
+            
+            // 创建CSV内容
+            const headers = Object.keys(alertData[0]);
+            let csvContent = headers.join(',') + '\n';
+            
+            alertData.forEach(row => {
+                const values = headers.map(header => row[header]);
+                csvContent += values.join(',') + '\n';
+            });
+            
+            // 下载CSV文件
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `历史告警数据_${new Date().toISOString().slice(0,10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('告警数据已导出为CSV文件');
+        }
+        
+        // 查看告警详情
+        function viewAlert(alertId) {
+            const alertDetails = {
+                1: {
+                    编号: '001',
+                    日期: '2024-08-20 14:23:15',
+                    告警类型: '电压过高告警',
+                    电压: '3.65V',
+                    电流: '-15.2A',
+                    电量: '85%',
+                    SOH: '98%',
+                    FCC: '95.2Ah',
+                    循环次数: '256',
+                    系统温度: '35°C',
+                    TempFET: '42°C',
+                    环境温度: '28°C',
+                    描述: '电芯5电压达到3.65V，超出安全阈值3.6V',
+                    处理状态: '已处理',
+                    处理方案: '系统已自动降低充电电流，电压已恢复正常范围'
+                },
+                2: {
+                    编号: '002',
+                    日期: '2024-08-19 09:15:42',
+                    告警类型: '温度异常告警',
+                    电压: '3.28V',
+                    电流: '8.5A',
+                    电量: '62%',
+                    SOH: '97%',
+                    FCC: '94.8Ah',
+                    循环次数: '245',
+                    系统温度: '45°C',
+                    TempFET: '38°C',
+                    环境温度: '32°C',
+                    描述: '探头2温度达到45°C，超出正常工作范围',
+                    处理状态: '已处理',
+                    处理方案: '启动散热系统，温度已降至正常范围'
+                },
+                3: {
+                    编号: '003',
+                    日期: '2024-08-18 16:07:28',
+                    告警类型: '通信超时告警',
+                    电压: '3.31V',
+                    电流: '0.0A',
+                    电量: '78%',
+                    SOH: '96%',
+                    FCC: '94.1Ah',
+                    循环次数: '238',
+                    系统温度: '33°C',
+                    TempFET: '35°C',
+                    环境温度: '29°C',
+                    描述: 'BMS通信异常，数据传输中断超过30秒',
+                    处理状态: '已处理',
+                    处理方案: '重启通信模块，连接已恢复正常'
+                }
+            };
+            
+            const alert = alertDetails[alertId];
+            if (alert) {
+                let message = `告警详情：\n\n`;
+                Object.keys(alert).forEach(key => {
+                    message += `${key}：${alert[key]}\n`;
+                });
+                alert(message);
+            }
+        }
+        
+        // 显示详细告警信息（行点击）
+        function showDetailedAlert(alertId) {
+            viewAlert(alertId);
+        }
+        
+        // 当前选择的日期类型和日期
+        let currentDateType = '';
+        let selectedYear = 2024;
+        let selectedMonth = 8;
+        let selectedDay = 1;
+        let startDate = { year: 2024, month: 8, day: 1 };
+        let endDate = { year: 2024, month: 8, day: 31 };
+
+        // 显示日期选择器
+        function showDatePicker(type) {
+            currentDateType = type;
+            const title = type === 'start' ? '选择开始时间' : '选择结束时间';
+            document.getElementById('pickerTitle').textContent = title;
+            
+            // 设置当前选择的日期
+            if (type === 'start') {
+                selectedYear = startDate.year;
+                selectedMonth = startDate.month;
+                selectedDay = startDate.day;
+            } else {
+                selectedYear = endDate.year;
+                selectedMonth = endDate.month;
+                selectedDay = endDate.day;
+            }
+            
+            initDatePicker();
+            document.getElementById('datePickerOverlay').style.display = 'block';
+        }
+
+        // 关闭日期选择器
+        function closeDatePicker() {
+            document.getElementById('datePickerOverlay').style.display = 'none';
+        }
+
+        // 初始化日期选择器
+        function initDatePicker() {
+            initYearPicker();
+            initMonthPicker();
+            initDayPicker();
+        }
+
+        // 初始化年份选择器
+        function initYearPicker() {
+            const yearPicker = document.getElementById('yearPicker');
+            yearPicker.innerHTML = '';
+            
+            for (let year = 2020; year <= 2030; year++) {
+                const item = document.createElement('div');
+                item.style.cssText = 'height: 40px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #1d1d1f; cursor: pointer;';
+                item.textContent = year + '年';
+                item.onclick = () => {
+                    selectedYear = year;
+                    updateDayPicker();
+                    scrollToCenter(yearPicker, item);
+                };
+                yearPicker.appendChild(item);
+                
+                if (year === selectedYear) {
+                    setTimeout(() => scrollToCenter(yearPicker, item), 10);
+                }
+            }
+        }
+
+        // 初始化月份选择器
+        function initMonthPicker() {
+            const monthPicker = document.getElementById('monthPicker');
+            monthPicker.innerHTML = '';
+            
+            for (let month = 1; month <= 12; month++) {
+                const item = document.createElement('div');
+                item.style.cssText = 'height: 40px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #1d1d1f; cursor: pointer;';
+                item.textContent = month + '月';
+                item.onclick = () => {
+                    selectedMonth = month;
+                    updateDayPicker();
+                    scrollToCenter(monthPicker, item);
+                };
+                monthPicker.appendChild(item);
+                
+                if (month === selectedMonth) {
+                    setTimeout(() => scrollToCenter(monthPicker, item), 10);
+                }
+            }
+        }
+
+        // 初始化日期选择器
+        function initDayPicker() {
+            updateDayPicker();
+        }
+
+        // 更新日期选择器
+        function updateDayPicker() {
+            const dayPicker = document.getElementById('dayPicker');
+            dayPicker.innerHTML = '';
+            
+            const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const item = document.createElement('div');
+                item.style.cssText = 'height: 40px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #1d1d1f; cursor: pointer;';
+                item.textContent = day + '日';
+                item.onclick = () => {
+                    selectedDay = day;
+                    scrollToCenter(dayPicker, item);
+                };
+                dayPicker.appendChild(item);
+                
+                if (day === selectedDay && day <= daysInMonth) {
+                    setTimeout(() => scrollToCenter(dayPicker, item), 10);
+                } else if (selectedDay > daysInMonth) {
+                    selectedDay = daysInMonth;
+                    if (day === daysInMonth) {
+                        setTimeout(() => scrollToCenter(dayPicker, item), 10);
+                    }
+                }
+            }
+        }
+
+        // 滚动到居中位置
+        function scrollToCenter(container, item) {
+            const containerHeight = container.clientHeight;
+            const itemHeight = item.offsetHeight;
+            const itemTop = item.offsetTop;
+            const scrollTop = itemTop - (containerHeight / 2) + (itemHeight / 2);
+            container.scrollTop = scrollTop;
+        }
+
+        // 确认日期选择
+        function confirmDateSelection() {
+            if (currentDateType === 'start') {
+                startDate = { year: selectedYear, month: selectedMonth, day: selectedDay };
+                updateDateDisplay('start');
+            } else {
+                endDate = { year: selectedYear, month: selectedMonth, day: selectedDay };
+                updateDateDisplay('end');
+            }
+            closeDatePicker();
+        }
+
+        // 更新日期显示
+        function updateDateDisplay(type) {
+            const date = type === 'start' ? startDate : endDate;
+            const displayText = `${date.year}年${date.month}月${date.day}日`;
+            const displayId = type === 'start' ? 'startDateDisplay' : 'endDateDisplay';
+            document.getElementById(displayId).querySelector('span').textContent = displayText;
+        }
+
+        // 搜索告警
+        function searchAlerts() {
+            // 验证日期范围
+            const start = new Date(startDate.year, startDate.month - 1, startDate.day);
+            const end = new Date(endDate.year, endDate.month - 1, endDate.day);
+            
+            if (start > end) {
+                alert('开始时间不能晚于结束时间');
+                return;
+            }
+            
+            const startStr = `${startDate.year}-${startDate.month.toString().padStart(2, '0')}-${startDate.day.toString().padStart(2, '0')}`;
+            const endStr = `${endDate.year}-${endDate.month.toString().padStart(2, '0')}-${endDate.day.toString().padStart(2, '0')}`;
+            
+            alert(`搜索时间范围：${startStr} 至 ${endStr}\n\n搜索功能已执行，实际应用中会根据时间范围过滤告警数据。`);
+        }
+        
+        // 页面初始化
+        console.log('历史告警页面加载完成');
+    </script>
+</body>
+</html>

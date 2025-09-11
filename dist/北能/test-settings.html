@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试设置交互</title>
+    <style>
+        .test-button {
+            margin: 10px;
+            padding: 10px 20px;
+            background: #007aff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #0051d5;
+        }
+    </style>
+</head>
+<body>
+    <h1>测试设置功能</h1>
+    
+    <button class="test-button" onclick="testInverter()">测试逆变器设置</button>
+    <button class="test-button" onclick="testBluetooth()">测试蓝牙设置</button>
+    <button class="test-button" onclick="testBMS()">测试BMS设置</button>
+    <button class="test-button" onclick="testFirmware()">测试固件升级</button>
+    <button class="test-button" onclick="testLanguage()">测试语言切换</button>
+    <button class="test-button" onclick="testVersion()">测试版本信息</button>
+    
+    <h2>控制台输出：</h2>
+    <div id="output" style="border: 1px solid #ccc; padding: 10px; min-height: 200px;"></div>
+    
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            output.innerHTML += message + '<br>';
+            console.log(message);
+        }
+        
+        function testInverter() {
+            log('点击逆变器设置 - 应该跳转到 inverter-settings.html');
+            window.location.href = 'inverter-settings.html';
+        }
+        
+        function testBluetooth() {
+            log('点击蓝牙设置 - 应该显示蓝牙对话框');
+            alert('蓝牙对话框功能');
+        }
+        
+        function testBMS() {
+            log('点击BMS设置 - 应该跳转到 bms-settings.html');
+            window.location.href = 'bms-settings.html';
+        }
+        
+        function testFirmware() {
+            log('点击固件升级 - 应该显示固件对话框');
+            alert('固件升级对话框');
+        }
+        
+        function testLanguage() {
+            log('点击语言切换 - 应该显示语言菜单');
+            alert('语言选择菜单');
+        }
+        
+        function testVersion() {
+            log('点击版本信息 - 应该显示版本对话框');
+            alert('版本信息对话框');
+        }
+        
+        // 测试设置点击处理函数是否存在
+        window.onload = function() {
+            log('页面加载完成');
+            
+            // 检查函数是否定义
+            if (typeof handleSettingsClick !== 'undefined') {
+                log('✅ handleSettingsClick 函数已定义');
+            } else {
+                log('❌ handleSettingsClick 函数未定义');
+            }
+        };
+    </script>
+</body>
+</html>
