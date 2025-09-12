@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>移动端预览 - 授权书</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        /* iPhone 14 Pro 模型样式 */
+        .iphone-container {
+            position: relative;
+            width: 393px;
+            height: 852px;
+            background: #1c1c1e;
+            border-radius: 60px;
+            padding: 12px;
+            box-shadow: 
+                0 0 0 12px #2c2c2e,
+                0 0 0 14px #1c1c1e,
+                0 50px 100px rgba(0, 0, 0, 0.5),
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                inset 0 0 0 2px rgba(255, 255, 255, 0.1);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .iphone-container:hover {
+            transform: scale(0.92);
+        }
+        
+        /* 动态岛 */
+        .dynamic-island {
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 126px;
+            height: 37px;
+            background: #000;
+            border-radius: 25px;
+            z-index: 100;
+            box-shadow: 
+                inset 0 0 2px rgba(255, 255, 255, 0.1),
+                0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* 前置摄像头（动态岛内） */
+        .front-camera {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: #1a1a1c;
+            border-radius: 50%;
+            border: 2px solid #2c2c2e;
+        }
+        
+        /* 侧边按钮 */
+        .side-button {
+            position: absolute;
+            background: #2c2c2e;
+            box-shadow: 
+                -2px 0 5px rgba(0, 0, 0, 0.3),
+                inset 1px 0 1px rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 电源按钮 */
+        .power-button {
+            right: -14px;
+            top: 200px;
+            width: 4px;
+            height: 80px;
+            border-radius: 0 3px 3px 0;
+        }
+        
+        /* 音量按钮 */
+        .volume-up {
+            left: -14px;
+            top: 160px;
+            width: 4px;
+            height: 60px;
+            border-radius: 3px 0 0 3px;
+        }
+        
+        .volume-down {
+            left: -14px;
+            top: 240px;
+            width: 4px;
+            height: 60px;
+            border-radius: 3px 0 0 3px;
+        }
+        
+        /* 静音开关 */
+        .mute-switch {
+            left: -14px;
+            top: 100px;
+            width: 4px;
+            height: 35px;
+            border-radius: 3px 0 0 3px;
+            background: #ff9500;
+        }
+        
+        /* 屏幕区域 */
+        .iphone-screen {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 48px;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 2px rgba(255, 255, 255, 0.2),
+                0 0 10px rgba(0, 0, 0, 0.8);
+        }
+        
+        /* 状态栏 */
+        .status-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+            z-index: 90;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 30px 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+            backdrop-filter: blur(20px);
+        }
+        
+        .status-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Home 指示条 */
+        .home-indicator {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 5px;
+            background: #000;
+            border-radius: 3px;
+            z-index: 90;
+            opacity: 0.5;
+        }
+        
+        /* iframe 容器 */
+        .iframe-container {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 20px;
+            background: #f5f5f7;
+            overflow: hidden;
+        }
+        
+        /* 设备选择器 */
+        .device-selector {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 200;
+        }
+        
+        .device-btn {
+            padding: 8px 16px;
+            border-radius: 12px;
+            background: transparent;
+            border: 2px solid transparent;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+        
+        .device-btn:hover {
+            background: rgba(0, 113, 227, 0.1);
+        }
+        
+        .device-btn.active {
+            background: #0071e3;
+            color: white;
+            border-color: #0071e3;
+        }
+        
+        /* 不同设备尺寸 */
+        .iphone-container.iphone-se {
+            width: 375px;
+            height: 667px;
+            transform: scale(1);
+        }
+        
+        .iphone-container.iphone-14 {
+            width: 390px;
+            height: 844px;
+            transform: scale(0.9);
+        }
+        
+        .iphone-container.iphone-14-plus {
+            width: 428px;
+            height: 926px;
+            transform: scale(0.85);
+        }
+        
+        /* 横屏模式 */
+        .iphone-container.landscape {
+            transform: rotate(90deg) scale(0.7);
+        }
+        
+        /* 电池图标 */
+        .battery-icon {
+            position: relative;
+            width: 24px;
+            height: 12px;
+            border: 2px solid #000;
+            border-radius: 2px;
+        }
+        
+        .battery-icon::after {
+            content: '';
+            position: absolute;
+            right: -4px;
+            top: 3px;
+            width: 2px;
+            height: 6px;
+            background: #000;
+            border-radius: 0 1px 1px 0;
+        }
+        
+        .battery-level {
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            height: calc(100% - 2px);
+            width: 80%;
+            background: #000;
+            border-radius: 1px;
+        }
+        
+        /* 信号格 */
+        .signal-bars {
+            display: flex;
+            gap: 2px;
+            align-items: flex-end;
+        }
+        
+        .signal-bar {
+            width: 3px;
+            background: #000;
+            border-radius: 1px;
+        }
+        
+        .signal-bar:nth-child(1) { height: 4px; }
+        .signal-bar:nth-child(2) { height: 6px; }
+        .signal-bar:nth-child(3) { height: 8px; }
+        .signal-bar:nth-child(4) { height: 10px; }
+        
+        /* WiFi 图标 */
+        .wifi-icon {
+            width: 15px;
+            height: 15px;
+            position: relative;
+        }
+        
+        .wifi-icon::before,
+        .wifi-icon::after {
+            content: '';
+            position: absolute;
+            border: 2px solid transparent;
+            border-top-color: #000;
+            border-radius: 50%;
+        }
+        
+        .wifi-icon::before {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+        
+        .wifi-icon::after {
+            width: 60%;
+            height: 60%;
+            top: 20%;
+            left: 20%;
+        }
+        
+        /* 加载动画 */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading {
+            animation: pulse 2s infinite;
+        }
+        
+        /* 信息面板 */
+        .info-panel {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 250px;
+        }
+        
+        .info-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #1c1c1e;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 14px;
+        }
+        
+        .info-label {
+            color: #86868b;
+        }
+        
+        .info-value {
+            color: #1c1c1e;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- 设备选择器 -->
+    <div class="device-selector">
+        <button class="device-btn" onclick="changeDevice('iphone-se')">iPhone SE</button>
+        <button class="device-btn active" onclick="changeDevice('iphone-14-pro')">iPhone 14 Pro</button>
+        <button class="device-btn" onclick="changeDevice('iphone-14')">iPhone 14</button>
+        <button class="device-btn" onclick="changeDevice('iphone-14-plus')">iPhone 14 Plus</button>
+    </div>
+    
+    <!-- iPhone 模型容器 -->
+    <div id="phone-model" class="iphone-container">
+        <!-- 动态岛（仅 iPhone 14 Pro） -->
+        <div class="dynamic-island" id="dynamic-island">
+            <div class="front-camera"></div>
+        </div>
+        
+        <!-- 侧边按钮 -->
+        <div class="side-button power-button"></div>
+        <div class="side-button volume-up"></div>
+        <div class="side-button volume-down"></div>
+        <div class="side-button mute-switch"></div>
+        
+        <!-- 屏幕区域 -->
+        <div class="iphone-screen">
+            <!-- 状态栏 -->
+            <div class="status-bar">
+                <div class="status-bar-left">
+                    <span id="time">9:41</span>
+                </div>
+                <div class="status-bar-right">
+                    <div class="signal-bars">
+                        <div class="signal-bar"></div>
+                        <div class="signal-bar"></div>
+                        <div class="signal-bar"></div>
+                        <div class="signal-bar"></div>
+                    </div>
+                    <div class="wifi-icon"></div>
+                    <div class="battery-icon">
+                        <div class="battery-level"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- iframe 容器 -->
+            <div class="iframe-container">
+                <iframe 
+                    id="mobile-content"
+                    src="device_form_mobile.html" 
+                    style="width: 100%; height: 100%; border: none; background: #f5f5f7;"
+                    title="移动端内容">
+                </iframe>
+            </div>
+            
+            <!-- Home 指示条 -->
+            <div class="home-indicator"></div>
+        </div>
+    </div>
+    
+    
+    <!-- 设备信息面板 -->
+    <div class="info-panel">
+        <div class="info-title">设备信息</div>
+        <div class="info-item">
+            <span class="info-label">型号</span>
+            <span class="info-value" id="device-name">iPhone 14 Pro</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">屏幕尺寸</span>
+            <span class="info-value" id="screen-size">393 × 852</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">像素比</span>
+            <span class="info-value">3x</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">系统</span>
+            <span class="info-value">iOS 17.0</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">浏览器</span>
+            <span class="info-value">Safari</span>
+        </div>
+    </div>
+    
+    <script>
+        // 当前设备类型
+        let currentDevice = 'iphone-14-pro';
+        let isLandscape = false;
+        let isDarkMode = false;
+        
+        // 更新时间
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('time').textContent = `${hours}:${minutes}`;
+        }
+        
+        // 每分钟更新时间
+        updateTime();
+        setInterval(updateTime, 60000);
+        
+        // 切换设备
+        function changeDevice(device) {
+            const phoneModel = document.getElementById('phone-model');
+            const dynamicIsland = document.getElementById('dynamic-island');
+            const deviceName = document.getElementById('device-name');
+            const screenSize = document.getElementById('screen-size');
+            
+            // 移除所有设备类
+            phoneModel.classList.remove('iphone-se', 'iphone-14', 'iphone-14-plus');
+            
+            // 更新按钮状态
+            document.querySelectorAll('.device-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 应用新设备类和更新信息
+            switch(device) {
+                case 'iphone-se':
+                    phoneModel.classList.add('iphone-se');
+                    dynamicIsland.style.display = 'none';
+                    deviceName.textContent = 'iPhone SE';
+                    screenSize.textContent = '375 × 667';
+                    break;
+                case 'iphone-14':
+                    phoneModel.classList.add('iphone-14');
+                    dynamicIsland.style.display = 'none';
+                    deviceName.textContent = 'iPhone 14';
+                    screenSize.textContent = '390 × 844';
+                    break;
+                case 'iphone-14-plus':
+                    phoneModel.classList.add('iphone-14-plus');
+                    dynamicIsland.style.display = 'none';
+                    deviceName.textContent = 'iPhone 14 Plus';
+                    screenSize.textContent = '428 × 926';
+                    break;
+                default: // iphone-14-pro
+                    dynamicIsland.style.display = 'block';
+                    deviceName.textContent = 'iPhone 14 Pro';
+                    screenSize.textContent = '393 × 852';
+            }
+            
+            currentDevice = device;
+        }
+        
+        
+        // 拖拽旋转手机（可选功能）
+        let isDragging = false;
+        let startX = 0;
+        let rotation = 0;
+        
+        const phoneModel = document.getElementById('phone-model');
+        
+        phoneModel.addEventListener('mousedown', (e) => {
+            if (e.shiftKey) {
+                isDragging = true;
+                startX = e.clientX;
+                phoneModel.style.cursor = 'grabbing';
+            }
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - startX;
+                rotation = deltaX * 0.5;
+                phoneModel.style.transform = `rotateY(${rotation}deg) scale(0.9)`;
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                phoneModel.style.cursor = 'default';
+                phoneModel.style.transform = 'rotateY(0) scale(0.9)';
+            }
+        });
+        
+        // 添加加载完成事件
+        document.getElementById('mobile-content').addEventListener('load', function() {
+            console.log('移动端内容加载完成');
+        });
+    </script>
+</body>
+</html>

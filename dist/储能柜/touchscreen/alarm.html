@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>告警管理 - 储能柜管理系统</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="common-header-styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0e1a;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 科技风背景网格 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 150, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 150, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 动态光效背景 */
+        .bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .bg-effects::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 150, 255, 0.15) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+            top: -50%;
+            left: -50%;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 头部导航 */
+        .header {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.3);
+            position: relative;
+            z-index: 100;
+            gap: 40px;
+            flex-wrap: nowrap;
+            min-width: 0;
+        }
+
+        /* Logo区域 */
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: none;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #0096ff, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 导航菜单 */
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            justify-content: center;
+            flex-wrap: nowrap;
+            min-width: 0;
+        }
+
+        .nav-item {
+            padding: 12px 28px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 17px;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-radius: 8px;
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-item:hover {
+            color: #00d4ff;
+            background: rgba(0, 150, 255, 0.1);
+        }
+
+        .nav-item:hover::before {
+            width: 80%;
+        }
+
+        .nav-item.active {
+            color: #00d4ff;
+            background: rgba(0, 150, 255, 0.15);
+        }
+
+        .nav-item.active::before {
+            width: 80%;
+            background: #00d4ff;
+            box-shadow: 0 0 10px #00d4ff;
+        }
+
+        /* 头部右侧 */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* 时间显示 */
+        .header-time {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-family: 'SF Mono', monospace;
+            letter-spacing: 1px;
+        }
+
+        /* 科技风图标按钮 */
+        .tech-icon-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 150, 255, 0.1);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tech-icon-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(0, 150, 255, 0.6) 0%, transparent 70%);
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .tech-icon-btn:hover {
+            background: rgba(0, 150, 255, 0.2);
+            border-color: rgba(0, 150, 255, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 150, 255, 0.4);
+        }
+
+        .tech-icon-btn:hover::before {
+            width: 100px;
+            height: 100px;
+        }
+
+        .tech-icon-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 图标样式 */
+        .tech-icon {
+            width: 20px;
+            height: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 语言切换图标 */
+        .lang-icon {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00d4ff;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .lang-icon::before,
+        .lang-icon::after {
+            content: '';
+            position: absolute;
+            border: 1px solid #00d4ff;
+            border-radius: 50%;
+        }
+
+        .lang-icon::before {
+            width: 100%;
+            height: 8px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .lang-icon::after {
+            width: 8px;
+            height: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 工具提示 */
+        .tooltip {
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .tech-icon-btn:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            height: calc(100vh - 60px);
+            margin-top: 0px;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 查询条件区域 */
+        .alarm-query-section {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin: 0 6px 6px 6px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 3px;
+            height: 16px;
+            background: linear-gradient(45deg, #0096ff, #00d4ff);
+            border-radius: 2px;
+        }
+
+        .query-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            align-items: center;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .form-label {
+            font-size: 18px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+
+        .form-select,
+        .form-input {
+            flex: 1;
+            height: 52px;
+            padding: 0 16px;
+            border: 2px solid rgba(0, 150, 255, 0.3);
+            border-radius: 10px;
+            font-size: 18px;
+            background: rgba(15, 25, 42, 0.8);
+            color: rgba(255, 255, 255, 0.9);
+            transition: all 0.2s;
+            cursor: pointer;
+            min-height: 52px;
+        }
+
+        .form-select:focus,
+        .form-input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+
+        /* 时间范围输入样式 */
+        .date-range-group {
+            grid-column: 1 / -1;
+            min-width: 400px;
+        }
+
+        .date-range-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .date-input {
+            flex: 1;
+        }
+
+        .date-separator {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            padding: 0 4px;
+        }
+
+        .btn {
+            height: 52px;
+            padding: 0 24px;
+            border: 2px solid rgba(0, 150, 255, 0.3);
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+            background: rgba(30, 41, 59, 0.8);
+            color: rgba(255, 255, 255, 0.9);
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            background: rgba(0, 150, 255, 0.1);
+            border-color: #00d4ff;
+        }
+
+        .btn.primary {
+            background: #00d4ff;
+            color: #0a0e1a;
+            border-color: #00d4ff;
+        }
+
+        .btn.primary:hover {
+            background: #0096ff;
+            transform: translateY(-1px);
+        }
+
+        .btn.danger {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .btn.danger:hover {
+            background: #dc2626;
+        }
+
+        /* 告警列表区域 */
+        .alarm-list-section {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 150, 255, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            position: relative;
+            z-index: 1;
+            margin-top: 10px;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .list-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 表格容器 */
+        .table-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            margin-bottom: 8px;
+        }
+        
+        /* 表格样式 */
+        .alarm-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 150, 255, 0.2);
+        }
+
+        .alarm-table th {
+            background: rgba(15, 25, 42, 0.8);
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            padding: 20px 18px;
+            text-align: left;
+            font-size: 20px;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.2);
+            white-space: nowrap;
+        }
+
+        .alarm-table td {
+            padding: 18px 16px;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.1);
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            vertical-align: middle;
+            font-weight: 500;
+        }
+
+        .alarm-table tbody tr:hover {
+            background: rgba(0, 150, 255, 0.05);
+        }
+
+        /* 告警级别标签 */
+        .alarm-level-badge {
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 80px;
+            display: inline-block;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .alarm-level-badge.critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .alarm-level-badge.major {
+            background: rgba(249, 115, 22, 0.2);
+            color: #f97316;
+            border: 1px solid rgba(249, 115, 22, 0.3);
+        }
+
+        .alarm-level-badge.minor {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        /* 告警状态标签 */
+        .alarm-status-badge {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 90px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .alarm-status-badge.resolved {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .alarm-status-badge.unresolved {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* 分页控件 */
+        .alarm-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            margin-top: 15px;
+        }
+
+        .pagination-info {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pagination-btn {
+            height: 48px;
+            padding: 0 20px;
+            border: 2px solid rgba(0, 150, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.8);
+            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+            min-width: 48px;
+            font-weight: 500;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: rgba(0, 150, 255, 0.1);
+            border-color: #00d4ff;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 复选框样式 */
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            accent-color: #00d4ff;
+            cursor: pointer;
+        }
+
+        /* 操作按钮 */
+        .action-btn {
+            padding: 12px 18px;
+            border: 2px solid rgba(0, 150, 255, 0.5);
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.9);
+            color: #00d4ff;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-right: 8px;
+            min-width: 85px;
+            min-height: 44px;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        /* 触摸屏优化 */
+        @media (max-width: 1366px) {
+            .alarm-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .alarm-table th,
+            .alarm-table td {
+                white-space: nowrap;
+                padding: 16px 12px;
+            }
+            
+            .alarm-table td:nth-child(3) {
+                white-space: normal;
+            }
+            
+            .form-group {
+                min-width: 100%;
+            }
+            
+            .query-form {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .date-range-group {
+                grid-column: 1;
+                min-width: 100%;
+            }
+            
+            .alarm-query-section,
+            .alarm-list-section {
+                margin: 0 8px 16px 8px;
+                padding: 20px 16px;
+            }
+        }
+        
+        /* 行高增加，便于触摸 */
+        .alarm-table tbody tr {
+            min-height: 60px;
+        }
+        
+        /* 滚动条样式 */
+        .alarm-table::-webkit-scrollbar {
+            height: 12px;
+        }
+        
+        .alarm-table::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+        }
+        
+        .alarm-table::-webkit-scrollbar-thumb {
+            background: rgba(0, 150, 255, 0.4);
+            border-radius: 6px;
+        }
+        
+        .alarm-table::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 150, 255, 0.6);
+        }
+
+        .action-btn:hover {
+            background: rgba(0, 150, 255, 0.1);
+            border-color: #00d4ff;
+        }
+
+        .action-btn.success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .action-btn.success:hover {
+            background: rgba(16, 185, 129, 0.3);
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(15px);
+            margin: 1% auto;
+            padding: 20px;
+            border: 2px solid rgba(0, 150, 255, 0.4);
+            border-radius: 16px;
+            width: 80%;
+            max-width: 850px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 50px rgba(0, 150, 255, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(0, 150, 255, 0.3);
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #00d4ff;
+            letter-spacing: 1px;
+        }
+
+        .close {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 36px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+        }
+
+        .close:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
+            transform: rotate(90deg);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 16px;
+            margin: 12px 0;
+            flex: 1;
+        }
+
+        .detail-row {
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 150, 255, 0.25);
+            transition: all 0.2s ease;
+        }
+        
+        .detail-row:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(0, 150, 255, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .detail-row.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .detail-label {
+            font-weight: 700;
+            color: rgba(0, 212, 255, 0.9);
+            font-size: 15px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .detail-value {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        /* 通知样式 */
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            padding: 12px 16px;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+            z-index: 10000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #10b981;
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        .notification.info {
+            background: #3b82f6;
+        }
+
+        .notification.warning {
+            background: #f59e0b;
+        }
+
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { 
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+
+
+
+
+        /* 确认弹窗样式 - 用于解决告警 */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .confirm-modal.show {
+            display: flex;
+        }
+
+        .confirm-content {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            border: none;
+            border-radius: 16px;
+            padding: 40px;
+            width: 480px;
+            max-width: 90%;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.2s ease;
+            position: relative;
+        }
+
+        .confirm-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 24px;
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f59e0b;
+            font-size: 28px;
+        }
+
+        .confirm-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .confirm-message {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            padding: 14px 36px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            min-width: 130px;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .confirm-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .confirm-btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .confirm-btn.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .confirm-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .confirm-btn.primary {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            color: #0a0e1a;
+            font-weight: 700;
+            border: none;
+            box-shadow: 0 4px 16px rgba(0, 255, 136, 0.3);
+        }
+
+        .confirm-btn.primary:hover {
+            background: linear-gradient(135deg, #00cc6a 0%, #00aa55 100%);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
+        }
+
+        /* 退出按钮样式 */
+        .logout-btn {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 18px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.4);
+            transform: scale(1.05);
+            color: #ef4444;
+        }
+
+        /* 退出确认弹窗 - 工业风格 */
+        .logout-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .logout-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-content {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            border: none;
+            border-radius: 16px;
+            padding: 40px;
+            width: 480px;
+            max-width: 90%;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.2s ease;
+            position: relative;
+        }
+
+        .logout-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 24px;
+            background: rgba(239, 68, 68, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ef4444;
+            font-size: 28px;
+        }
+
+        .logout-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .logout-message {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .logout-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .logout-btn-action {
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            min-width: 120px;
+        }
+
+        .logout-btn-action.cancel {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .logout-btn-action.cancel:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .logout-btn-action.confirm {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .logout-btn-action.confirm:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+/* 响应式设计 */
+        @media (max-width: 1024px) {
+            .query-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .form-group {
+                min-width: auto;
+            }
+
+            .alarm-table {
+                font-size: 12px;
+            }
+
+            .alarm-table th,
+            .alarm-table td {
+                padding: 8px 6px;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 2% auto;
+                padding: 16px;
+            }
+            
+            .detail-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .detail-row {
+                padding: 10px;
+            }
+            
+            .detail-label {
+                font-size: 13px;
+                margin-bottom: 4px;
+            }
+            
+            .detail-value {
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 10px;
+            }
+
+            .alarm-query-section,
+            .alarm-list-section {
+                padding: 16px;
+            }
+
+            .list-header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+
+            .list-actions {
+                justify-content: center;
+            }
+
+            .alarm-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .pagination-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 150, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 150, 255, 0.5);
+        }
+
+
+    </style>
+</head>
+<body>
+    <!-- 背景效果 -->
+    <div class="bg-effects"></div>
+
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">
+                    <img src="logo.png" alt="Logo">
+                </div>
+                <div class="logo-text">储能柜管理系统</div>
+            </div>
+        </div>
+        
+        <!-- 导航菜单 -->
+        <nav class="nav-menu">
+            <div class="nav-item" onclick="switchPage('home')">首页</div>
+            <a href="#data" class="nav-item" onclick="switchPage('data')">数据</a>
+            <a href="#" class="nav-item" onclick="switchPage('history')">历史</a>
+            <a href="#control" class="nav-item" onclick="switchPage('control')">控制</a>
+            <a href="#alarm" class="nav-item active" onclick="switchPage('alarm')">告警</a>
+            <a href="#log" class="nav-item" onclick="switchPage('log')">日志</a>
+            <a href="#settings" class="nav-item" onclick="switchPage('settings')">设置</a>
+        </nav>
+        
+        <div class="header-right">
+            <div class="header-time" id="currentTime">2024-01-31 14:30:00</div>
+            
+            <!-- 语言切换按钮 -->
+            <div class="lang-switcher">
+                <button class="lang-btn" onclick="toggleLanguageDropdown(event)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                </button>
+                <div class="lang-dropdown" id="langDropdown">
+                    <div class="lang-option" onclick="changeLanguage('zh', event)">
+                        <span class="flag">🇨🇳</span>
+                        <span>中文</span>
+                    </div>
+                    <div class="lang-option" onclick="changeLanguage('en', event)">
+                        <span class="flag">🇺🇸</span>
+                        <span>English</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 退出按钮 -->
+            <button class="logout-btn" onclick="logout()" title="退出登录">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 告警列表 -->
+        <div class="alarm-list-section">
+            <div class="list-header">
+                <div class="section-title">告警列表</div>
+                <div class="list-actions">
+                    <button class="btn success" onclick="batchResolve()" id="batchResolveBtn" disabled>
+                        <i class="fas fa-check"></i>
+                        批量解决
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="alarm-table">
+                    <thead>
+                        <tr>
+                            <th width="80">
+                                <input type="checkbox" class="checkbox" id="selectAll" onchange="toggleAllAlarms()">
+                            </th>
+                            <th width="350">告警类型</th>
+                            <th width="500">告警描述</th>
+                            <th width="150">级别</th>
+                            <th width="250">告警时间</th>
+                            <th width="280">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alarmTableBody">
+                        <!-- 动态生成告警数据 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 分页控件 -->
+        <div class="alarm-pagination">
+            <div class="pagination-info" id="paginationInfo">
+                第 1-10 条，共 0 条记录
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" id="prevPageBtn" onclick="previousPage()" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                    上一页
+                </button>
+                <span id="pageInfo" style="padding: 8px 12px; color: rgba(255,255,255,0.7);">第 1 页，共 1 页</span>
+                <button class="pagination-btn" id="nextPageBtn" onclick="nextPage()" disabled>
+                    下一页
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义确认弹窗 -->
+    <div id="confirmModal" class="confirm-modal">
+        <div class="confirm-content">
+            <div class="confirm-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="confirm-title" id="confirmTitle">操作确认</div>
+            <div class="confirm-message" id="confirmMessage">您确定要执行此操作吗？</div>
+            <div class="confirm-buttons">
+                <button class="confirm-btn secondary" onclick="closeConfirmModal()">
+                    <i class="fas fa-times"></i>
+                    取消
+                </button>
+                <button class="confirm-btn primary" id="confirmButton" onclick="confirmAction()">
+                    <i class="fas fa-check"></i>
+                    确认
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 告警详情模态框 -->
+    <div id="alarmDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">告警详情</div>
+                <span class="close" onclick="closeAlarmDetail()">&times;</span>
+            </div>
+            <div id="alarmDetailContent">
+                <!-- 动态生成详情内容 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let allAlarms = [];
+        let filteredAlarms = [];
+        let currentPage = 1;
+        const pageSize = 4;
+        let selectedAlarmId = null;
+        let confirmCallback = null;
+
+        // 告警数据
+        const alarmTypes = {
+            critical: [
+                { type: '电池过温告警', description: '电池温度超过安全阈值', threshold: '45°C' },
+                { type: '系统过流告警', description: '系统电流超过额定值', threshold: '200A' },
+                { type: '绝缘故障告警', description: '系统绝缘阻抗过低', threshold: '100MΩ' },
+                { type: '烟雾探测告警', description: '检测到烟雾信号', threshold: '50ppm' },
+                { type: '直流母线过压', description: '直流母线电压过高', threshold: '850V' },
+                { type: '交流侧缺相', description: '交流侧出现缺相故障', threshold: 'N/A' },
+                { type: '功率模块故障', description: 'IGBT功率模块异常', threshold: 'N/A' },
+                { type: '冷却系统故障', description: '冷却系统工作异常', threshold: 'N/A' },
+                { type: '应急停机触发', description: '应急停机按钮被触发', threshold: 'N/A' },
+                { type: '消防系统启动', description: '消防系统自动启动', threshold: 'N/A' }
+            ],
+            major: [
+                { type: 'SOC异常告警', description: '电池SOC超出正常范围', threshold: '5%-95%' },
+                { type: '单体电压差异', description: '单体电池电压差异过大', threshold: '0.1V' },
+                { type: '通讯中断告警', description: 'BMS通讯连接中断', threshold: '5s' },
+                { type: '风扇故障告警', description: '散热风扇工作异常', threshold: 'N/A' },
+                { type: '充电功率异常', description: '充电功率超出设定范围', threshold: '±10%' },
+                { type: '放电功率异常', description: '放电功率超出设定范围', threshold: '±10%' },
+                { type: '环境温度异常', description: '环境温度超出工作范围', threshold: '-10°C~45°C' },
+                { type: '湿度超标告警', description: '环境湿度超出正常范围', threshold: '≤80%' },
+                { type: '电能质量异常', description: '电网电能质量不达标', threshold: 'THD<5%' },
+                { type: '均衡系统异常', description: '电池均衡系统工作异常', threshold: 'N/A' }
+            ],
+            minor: [
+                { type: '设备维护提醒', description: '设备需要定期维护', threshold: 'N/A' },
+                { type: '参数配置变更', description: '系统参数被手动修改', threshold: 'N/A' },
+                { type: '用户登录异常', description: '检测到异常登录行为', threshold: 'N/A' },
+                { type: '数据采集延迟', description: '数据采集存在延迟', threshold: '>1s' },
+                { type: '存储空间不足', description: '系统存储空间使用率过高', threshold: '>90%' },
+                { type: '网络连接不稳定', description: '网络连接质量较差', threshold: '丢包率>5%' },
+                { type: '时钟同步异常', description: '系统时钟同步失败', threshold: '±1s' },
+                { type: '负载均衡调整', description: '系统自动调整负载均衡', threshold: 'N/A' },
+                { type: '电价策略变更', description: '峰谷电价策略已更新', threshold: 'N/A' },
+                { type: '运行模式切换', description: '系统运行模式已切换', threshold: 'N/A' }
+            ]
+        };
+
+        const sites = ['站点A', '站点B', '站点C', '站点D', '站点E', '站点F'];
+        const devices = ['储能柜01', '储能柜02', '储能柜03', '储能柜04', '储能柜05', '储能柜06', '储能柜07', '储能柜08'];
+
+        // 页面初始化
+        window.onload = function() {
+            // 检查登录状态
+            const user = localStorage.getItem('touchscreen_user') || sessionStorage.getItem('touchscreen_user');
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 更新时间
+            updateTime();
+            setInterval(updateTime, 1000);
+
+            // 生成模拟数据
+            generateAlarmData();
+            
+            // 渲染表格
+            renderAlarmTable();
+        };
+
+        // 更新时间显示
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        // 登出功能
+        // 切换页面
+        function switchPage(page) {
+            // 页面跳转
+            if (page === 'home') {
+                window.location.href = 'home.html';
+            } else if (page === 'data') {
+                window.location.href = 'data.html';
+            } else if (page === 'control') {
+                window.location.href = 'control.html';
+            } else if (page === 'history') {
+                window.location.href = 'history.html';
+            } else if (page === 'log') {
+                window.location.href = 'logs.html';
+            } else if (page === 'settings') {
+                window.location.href = 'settings.html';
+            }
+            // alarm page stays on current page
+        }
+
+        // 切换语言下拉菜单
+        function toggleLanguage(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('langDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // 选择语言
+        function selectLanguage(lang, event) {
+            event.stopPropagation();
+            
+            // 更新选中状态
+            document.querySelectorAll('.lang-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 保存语言设置
+            localStorage.setItem('touchscreen_lang', lang);
+            
+            // 关闭下拉菜单
+            document.getElementById('langDropdown').classList.remove('show');
+            
+            // 这里可以添加语言切换逻辑
+            console.log('切换语言到:', lang);
+        }
+
+        // 点击其他地方关闭下拉菜单
+        document.addEventListener('click', function(e) {
+            const langBtn = document.querySelector('.tech-icon-btn');
+            if (langBtn && !langBtn.contains(e.target)) {
+                document.getElementById('langDropdown').classList.remove('show');
+            }
+        });
+
+        // 生成告警数据
+        function generateAlarmData() {
+            allAlarms = [];
+            let alarmId = 1;
+
+            // 为每个站点和设备生成告警
+            sites.forEach(site => {
+                devices.forEach(device => {
+                    // 随机生成0-3个告警
+                    const alarmCount = Math.floor(Math.random() * 4);
+                    
+                    for (let i = 0; i < alarmCount; i++) {
+                        const levels = ['critical', 'major', 'minor'];
+                        const level = levels[Math.floor(Math.random() * levels.length)];
+                        const alarmTypeData = alarmTypes[level][Math.floor(Math.random() * alarmTypes[level].length)];
+                        
+                        // 随机生成告警时间（最近7天内）
+                        const alarmTime = new Date();
+                        alarmTime.setTime(alarmTime.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000);
+                        
+                        const alarm = {
+                            id: alarmId++,
+                            type: alarmTypeData.type,
+                            description: alarmTypeData.description,
+                            level: level,
+                            levelText: level === 'critical' ? '严重' : level === 'major' ? '重要' : '一般',
+                            device: device,
+                            site: site,
+                            status: Math.random() > 0.3 ? 'resolved' : 'unresolved',
+                            statusText: Math.random() > 0.3 ? '已解决' : '未解决',
+                            time: alarmTime.toLocaleString('zh-CN'),
+                            currentValue: generateCurrentValue(alarmTypeData.type),
+                            threshold: alarmTypeData.threshold,
+                            resolveTime: Math.random() > 0.3 ? new Date(alarmTime.getTime() + Math.random() * 24 * 60 * 60 * 1000).toLocaleString('zh-CN') : null
+                        };
+                        
+                        allAlarms.push(alarm);
+                    }
+                });
+            });
+
+            // 按时间倒序排列
+            allAlarms.sort((a, b) => new Date(b.time) - new Date(a.time));
+            filteredAlarms = [...allAlarms];
+        }
+
+        // 生成当前值
+        function generateCurrentValue(type) {
+            const valueMap = {
+                '电池过温告警': (45 + Math.random() * 10).toFixed(1) + '°C',
+                '系统过流告警': (200 + Math.random() * 50).toFixed(1) + 'A',
+                '绝缘故障告警': (50 + Math.random() * 40).toFixed(1) + 'MΩ',
+                '烟雾探测告警': (50 + Math.random() * 20).toFixed(1) + 'ppm',
+                '直流母线过压': (850 + Math.random() * 50).toFixed(1) + 'V',
+                'SOC异常告警': (Math.random() > 0.5 ? (95 + Math.random() * 5) : (0 + Math.random() * 5)).toFixed(1) + '%',
+                '单体电压差异': (0.1 + Math.random() * 0.1).toFixed(3) + 'V',
+                '充电功率异常': (Math.random() * 100 + 250).toFixed(1) + 'kW',
+                '放电功率异常': (Math.random() * 100 + 250).toFixed(1) + 'kW',
+                '环境温度异常': (Math.random() > 0.5 ? (45 + Math.random() * 10) : (-15 + Math.random() * 5)).toFixed(1) + '°C',
+                '湿度超标告警': (80 + Math.random() * 15).toFixed(1) + '%',
+                '数据采集延迟': (1 + Math.random() * 2).toFixed(2) + 's',
+                '存储空间不足': (90 + Math.random() * 8).toFixed(1) + '%',
+                '网络连接不稳定': (5 + Math.random() * 10).toFixed(1) + '%'
+            };
+            
+            return valueMap[type] || 'N/A';
+        }
+
+        // 渲染告警表格
+        function renderAlarmTable() {
+            const tbody = document.getElementById('alarmTableBody');
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const pageData = filteredAlarms.slice(startIndex, endIndex);
+
+            let html = '';
+            pageData.forEach(alarm => {
+                html += `
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="checkbox alarm-checkbox" value="${alarm.id}" onchange="updateBatchButton()">
+                        </td>
+                        <td>${alarm.type}</td>
+                        <td>${alarm.description}</td>
+                        <td>
+                            <span class="alarm-level-badge ${alarm.level}">${alarm.levelText}</span>
+                        </td>
+                        <td style="white-space: nowrap;">${alarm.time}</td>
+                        <td style="white-space: nowrap;">
+                            <button class="action-btn" onclick="viewAlarmDetail(${alarm.id})" style="display: inline-block;">
+                                <i class="fas fa-eye"></i>
+                                详情
+                            </button>
+                            ${alarm.status === 'unresolved' ? `
+                                <button class="action-btn success" onclick="resolveAlarm(${alarm.id})" style="display: inline-block;">
+                                    <i class="fas fa-check"></i>
+                                    解决
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+            updatePagination();
+            updateBatchButton();
+        }
+
+        // 更新分页信息
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredAlarms.length / pageSize);
+            const startIndex = (currentPage - 1) * pageSize + 1;
+            const endIndex = Math.min(currentPage * pageSize, filteredAlarms.length);
+
+            document.getElementById('paginationInfo').textContent = 
+                `第 ${startIndex}-${endIndex} 条，共 ${filteredAlarms.length} 条记录`;
+            
+            document.getElementById('pageInfo').textContent = 
+                `第 ${currentPage} 页，共 ${totalPages} 页`;
+
+            document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+            document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+        }
+
+        // 上一页
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderAlarmTable();
+            }
+        }
+
+        // 下一页
+        function nextPage() {
+            const totalPages = Math.ceil(filteredAlarms.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderAlarmTable();
+            }
+        }
+
+        // 全选切换
+        function toggleAllAlarms() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.alarm-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+            });
+            
+            updateBatchButton();
+        }
+
+        // 更新批量操作按钮状态
+        function updateBatchButton() {
+            const checkedBoxes = document.querySelectorAll('.alarm-checkbox:checked');
+            const batchBtn = document.getElementById('batchResolveBtn');
+            const selectAll = document.getElementById('selectAll');
+            const totalCheckboxes = document.querySelectorAll('.alarm-checkbox');
+            
+            batchBtn.disabled = checkedBoxes.length === 0;
+            selectAll.checked = checkedBoxes.length === totalCheckboxes.length && totalCheckboxes.length > 0;
+            selectAll.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < totalCheckboxes.length;
+        }
+
+        // 显示确认弹窗
+        function showConfirmModal(title, message, callback) {
+            const modal = document.getElementById('confirmModal');
+            const titleEl = document.getElementById('confirmTitle');
+            const messageEl = document.getElementById('confirmMessage');
+            
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            confirmCallback = callback;
+            
+            modal.classList.add('show');
+        }
+
+        // 关闭确认弹窗
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('show');
+            confirmCallback = null;
+        }
+
+        // 确认操作
+        function confirmAction() {
+            if (confirmCallback) {
+                confirmCallback();
+                confirmCallback = null;
+            }
+            closeConfirmModal();
+        }
+
+        // 批量解决告警
+        function batchResolve() {
+            const checkedBoxes = document.querySelectorAll('.alarm-checkbox:checked');
+            const alarmIds = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
+            
+            if (alarmIds.length === 0) return;
+            
+            showConfirmModal(
+                '批量解决告警',
+                `您确定要解决选中的 ${alarmIds.length} 个告警吗？此操作不可撤销。`,
+                function() {
+                    alarmIds.forEach(id => {
+                        const alarm = allAlarms.find(a => a.id === id);
+                        if (alarm && alarm.status === 'unresolved') {
+                            alarm.status = 'resolved';
+                            alarm.statusText = '已解决';
+                            alarm.resolveTime = new Date().toLocaleString('zh-CN');
+                        }
+                    });
+                    
+                    renderAlarmTable();
+                    showNotification(`成功解决 ${alarmIds.length} 个告警`, 'success');
+                }
+            );
+        }
+
+        // 查看告警详情
+        function viewAlarmDetail(alarmId) {
+            const alarm = allAlarms.find(a => a.id === alarmId);
+            if (!alarm) return;
+            
+            selectedAlarmId = alarmId;
+            
+            const detailContent = document.getElementById('alarmDetailContent');
+            detailContent.innerHTML = `
+                <div class="detail-grid">
+                    <!-- 顶部告警类型 -->
+                    <div class="detail-row full-width" style="background: linear-gradient(135deg, rgba(0, 150, 255, 0.1), rgba(0, 212, 255, 0.05)); border: 2px solid rgba(0, 212, 255, 0.3); padding: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div class="detail-label" style="font-size: 16px; color: #00d4ff; margin-bottom: 10px;">
+                                    <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                                    告警类型
+                                </div>
+                                <div class="detail-value" style="font-size: 22px; font-weight: 600;">
+                                    ${alarm.type}
+                                    <span class="alarm-level-badge ${alarm.level}" style="margin-left: 12px; padding: 8px 16px; font-size: 15px;">${alarm.levelText}</span>
+                                </div>
+                            </div>
+                            ${alarm.status === 'resolved' ? `
+                                <span class="alarm-status-badge resolved" style="padding: 10px 20px; font-size: 16px; font-weight: 600;">
+                                    <i class="fas fa-check-circle" style="margin-right: 6px;"></i>
+                                    已解决
+                                </span>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <!-- 告警描述 -->
+                    <div class="detail-row full-width">
+                        <div class="detail-label">
+                            <i class="fas fa-info-circle" style="margin-right: 8px; color: #00d4ff;"></i>
+                            告警描述
+                        </div>
+                        <div class="detail-value" style="font-size: 20px; line-height: 1.5; color: #fff;">${alarm.description}</div>
+                    </div>
+                    
+                    <!-- 数值信息 -->
+                    <div class="detail-row" style="background: rgba(239, 68, 68, 0.05); border-color: rgba(239, 68, 68, 0.2);">
+                        <div class="detail-label">
+                            <i class="fas fa-chart-line" style="margin-right: 8px; color: #ef4444;"></i>
+                            当前值
+                        </div>
+                        <div class="detail-value" style="font-size: 20px; color: #ef4444; font-weight: 600;">${alarm.currentValue}</div>
+                    </div>
+                    
+                    <div class="detail-row" style="background: rgba(245, 158, 11, 0.05); border-color: rgba(245, 158, 11, 0.2);">
+                        <div class="detail-label">
+                            <i class="fas fa-exclamation" style="margin-right: 8px; color: #f59e0b;"></i>
+                            阈值
+                        </div>
+                        <div class="detail-value" style="font-size: 20px; color: #f59e0b; font-weight: 600;">${alarm.threshold}</div>
+                    </div>
+                    
+                    <!-- 时间信息 -->
+                    <div class="detail-row">
+                        <div class="detail-label">
+                            <i class="fas fa-clock" style="margin-right: 8px; color: #00d4ff;"></i>
+                            告警时间
+                        </div>
+                        <div class="detail-value" style="font-size: 18px;">${alarm.time}</div>
+                    </div>
+                    ${alarm.resolveTime ? `
+                        <div class="detail-row">
+                            <div class="detail-label">
+                                <i class="fas fa-check-circle" style="margin-right: 8px; color: #10b981;"></i>
+                                消警时间
+                            </div>
+                            <div class="detail-value" style="font-size: 18px; color: #10b981;">${alarm.resolveTime}</div>
+                        </div>
+                    ` : `
+                        <div class="detail-row" style="opacity: 0.5;">
+                            <div class="detail-label">
+                                <i class="fas fa-times-circle" style="margin-right: 8px; color: #666;"></i>
+                                消警时间
+                            </div>
+                            <div class="detail-value" style="font-size: 18px; color: #666;">未解决</div>
+                        </div>
+                    `}
+                </div>
+                
+                <!-- 底部操作按钮 -->
+                ${alarm.status === 'unresolved' ? `
+                    <div style="display: flex; justify-content: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(0, 150, 255, 0.2);">
+                        <button class="action-btn success" onclick="resolveAlarmFromDetail()" style="padding: 14px 36px; font-size: 18px; font-weight: 600; border-radius: 10px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                            <i class="fas fa-check" style="margin-right: 8px;"></i>
+                            解决告警
+                        </button>
+                    </div>
+                ` : ''}
+            `;
+            
+            // 解决按钮已移至告警类型行右侧，不再需要底部按钮控制
+            
+            document.getElementById('alarmDetailModal').style.display = 'block';
+        }
+
+        // 从详情页解决告警
+        function resolveAlarmFromDetail() {
+            if (selectedAlarmId) {
+                resolveAlarm(selectedAlarmId);
+                closeAlarmDetail();
+            }
+        }
+
+        // 解决告警
+        function resolveAlarm(alarmId) {
+            const alarm = allAlarms.find(a => a.id === alarmId);
+            if (alarm && alarm.status === 'unresolved') {
+                showConfirmModal(
+                    '解决告警',
+                    `您确定要解决告警"${alarm.type}"吗？此操作不可撤销。`,
+                    function() {
+                        alarm.status = 'resolved';
+                        alarm.statusText = '已解决';
+                        alarm.resolveTime = new Date().toLocaleString('zh-CN');
+                        
+                        renderAlarmTable();
+                        showNotification('告警已解决', 'success');
+                    }
+                );
+            }
+        }
+
+        // 关闭告警详情
+        function closeAlarmDetail() {
+            document.getElementById('alarmDetailModal').style.display = 'none';
+            selectedAlarmId = null;
+        }
+
+        // 导出告警数据
+        function exportAlarms() {
+            if (filteredAlarms.length === 0) {
+                showNotification('没有数据可导出', 'warning');
+                return;
+            }
+            
+            const headers = ['告警ID', '告警类型', '告警描述', '级别', '状态', '当前值', '阈值', '告警时间', '解决时间'];
+            const csvContent = [
+                '\ufeff' + headers.join(','), // UTF-8 BOM
+                ...filteredAlarms.map(alarm => [
+                    alarm.id,
+                    `"${alarm.type}"`,
+                    `"${alarm.description}"`,
+                    alarm.levelText,
+                    alarm.statusText,
+                    `"${alarm.currentValue}"`,
+                    `"${alarm.threshold}"`,
+                    `"${alarm.time}"`,
+                    alarm.resolveTime ? `"${alarm.resolveTime}"` : ''
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `告警数据_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('导出成功', 'success');
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // 显示动画
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            // 3秒后隐藏
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const alarmModal = document.getElementById('alarmDetailModal');
+            const confirmModal = document.getElementById('confirmModal');
+            
+            if (event.target === alarmModal) {
+                closeAlarmDetail();
+            }
+            if (event.target === confirmModal) {
+                closeConfirmModal();
+            }
+        }
+
+    </script>
+    <script src="common-header-scripts.js"></script>
+
+    <!-- 退出确认弹窗 -->
+    <div id="logoutModal" class="logout-modal">
+        <div class="logout-content">
+            <div class="logout-icon">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <div class="logout-title" id="logoutTitle">退出登录</div>
+            <div class="logout-message" id="logoutMessage">您确定要退出当前账户吗？退出后需要重新登录。</div>
+            <div class="logout-buttons">
+                <button class="logout-btn-action cancel" id="logoutCancelBtn" onclick="closeLogoutModal()">
+                    <i class="fas fa-times"></i> 取消
+                </button>
+                <button class="logout-btn-action confirm" id="logoutConfirmBtn" onclick="confirmLogout()">
+                    <i class="fas fa-sign-out-alt"></i> 退出
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

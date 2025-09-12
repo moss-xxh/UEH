@@ -1,0 +1,3223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>操作记录 - AlwaysControl</title>
+    <link rel="stylesheet" href="components/common-styles.css">
+    <link rel="stylesheet" href="components/drawer-component.css">
+    <link rel="stylesheet" href="components/i18n.css">
+    <link rel="stylesheet" href="components/notification-center.css">
+    <script src="components/drawer-component.js"></script>
+    <script src="components/i18n.js"></script>
+    <script src="components/simple-message-icon.js"></script>
+    <link rel="stylesheet" href="components/header-nav.css">
+    <link rel="stylesheet" href="components/standard-layout.css">
+    <link rel="stylesheet" href="components/pagination.css">
+    <script src="components/header-nav.js"></script>
+    <script src="components/user-menu-link.js"></script>
+    <script src="components/user-dropdown-simple-new.js"></script>
+    <script src="components/pagination.js"></script>
+    <style>
+        /* Page-specific styles */
+        html, body {
+            background: var(--color-bg) !important;
+            width: 100vw;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            color: var(--color-text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .container {
+            background: var(--color-bg);
+            max-width: 1200px;
+            height: 100vh;
+            margin: 0 auto;
+            box-sizing: border-box;
+            padding: 20px 24px 40px;  /* Further reduced from 30px to 20px (10px up) */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Fixed Header Area */
+        .fixed-header {
+            position: sticky;
+            top: 20px;  /* Moved up 10px more from 30px */
+            background: #000;
+            z-index: 100;
+            padding-bottom: 0;
+            padding-top: 0;  /* Removed top padding */
+        }
+        
+        /* Tabs Styles */
+        .tabs-container {
+            margin: 0 0 20px 0;  /* Removed top margin */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0;
+        }
+        
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 12px 24px;
+            font-size: 28px;  /* Changed from 15px to match push-strategy page */
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab-btn:hover {
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .tab-btn.active {
+            color: #00ff88;
+            border-bottom-color: #00ff88;
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            animation: tabGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes tabGlow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Scrollable Content Area */
+        .scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+            padding-top: 10px;  /* 添加顶部内边距，内容向下移动10px */
+        }
+        .card, .glass, .stat-card, .chart-container, .table-container {
+            background: var(--color-bg-card);
+            color: var(--color-text);
+            border-radius: var(--radius);
+            box-shadow: var(--color-shadow);
+            border: 1.5px solid var(--color-border);
+            transition: background 0.3s, color 0.3s, border 0.3s;
+        }
+        .btn, .export-btn, .search-btn {
+            background: var(--color-bg-card);
+            color: var(--color-text);
+            border: 1.5px solid var(--color-border);
+            border-radius: 8px;
+            transition: background 0.3s, color 0.3s, border 0.3s;
+        }
+        .btn-primary {
+            background: var(--color-primary);
+            color: #fff;
+            border: none;
+        }
+        .btn-primary:hover {
+            filter: brightness(1.1);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-text-secondary);
+        }
+        .btn-secondary:hover {
+            background: var(--color-border);
+            color: var(--color-text);
+        }
+        .data-table th, .data-table td {
+            color: var(--color-text);
+            border-bottom: 1px solid var(--color-border);
+        }
+        .data-table th {
+            background: var(--color-bg-card);
+        }
+        .data-table tr:hover td {
+            background: var(--color-border);
+        }
+        .table-header {
+            border-bottom: 1px solid var(--color-border);
+        }
+        .header {
+            background: var(--color-bg);
+            color: var(--color-text);
+            transition: background 0.3s, color 0.3s;
+        }
+        .header .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            min-width: 160px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+        .theme-toggle-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--color-bg-card);
+            color: var(--color-text);
+            border: 1.5px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s, border 0.3s;
+            box-shadow: var(--color-shadow);
+            outline: none;
+        }
+        .theme-toggle-btn:hover, .theme-toggle-btn:focus {
+            background: var(--color-border);
+            color: var(--color-primary);
+        }
+        .user-avatar {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            color: #fff;
+        }
+        * {
+            transition: background 0.3s, color 0.3s, border 0.3s;
+        }
+
+        /* Glass morphism effects */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+
+
+        /* 消息徽章 - 已禁用 */
+        /* .message-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            min-width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #ff3b30, #ff6b6b);
+            color: #fff;
+            border-radius: 9px;
+            font-size: 11px;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            box-shadow: 0 2px 6px rgba(255, 59, 48, 0.4);
+            animation: badgePulse 2s infinite;
+        } */
+
+        @keyframes badgePulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* 消息下拉框 */
+        .message-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 420px;
+            max-height: 600px;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+        }
+
+        .message-dropdown.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .message-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 20px;
+            width: 16px;
+            height: 16px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: none;
+            border-right: none;
+            transform: rotate(45deg);
+            backdrop-filter: blur(20px);
+        }
+
+        /* 消息头部 */
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        .message-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .message-title-icon {
+            font-size: 20px;
+        }
+
+        .message-title-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .message-count {
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            color: #000;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 8px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .message-action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .message-action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        /* 消息标签页 */
+        .message-tabs {
+            display: flex;
+            padding: 0 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        .message-tab {
+            padding: 12px 0;
+            margin-right: 24px;
+            position: relative;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: color 0.3s;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+        }
+
+        .message-tab:hover {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .message-tab.active {
+            color: #fff;
+        }
+
+        .message-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            border-radius: 2px;
+        }
+
+        .tab-count {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 6px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .message-tab.active .tab-count {
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            color: #000;
+        }
+
+        /* 消息内容 */
+        .message-content {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .message-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        .message-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .message-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .message-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .message-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 消息项 */
+        .message-item {
+            display: flex;
+            gap: 12px;
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .message-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .message-item.unread {
+            background: rgba(0, 255, 136, 0.02);
+            border-left: 3px solid #00ff88;
+        }
+
+        .message-item.unread::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 20px;
+            width: 6px;
+            height: 6px;
+            background: #00ff88;
+            border-radius: 50%;
+            box-shadow: 0 0 6px #00ff88;
+        }
+
+        .message-item-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .message-item.level-high .message-item-icon {
+            background: rgba(255, 59, 48, 0.2);
+            color: #ff3b30;
+        }
+
+        .message-item.level-medium .message-item-icon {
+            background: rgba(255, 149, 0, 0.2);
+            color: #ff9500;
+        }
+
+        .message-item.level-low .message-item-icon {
+            background: rgba(52, 199, 89, 0.2);
+            color: #34c759;
+        }
+
+        .message-item-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 4px;
+            gap: 8px;
+        }
+
+        .message-item-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        .message-item-time {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .message-item-text {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.4;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .message-item-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .message-item:hover .message-item-actions {
+            opacity: 1;
+        }
+
+        .message-item-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .message-item-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .message-item-btn.danger:hover {
+            background: rgba(255, 59, 48, 0.2);
+            border-color: #ff3b30;
+            color: #ff3b30;
+        }
+
+        /* 空状态 */
+        .message-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 24px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+
+        .empty-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* 消息底部 */
+        .message-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        .message-footer-btn {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .message-footer-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 95%;
+            margin: 0 auto;
+            padding: 100px 10px 40px;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 36px;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .page-title {
+            font-size: 48px;
+            font-weight: 500;
+            color: var(--color-text);
+            margin: 0;
+            letter-spacing: -2px;
+            background: none;
+            -webkit-text-fill-color: unset;
+            margin-bottom: 0 !important; /* 移除底部间距 */
+        }
+
+        .page-header + .search-filter-section {
+            margin-top: 0;
+        }
+
+        /* === 消息中心查询区域样式同步 start === */
+        .search-filter-section {
+            background: var(--color-bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--color-shadow);
+            border: 1.5px solid var(--color-border);
+            padding: 20px;
+            margin-bottom: 36px;
+        }
+        .search-input {
+            width: 220px;
+            padding: 12px 16px 12px 44px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .search-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 255, 136, 0.5);
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+        }
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+        .filter-select {
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 120px;
+            width: 220px;
+        }
+        .filter-select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+        .filter-select option {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 8px;
+        }
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+        .filter-btn {
+            padding: 10px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .filter-btn.primary {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 170, 255, 0.2));
+            border-color: rgba(0, 255, 136, 0.5);
+            color: #fff;
+        }
+        .filter-btn.primary:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 170, 255, 0.3));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+        }
+        .filter-btn.secondary {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .filter-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        .filter-btn.export {
+            background: rgba(30, 127, 255, 0.1);
+            border: 1px solid rgba(30, 127, 255, 0.3);
+            color: var(--color-accent);
+        }
+        .filter-btn.export:hover {
+            background: rgba(30, 127, 255, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 127, 255, 0.3);
+        }
+        .filter-btn.refresh {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+        }
+        .filter-btn.refresh:hover {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: rgba(0, 255, 136, 0.4);
+            transform: translateY(-1px);
+        }
+        @media (max-width: 768px) {
+            .search-filter-section {
+                flex-direction: column;
+            }
+        }
+        /* === 消息中心查询区域样式同步 end === */
+        
+        /* Table Card - 与家庭页面保持一致 */
+        .table-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--color-shadow);
+            border: 1.5px solid var(--color-border);
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        
+        /* Table Actions Header */
+        .table-actions-header {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        /* Table Wrapper */
+        .table-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius);
+            border: 1px solid var(--color-border);
+        }
+        
+        /* Scrollable container */
+        .table-scrollable {
+            overflow-x: auto;
+            width: 100%;
+            position: relative;
+        }
+        
+        /* Custom scrollbar */
+        .table-scrollable::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .table-scrollable::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        
+        .table-scrollable::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        
+        .table-scrollable::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Task table specific - with fixed action column */
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            position: relative;
+            min-width: 1800px; /* Further increased for better spacing */
+        }
+        
+        /* Fixed action column styles */
+        .task-table th:last-child,
+        .task-table td:last-child {
+            position: sticky;
+            right: 0;
+            background: #000000; /* Solid black background */
+            z-index: 2;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .task-table th:last-child {
+            background: #0a0a0a; /* Slightly lighter black for header */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .task-table tbody tr:hover td:last-child {
+            background: #111111; /* Darker on hover but still opaque */
+        }
+        
+        /* Operation table action column - same styling */
+        .data-table th:last-child,
+        .data-table td:last-child {
+            position: sticky;
+            right: 0;
+            background: #000000; /* Solid black background */
+            z-index: 2;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .data-table th:last-child {
+            background: #0a0a0a; /* Slightly lighter black for header */
+        }
+        
+        .data-table tbody tr:hover td:last-child {
+            background: #111111; /* Darker on hover but still opaque */
+        }
+
+        /* Data Table */
+        .table-section {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .table-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 0%, rgba(0, 255, 136, 0.01), transparent 70%);
+            pointer-events: none;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        .data-table th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px 24px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            vertical-align: middle;
+        }
+
+        .data-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Operation Commands */
+        .operation-command {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid;
+        }
+
+        .command-charge {
+            background: rgba(52, 199, 89, 0.15);
+            color: #34c759;
+            border-color: rgba(52, 199, 89, 0.3);
+        }
+
+        .command-discharge {
+            background: rgba(0, 122, 255, 0.15);
+            color: #007aff;
+            border-color: rgba(0, 122, 255, 0.3);
+        }
+
+        .command-stop-charge {
+            background: rgba(255, 149, 0, 0.15);
+            color: #ff9500;
+            border-color: rgba(255, 149, 0, 0.3);
+        }
+
+        .command-stop-discharge {
+            background: rgba(255, 59, 48, 0.15);
+            color: #ff3b30;
+            border-color: rgba(255, 59, 48, 0.3);
+        }
+
+        .command-icon {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 0 4px currentColor;
+        }
+
+        /* Action Buttons */
+        .action-link {
+            color: #00ff88;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            background: rgba(0, 255, 136, 0.05);
+            display: inline-block;
+        }
+
+        .action-link:hover {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: rgba(0, 255, 136, 0.5);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        
+        /* Task Type Badge */
+        .task-type-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(100, 100, 255, 0.1);
+            color: #6464ff;
+            border: 1px solid rgba(100, 100, 255, 0.2);
+        }
+        
+        /* Discharge Type Badge */
+        .discharge-type-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .discharge-type-badge.auto {
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+        
+        .discharge-type-badge.manual {
+            background: rgba(255, 184, 0, 0.1);
+            color: #ffb800;
+            border: 1px solid rgba(255, 184, 0, 0.2);
+        }
+        
+        /* Profit styles */
+        .profit-positive {
+            color: #00ff88;
+            font-weight: 600;
+        }
+        
+        /* Participation Rate styles */
+        .participation-rate {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .participation-rate.high {
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+        
+        .participation-rate.medium {
+            background: rgba(255, 184, 0, 0.1);
+            color: #ffb800;
+            border: 1px solid rgba(255, 184, 0, 0.2);
+        }
+        
+        .participation-rate.low {
+            background: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.2);
+        }
+        
+        /* Sort buttons - matching family page style */
+        .sort-buttons {
+            margin-left: 6px;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            vertical-align: middle;
+            position: relative;
+            top: -2px;
+        }
+        
+        /* Table header cells - ensure horizontal layout */
+        .task-table th {
+            white-space: nowrap;
+            padding: 15px 20px;
+            min-width: 120px;
+        }
+        
+        /* Specific column widths for better layout */
+        .task-table th:nth-child(1) { min-width: 160px; } /* 时间 */
+        .task-table th:nth-child(2) { min-width: 80px; } /* 地区 */
+        .task-table th:nth-child(3) { min-width: 100px; } /* 放电类型 */
+        .task-table th:nth-child(4) { min-width: 100px; } /* 下发任务 */
+        .task-table th:nth-child(5) { min-width: 130px; } /* 下发任务数 */
+        .task-table th:nth-child(6) { min-width: 120px; } /* 参与人数 */
+        .task-table th:nth-child(7) { min-width: 100px; } /* 参与率 */
+        .task-table th:nth-child(8) { min-width: 140px; } /* 放电量 */
+        .task-table th:nth-child(9) { min-width: 120px; } /* 净利润 */
+        .task-table th:nth-child(10) { min-width: 180px; } /* 每度电净利润 */
+        .task-table th:nth-child(11) { min-width: 100px; } /* 操作 */
+        
+        /* Table data cells */
+        .task-table td {
+            white-space: nowrap;
+            padding: 15px 20px;
+        }
+        
+        /* Header content container for sortable columns */
+        .header-content {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        
+        .header-content > span:first-child {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        /* Ensure sort buttons stay inline */
+        .sortable-header .sort-buttons {
+            display: inline-flex !important;
+            margin-left: 4px !important;
+        }
+
+        .sort-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            width: 16px;
+            height: 14px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            padding: 0;
+            margin: 0;
+            line-height: 1;
+            opacity: 0.8;
+        }
+
+        .sort-btn:hover {
+            color: rgba(255, 255, 255, 0.8);
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .sort-btn.active {
+            color: var(--color-primary);
+            opacity: 1;
+            text-shadow: 0 0 8px rgba(0, 255, 136, 0.6);
+        }
+        
+        /* Modal styles removed - details now shown on separate page */
+        
+        /* Task Status Badges */
+        .status-running {
+            background: rgba(0, 122, 255, 0.15);
+            color: #007aff;
+            border: 1px solid rgba(0, 122, 255, 0.3);
+        }
+        
+        .status-running::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-success {
+            background: rgba(52, 199, 89, 0.15);
+            color: #34c759;
+            border: 1px solid rgba(52, 199, 89, 0.3);
+        }
+        
+        .status-pending {
+            background: rgba(255, 149, 0, 0.15);
+            color: #ff9500;
+            border: 1px solid rgba(255, 149, 0, 0.3);
+        }
+        
+        .status-cancelled {
+            background: rgba(255, 59, 48, 0.15);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.3);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Pagination */
+        .pagination-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .page-size-select {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 6px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .page-size-select:focus {
+            border-color: rgba(0, 255, 136, 0.5);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .page-size-select option {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .page-btn.active {
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            color: #000;
+            border-color: #00ff88;
+            font-weight: 600;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-jump {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .page-input {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            width: 50px;
+            height: 32px;
+            text-align: center;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .page-input:focus {
+            border-color: rgba(0, 255, 136, 0.5);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .page-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Date Picker Styles */
+        .date-picker-container {
+            position: relative;
+        }
+
+        .date-picker-input {
+            cursor: pointer;
+            position: relative;
+            padding-right: 40px;
+        }
+
+        .date-picker-container::after {
+            content: '📅';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+        }
+
+        /* Search Section - ensure proper stacking context */
+        .search-section {
+            position: relative;
+            z-index: 10;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .date-picker-container {
+            position: relative;
+            z-index: 1000;
+        }
+
+        .date-picker-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.98);
+            backdrop-filter: blur(30px);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            display: none;
+            z-index: 100000;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 320px;
+            max-width: 400px;
+        }
+
+        .date-picker-dropdown.show {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Ensure table section doesn't interfere */
+        .table-section {
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .date-picker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .date-nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .date-nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        .current-month {
+            font-size: 16px;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .date-picker-calendar {
+            margin-bottom: 20px;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+            padding: 8px 0;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid transparent;
+        }
+
+        .calendar-day:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .calendar-day.other-month {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .calendar-day.selected {
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            color: #000;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 255, 136, 0.3);
+        }
+
+        .calendar-day.today {
+            border-color: rgba(0, 255, 136, 0.5);
+            color: #00ff88;
+        }
+
+        .date-picker-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .date-action-btn {
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .date-action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .date-action-btn.primary {
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            color: #000;
+            border-color: #00ff88;
+            font-weight: 500;
+        }
+
+        .date-action-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 320px;
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon {
+            background: #34c759;
+            color: #000;
+        }
+
+        .toast.error .toast-icon {
+            background: #ff3b30;
+            color: #fff;
+        }
+
+        .toast.info .toast-icon {
+            background: #007aff;
+            color: #fff;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .toast-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .container {
+                padding: 100px 30px 60px;
+            }
+
+            .search-form {
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+
+            .search-form .form-group:nth-child(3) {
+                grid-column: 1 / -1;
+            }
+
+            .search-form .btn {
+                grid-column: 1 / -1;
+                justify-self: center;
+                min-width: 120px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 100px 20px 60px;
+            }
+
+            .search-section {
+                padding: 30px 20px;
+            }
+
+            .search-form {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .pagination-section {
+                flex-direction: column;
+                gap: 20px;
+                align-items: stretch;
+            }
+
+            .pagination-controls {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .page-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Container for HeaderNav Component -->
+    <div id="headerContainer"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Fixed Header Area -->
+        <div class="fixed-header">
+            <!-- Tabs -->
+            <div class="tabs-container">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="task" onclick="switchTab('task')">
+                        <span data-i18n="operationLog.tabs.task">任务记录</span>
+                    </button>
+                    <button class="tab-btn" data-tab="operation" onclick="switchTab('operation')">
+                        <span data-i18n="operationLog.tabs.operation">操作记录</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search and Filter Section -->
+            <div class="search-filter-section" style="display: flex; align-items: center; gap: 12px; margin-top: -14px; margin-bottom: 16px; padding: 20px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; backdrop-filter: blur(10px);">
+                <select id="regionFilter" class="filter-select" 
+                        style="width: 180px; padding: 12px 16px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: rgba(255, 255, 255, 0.9); font-size: 14px;">
+                    <option value="" data-i18n="operationLog.filter.allRegions">全部地区</option>
+                    <option value="NSW">NSW</option>
+                    <option value="QLD">QLD</option>
+                    <option value="VIC">VIC</option>
+                    <option value="SA">SA</option>
+                    <option value="TAS">TAS</option>
+                </select>
+                
+                <input type="text" class="search-input" id="opSearchInput" 
+                       style="width: 180px; padding: 12px 16px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: rgba(255, 255, 255, 0.9); font-size: 14px;"
+                       data-i18n-placeholder="operationLog.filter.operatorPlaceholder" 
+                       placeholder="请输入操作人员...">
+                
+                <select class="filter-select" id="opCommandFilter"
+                        style="width: 180px; padding: 12px 16px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: rgba(255, 255, 255, 0.9); font-size: 14px;">
+                    <option value="" data-i18n="operationLog.filter.allCommands">全部命令</option>
+                    <option value="charge" data-i18n="operationLog.filter.charge">充电</option>
+                    <option value="discharge" data-i18n="operationLog.filter.discharge">放电</option>
+                    <option value="stop-charge" data-i18n="operationLog.filter.stopCharge">停止充电</option>
+                    <option value="stop-discharge" data-i18n="operationLog.filter.stopDischarge">停止放电</option>
+                </select>
+                
+                <input type="text" class="search-input" id="opDateInput" 
+                       style="width: 180px; padding: 12px 16px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: rgba(255, 255, 255, 0.9); font-size: 14px; cursor: pointer;"
+                       data-i18n-placeholder="operationLog.filter.timePlaceholder" 
+                       placeholder="请选择时间..." 
+                       readonly>
+                
+                <div class="filter-actions" style="display: flex; gap: 8px; margin-left: auto;">
+                    <button class="filter-btn primary" onclick="applyOpFilters()"
+                            style="background: #00ff88; border-color: #00ff88; color: #000; font-weight: 500;">
+                        <span></span>
+                        <span data-i18n="operationLog.buttons.search">查询</span>
+                    </button>
+                    <button class="filter-btn secondary" onclick="resetOpFilters()"
+                            style="background: rgba(255, 255, 255, 0.05);">
+                        <span></span>
+                        <span data-i18n="operationLog.buttons.reset">重置</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Contents -->
+        <!-- Task Records Tab -->
+        <div id="taskTab" class="tab-content active">
+            <div class="scrollable-content">
+                <!-- Task Records Table -->
+                <div class="table-card">
+                    <div class="table-actions-header">
+                        <button class="filter-btn export" onclick="exportTaskLogs()">
+                            <span>📥</span>
+                            <span data-i18n="operationLog.buttons.export">导出</span>
+                        </button>
+                    </div>
+                    <div class="table-wrapper">
+                        <div class="table-scrollable">
+                            <table class="data-table task-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="operationLog.table.time">时间</th>
+                                <th data-i18n="operationLog.table.region">地区</th>
+                                <th data-i18n="operationLog.table.dischargeType">放电类型</th>
+                                <th data-i18n="operationLog.table.taskIssuer">下发任务</th>
+                                <th class="sortable-header">
+                                    <div class="header-content">
+                                        <span data-i18n="operationLog.table.taskCount">下发任务数</span>
+                                        <span class="sort-buttons">
+                                            <button class="sort-btn sort-asc" onclick="sortTaskTable('taskCount', 'asc', this)" title="升序">▲</button>
+                                            <button class="sort-btn sort-desc" onclick="sortTaskTable('taskCount', 'desc', this)" title="降序">▼</button>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="sortable-header">
+                                    <div class="header-content">
+                                        <span data-i18n="operationLog.table.participants">参与人数</span>
+                                        <span class="sort-buttons">
+                                            <button class="sort-btn sort-asc" onclick="sortTaskTable('participants', 'asc', this)" title="升序">▲</button>
+                                            <button class="sort-btn sort-desc" onclick="sortTaskTable('participants', 'desc', this)" title="降序">▼</button>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="sortable-header">
+                                    <div class="header-content">
+                                        <span data-i18n="operationLog.table.participationRate">参与率</span>
+                                        <span class="sort-buttons">
+                                            <button class="sort-btn sort-asc" onclick="sortTaskTable('participationRate', 'asc', this)" title="升序">▲</button>
+                                            <button class="sort-btn sort-desc" onclick="sortTaskTable('participationRate', 'desc', this)" title="降序">▼</button>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="sortable-header">
+                                    <div class="header-content">
+                                        <span data-i18n="operationLog.table.dischargeAmount">放电量(kWh)</span>
+                                        <span class="sort-buttons">
+                                            <button class="sort-btn sort-asc" onclick="sortTaskTable('dischargeAmount', 'asc', this)" title="升序">▲</button>
+                                            <button class="sort-btn sort-desc" onclick="sortTaskTable('dischargeAmount', 'desc', this)" title="降序">▼</button>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="sortable-header">
+                                    <div class="header-content">
+                                        <span data-i18n="operationLog.table.netProfit">净利润($)</span>
+                                        <span class="sort-buttons">
+                                            <button class="sort-btn sort-asc" onclick="sortTaskTable('netProfit', 'asc', this)" title="升序">▲</button>
+                                            <button class="sort-btn sort-desc" onclick="sortTaskTable('netProfit', 'desc', this)" title="降序">▼</button>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="sortable-header">
+                                    <div class="header-content">
+                                        <span data-i18n="operationLog.table.profitPerKwh">每度电净利润($/kWh)</span>
+                                        <span class="sort-buttons">
+                                            <button class="sort-btn sort-asc" onclick="sortTaskTable('profitPerKwh', 'asc', this)" title="升序">▲</button>
+                                            <button class="sort-btn sort-desc" onclick="sortTaskTable('profitPerKwh', 'desc', this)" title="降序">▼</button>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th data-i18n="operationLog.table.action">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskTableBody">
+                            <!-- Task records will be loaded here -->
+                        </tbody>
+                    </table>
+                        </div>
+                    </div>
+                    <div id="taskPagination"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Operation Records Tab -->
+        <div id="operationTab" class="tab-content">
+            <div class="scrollable-content">
+            <!-- Table Card -->
+            <div class="table-card">
+                <!-- Table Actions Header -->
+                <div class="table-actions-header">
+                    <button class="filter-btn export" onclick="exportOperationLogs()">
+                        <span></span>
+                        <span data-i18n="operationLog.buttons.export">导出</span>
+                    </button>
+                    <button class="filter-btn refresh" onclick="refreshOperationLogs()">
+                        <span></span>
+                        <span data-i18n="operationLog.buttons.refresh">刷新</span>
+                    </button>
+                </div>
+                
+                <!-- Table -->
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="operationLog.table.time">时间</th>
+                                <th data-i18n="operationLog.table.region">地区</th>
+                                <th data-i18n="operationLog.table.command">命令</th>
+                                <th data-i18n="operationLog.table.stations">下发电站</th>
+                                <th data-i18n="operationLog.table.success">成功</th>
+                                <th data-i18n="operationLog.table.failed">失败</th>
+                                <th data-i18n="operationLog.table.operator">操作人</th>
+                                <th data-i18n="operationLog.table.action">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="operationTableBody">
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div id="operationLogPaginationContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // Global variables
+        let toastCounter = 0;
+        let currentPage = 1;
+        let pageSize = 20;
+        let totalRecords = 243;
+        let totalPages = Math.ceil(totalRecords / pageSize);
+        let currentTab = 'task';  // Default tab
+        let filteredData = [];
+        let pagination = null;
+        
+        // Date picker variables
+        let currentDate = new Date();
+        let selectedDate = null;
+        let isDatePickerOpen = false;
+        
+        
+        // Mock operation log data with i18n support
+        const operatorsCN = ['李怡悦', '王乐康', '张三', '李四', '王五', '赵六', '孙七', '周八'];
+        const operatorsEN = ['Yiyue Li', 'Lekang Wang', 'John Zhang', 'Mike Li', 'David Wang', 'Lucy Zhao', 'Tom Sun', 'Emily Zhou'];
+        
+        function getOperatorName(cnName) {
+            const index = operatorsCN.indexOf(cnName);
+            if (window.i18n && window.i18n.getCurrentLanguage() === 'en' && index !== -1) {
+                return operatorsEN[index];
+            }
+            return cnName;
+        }
+        
+        const regions = ['NSW', 'QLD', 'VIC', 'SA', 'TAS'];
+        const allOperations = [
+            { id: 1, time: '2024-02-17 06:25', command: 'charge', operator: '李怡悦', region: 'NSW', stations: 59, success: 45, failed: 14 },
+            { id: 2, time: '2024-02-17 07:01', command: 'stop-charge', operator: '王乐康', region: 'NSW', stations: 59, success: 45, failed: 14 },
+            { id: 3, time: '2024-02-17 18:00', command: 'discharge', operator: '李怡悦', region: 'QLD', stations: 59, success: 45, failed: 14 },
+            { id: 4, time: '2024-02-17 23:07', command: 'stop-discharge', operator: '王乐康', region: 'QLD', stations: 59, success: 45, failed: 14 },
+            { id: 5, time: '2024-02-16 14:30', command: 'charge', operator: '张三', region: 'VIC', stations: 45, success: 38, failed: 7 },
+            { id: 6, time: '2024-02-16 16:45', command: 'discharge', operator: '李四', region: 'VIC', stations: 32, success: 28, failed: 4 },
+            { id: 7, time: '2024-02-16 20:15', command: 'stop-charge', operator: '王五', region: 'SA', stations: 67, success: 55, failed: 12 },
+            { id: 8, time: '2024-02-15 09:20', command: 'stop-discharge', operator: '赵六', region: 'SA', stations: 89, success: 78, failed: 11 },
+            { id: 9, time: '2024-02-15 11:35', command: 'charge', operator: '孙七', region: 'TAS', stations: 23, success: 20, failed: 3 },
+            { id: 10, time: '2024-02-15 15:50', command: 'discharge', operator: '周八', region: 'TAS', stations: 56, success: 48, failed: 8 }
+        ];
+
+        // Generate more mock data to simulate pagination
+        for (let i = 11; i <= 243; i++) {
+            const commands = ['charge', 'discharge', 'stop-charge', 'stop-discharge'];
+            const randomDate = new Date(2024, 1, Math.floor(Math.random() * 28) + 1, Math.floor(Math.random() * 24), Math.floor(Math.random() * 60));
+            
+            allOperations.push({
+                id: i,
+                time: randomDate.toLocaleString('zh-CN', { 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                }).replace(/\//g, '-'),
+                command: commands[Math.floor(Math.random() * commands.length)],
+                operator: operatorsCN[Math.floor(Math.random() * operatorsCN.length)],
+                region: regions[Math.floor(Math.random() * regions.length)],
+                stations: Math.floor(Math.random() * 80) + 20,
+                success: Math.floor(Math.random() * 60) + 20,
+                failed: Math.floor(Math.random() * 20) + 1
+            });
+        }
+
+        // Sort by time descending
+        allOperations.sort((a, b) => new Date(b.time) - new Date(a.time));
+        filteredData = [...allOperations];
+
+        // Toast functionality
+        function showToast(type, title, message, duration = 3000) {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = `toast-${++toastCounter}`;
+            
+            const icons = {
+                success: '✓',
+                error: '✕',
+                info: 'i'
+            };
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.id = toastId;
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type] || icons.info}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="hideToast('${toastId}')">&times;</button>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                hideToast(toastId);
+            }, duration);
+
+            return toastId;
+        }
+
+        function hideToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }
+        }
+
+        function showInfoToast(title, message, duration = 3000) {
+            showToast('info', title, message, duration);
+        }
+
+        function showSuccessToast(title, message, duration = 3000) {
+            showToast('success', title, message, duration);
+        }
+
+        function showErrorToast(title, message, duration = 4000) {
+            showToast('error', title, message, duration);
+        }
+
+        // Get command display info
+        function getCommandInfo(command) {
+            const commandTexts = {
+                'charge': window.i18n ? window.i18n.getText('operationLog.commands.charge') : '充电',
+                'discharge': window.i18n ? window.i18n.getText('operationLog.commands.discharge') : '放电',
+                'stop-charge': window.i18n ? window.i18n.getText('operationLog.commands.stopCharge') : '停止充电',
+                'stop-discharge': window.i18n ? window.i18n.getText('operationLog.commands.stopDischarge') : '停止放电'
+            };
+            const commandMap = {
+                'charge': { text: commandTexts['charge'], class: 'command-charge' },
+                'discharge': { text: commandTexts['discharge'], class: 'command-discharge' },
+                'stop-charge': { text: commandTexts['stop-charge'], class: 'command-stop-charge' },
+                'stop-discharge': { text: commandTexts['stop-discharge'], class: 'command-stop-discharge' }
+            };
+            return commandMap[command] || { text: command, class: 'command-charge' };
+        }
+
+        // Update table display
+        function updateTableDisplay() {
+            const tbody = document.getElementById('operationTableBody');
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const pageData = filteredData.slice(startIndex, endIndex);
+
+            tbody.innerHTML = '';
+
+            if (pageData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.5);">
+                            ${window.i18n ? window.i18n.getText('operationLog.noData') : '暂无数据'}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            pageData.forEach(operation => {
+                const commandInfo = getCommandInfo(operation.command);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${operation.time}</td>
+                    <td>${operation.region || '-'}</td>
+                    <td>
+                        <span class="operation-command ${commandInfo.class}">
+                            <span class="command-icon"></span>
+                            ${commandInfo.text}
+                        </span>
+                    </td>
+                    <td>${operation.stations}</td>
+                    <td>${operation.success}</td>
+                    <td>${operation.failed}</td>
+                    <td>${getOperatorName(operation.operator)}</td>
+                    <td>
+                        <a href="#" class="action-link" onclick="viewOperationDetails(${operation.id}); return false;">${window.i18n ? window.i18n.getText('operationLog.viewDetails') : '详情'}</a>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Update pagination display
+        function updatePaginationDisplay() {
+            if (pagination) {
+                pagination.updateTotal(filteredData.length);
+                pagination.currentPage = currentPage;
+                pagination.pageSize = pageSize;
+                pagination.refresh();
+            }
+        }
+
+        // Remove old searchOperations and resetSearch, add new filter logic
+        function applyOpFilters() {
+            const region = document.getElementById('regionFilter').value;
+            const operator = document.getElementById('opSearchInput').value.trim();
+            const command = document.getElementById('opCommandFilter').value;
+            const date = document.getElementById('opDateInput').value.trim();
+            
+            filteredData = allOperations.filter(op => {
+                const regionMatch = !region || op.region === region;
+                const nameMatch = !operator || op.operator.includes(operator);
+                const commandMatch = !command || op.command === command;
+                let dateMatch = true;
+                if (date) {
+                    dateMatch = op.time.startsWith(date);
+                }
+                return regionMatch && nameMatch && commandMatch && dateMatch;
+            });
+            currentPage = 1;
+            updateTableDisplay();
+            updatePaginationDisplay();
+            showInfoToast('查询完成', `找到 ${filteredData.length} 条匹配记录`);
+        }
+        function resetOpFilters() {
+            document.getElementById('regionFilter').selectedIndex = 0;
+            document.getElementById('opSearchInput').value = '';
+            document.getElementById('opCommandFilter').selectedIndex = 0;
+            document.getElementById('opDateInput').value = '';
+            filteredData = [...allOperations];
+            currentPage = 1;
+            updateTableDisplay();
+            updatePaginationDisplay();
+            showInfoToast('重置完成', '已清空搜索条件');
+        }
+        function exportOperationLogs() {
+            if (!filteredData.length) {
+                showErrorToast('导出失败', '没有可导出的数据');
+                return;
+            }
+            const headers = [
+                window.i18n ? window.i18n.getText('operationLog.table.time') : '时间',
+                window.i18n ? window.i18n.getText('operationLog.table.region') : '地区',
+                window.i18n ? window.i18n.getText('operationLog.table.command') : '命令',
+                window.i18n ? window.i18n.getText('operationLog.table.stations') : '下发电站',
+                window.i18n ? window.i18n.getText('operationLog.table.success') : '成功',
+                window.i18n ? window.i18n.getText('operationLog.table.failed') : '失败',
+                window.i18n ? window.i18n.getText('operationLog.table.operator') : '操作人',
+                window.i18n ? window.i18n.getText('operationLog.table.action') : '操作'
+            ];
+            const rows = filteredData.map(op => [
+                op.time, 
+                op.region || '-',
+                getCommandInfo(op.command).text, 
+                op.stations, 
+                op.success, 
+                op.failed,
+                op.operator, 
+                '详情'
+            ]);
+            let csv = headers.join(',') + '\n';
+            rows.forEach(row => {
+                csv += row.map(item => `"${item}"`).join(',') + '\n';
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `操作记录_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showSuccessToast('导出成功', `已导出 ${filteredData.length} 条记录`);
+        }
+        
+        function refreshOperationLogs() {
+            // 重新加载数据
+            filteredData = [...allOperations];
+            currentPage = 1;
+            updateTableDisplay();
+            updatePaginationDisplay();
+            showSuccessToast('刷新成功', '数据已更新');
+        }
+        
+        function setupOpRealTimeSearch() {
+            const searchInputs = [document.getElementById('opSearchInput'), document.getElementById('opDateInput')];
+            const searchSelects = [document.getElementById('regionFilter'), document.getElementById('opCommandFilter')];
+            searchInputs.forEach(input => {
+                let searchTimeout;
+                input.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        applyOpFilters();
+                    }, 500);
+                });
+            });
+            searchSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    applyOpFilters();
+                });
+            });
+        }
+        function setupOpDatePicker() {
+            const dateInput = document.getElementById('opDateInput');
+            dateInput.addEventListener('click', function(e) {
+                e.stopPropagation();
+                showDatePickerForOp();
+            });
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('#opDateInput') && document.getElementById('datePickerDropdown')) {
+                    closeDatePicker();
+                }
+            });
+        }
+        function showDatePickerForOp() {
+            showDatePicker();
+            const oldConfirm = confirmDate;
+            window.confirmDate = function() {
+                if (selectedDate) {
+                    const year = selectedDate.getFullYear();
+                    const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(selectedDate.getDate()).padStart(2, '0');
+                    const formattedDate = `${year}-${month}-${day}`;
+                    document.getElementById('opDateInput').value = formattedDate;
+                    showInfoToast(window.i18n ? window.i18n.getText('dateSelection') : '日期选择', `${window.i18n ? window.i18n.getText('dateSelected') : '已选择日期'}: ${formattedDate}`);
+                }
+                closeDatePicker();
+                window.confirmDate = oldConfirm;
+                applyOpFilters();
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            setupOpRealTimeSearch();
+            setupOpDatePicker();
+        });
+
+        // 操作记录抽屉组件
+        class OperationDrawer extends DrawerComponent {
+            constructor() {
+                super({
+                    containerId: 'operationDrawer',
+                    title: window.i18n ? window.i18n.getText('operationLog.detailTitle') : '操作记录详情',
+                    width: '500px',
+                    tabs: [
+                        { key: 'basic', label: window.i18n ? window.i18n.getText('operationLog.tabs.basic') : '基本信息' },
+                        { key: 'stations', label: window.i18n ? window.i18n.getText('operationLog.tabs.stations') : '电站详情' },
+                        { key: 'timeline', label: window.i18n ? window.i18n.getText('operationLog.tabs.timeline') : '执行时间线' }
+                    ],
+                    onClose: () => {
+                        console.log('操作记录抽屉关闭');
+                    },
+                    onTabSwitch: (tabKey, data) => {
+                        this.setContent(data, tabKey);
+                    }
+                });
+            }
+            
+            generateContent(operation, tabKey) {
+                if (!operation) return `<div>${window.i18n ? window.i18n.getText('dataLoading') : 'Loading data...'}</div>`;
+                
+                const commandInfo = getCommandInfo(operation.command);
+                
+                switch(tabKey) {
+                    case 'basic':
+                        return this.generateBasicInfo(operation, commandInfo);
+                    case 'stations':
+                        return this.generateStationDetails(operation);
+                    case 'timeline':
+                        return this.generateTimeline(operation);
+                    default:
+                        return this.generateBasicInfo(operation, commandInfo);
+                }
+            }
+            
+            generateBasicInfo(operation, commandInfo) {
+                return `
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <span>📊</span>
+                            ${window.i18n ? window.i18n.getText('operationLog.overview.title') : '操作概览'}
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">${operation.stations}</div>
+                                <div class="stat-label">${window.i18n ? window.i18n.getText('operationLog.overview.totalStations') : '总电站数'}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${operation.success}</div>
+                                <div class="stat-label">${window.i18n ? window.i18n.getText('operationLog.overview.successCount') : '成功数'}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${operation.failed}</div>
+                                <div class="stat-label">${window.i18n ? window.i18n.getText('operationLog.overview.failedCount') : '失败数'}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${Math.round((operation.success / operation.stations) * 100)}%</div>
+                                <div class="stat-label">${window.i18n ? window.i18n.getText('operationLog.overview.successRate') : '成功率'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <span>📝</span>
+                            ${window.i18n ? window.i18n.getText('operationLog.basicInfo.title') : '基本信息'}
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">${window.i18n ? window.i18n.getText('operationLog.basicInfo.operationTime') : '操作时间'}</span>
+                            <span class="detail-value">${operation.time}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">${window.i18n ? window.i18n.getText('operationLog.basicInfo.operationCommand') : '操作命令'}</span>
+                            <span class="detail-value">
+                                <span class="command-tag ${commandInfo.class}">${commandInfo.text}</span>
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">${window.i18n ? window.i18n.getText('operationLog.basicInfo.operator') : '操作人员'}</span>
+                            <span class="detail-value">${getOperatorName(operation.operator)}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">${window.i18n ? window.i18n.getText('operationLog.basicInfo.operationId') : '操作编号'}</span>
+                            <span class="detail-value">#${operation.id.toString().padStart(8, '0')}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">${window.i18n ? window.i18n.getText('operationLog.basicInfo.executionStatus') : '执行状态'}</span>
+                            <span class="detail-value">
+                                <span class="status-tag ${operation.failed === 0 ? 'success' : operation.success > operation.failed ? 'warning' : 'danger'}">
+                                    ${operation.failed === 0 ? (window.i18n ? window.i18n.getText('operationLog.basicInfo.allSuccess') : '全部成功') : operation.success > operation.failed ? (window.i18n ? window.i18n.getText('operationLog.basicInfo.partialSuccess') : '部分成功') : (window.i18n ? window.i18n.getText('operationLog.basicInfo.mostlyFailed') : '多数失败')}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            generateStationDetails(operation) {
+                // 生成模拟的电站数据
+                const stations = [];
+                for (let i = 0; i < operation.stations; i++) {
+                    const isSuccess = i < operation.success;
+                    stations.push({
+                        id: `ST${(1000 + i).toString()}`,
+                        name: `${window.i18n ? window.i18n.getText('operationLog.stationDetails.station') : '电站'}${String.fromCharCode(65 + (i % 26))}${Math.floor(i / 26) + 1}`,
+                        status: isSuccess ? 'success' : 'failed',
+                        location: `${window.i18n ? window.i18n.getText('operationLog.stationDetails.area') : '区域'}${Math.floor(i / 10) + 1}`,
+                        executeTime: new Date(new Date(operation.time).getTime() + i * 1000).toLocaleTimeString(window.i18n ? (window.i18n.getCurrentLanguage() === 'zh' ? 'zh-CN' : 'en-US') : 'zh-CN')
+                    });
+                }
+                
+                return `
+                    <div class="detail-section flex-fill">
+                        <div class="detail-section-title">
+                            <span>⚡</span>
+                            ${window.i18n ? window.i18n.getText('operationLog.stationDetails.title') : '电站执行详情'}
+                        </div>
+                        <div class="scrollable-list">
+                            ${stations.map(station => `
+                                <div class="detail-row">
+                                    <div>
+                                        <div class="detail-label">${station.name} (${station.id})</div>
+                                        <div style="font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-top: 2px;">
+                                            ${station.location} • ${station.executeTime}
+                                        </div>
+                                    </div>
+                                    <span class="status-tag ${station.status === 'success' ? 'success' : 'danger'}">
+                                        ${station.status === 'success' ? (window.i18n ? window.i18n.getText('operationLog.stationDetails.success') : '成功') : (window.i18n ? window.i18n.getText('operationLog.stationDetails.failed') : '失败')}
+                                    </span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            generateTimeline(operation) {
+                const startTime = new Date(operation.time);
+                const timeline = [
+                    { time: new Date(startTime.getTime() - 60000), event: window.i18n ? window.i18n.getText('operationLog.timeline.commandCreated') : '操作命令创建', status: 'success' },
+                    { time: new Date(startTime.getTime() - 30000), event: window.i18n ? window.i18n.getText('operationLog.timeline.validationPassed') : '命令验证通过', status: 'success' },
+                    { time: startTime, event: window.i18n ? window.i18n.getText('operationLog.timeline.executionStarted') : '开始执行命令', status: 'success' },
+                    { time: new Date(startTime.getTime() + 30000), event: `${operation.success}${window.i18n ? window.i18n.getText('operationLog.timeline.stationsSuccess') : '个电站执行成功'}`, status: 'success' },
+                ];
+                
+                if (operation.failed > 0) {
+                    timeline.push({
+                        time: new Date(startTime.getTime() + 45000),
+                        event: `${operation.failed}${window.i18n ? window.i18n.getText('operationLog.timeline.stationsFailed') : '个电站执行失败'}`,
+                        status: 'danger'
+                    });
+                }
+                
+                timeline.push({
+                    time: new Date(startTime.getTime() + 60000),
+                    event: window.i18n ? window.i18n.getText('operationLog.timeline.executionCompleted') : '操作执行完成',
+                    status: operation.failed === 0 ? 'success' : 'warning'
+                });
+                
+                return `
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <span>🕰️</span>
+                            ${window.i18n ? window.i18n.getText('operationLog.timeline.title') : '执行时间线'}
+                        </div>
+                        <div style="position: relative; padding-left: 24px;">
+                            <div style="position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: rgba(255, 255, 255, 0.1);"></div>
+                            ${timeline.map((item, index) => `
+                                <div style="position: relative; margin-bottom: 16px;">
+                                    <div style="position: absolute; left: -20px; top: 2px; width: 12px; height: 12px; border-radius: 50%; background: ${item.status === 'success' ? '#34c759' : item.status === 'warning' ? '#ff9500' : '#ff3b30'};"></div>
+                                    <div class="detail-row" style="border: none; padding: 0; margin-bottom: 4px;">
+                                        <span class="detail-label">${item.event}</span>
+                                        <span class="status-tag ${item.status}">
+                                            ${item.status === 'success' ? (window.i18n ? window.i18n.getText('operationLog.timeline.normal') : '正常') : item.status === 'warning' ? (window.i18n ? window.i18n.getText('operationLog.timeline.warning') : '警告') : (window.i18n ? window.i18n.getText('operationLog.timeline.error') : '错误')}
+                                        </span>
+                                    </div>
+                                    <div style="font-size: 12px; color: rgba(255, 255, 255, 0.5);">
+                                        ${item.time.toLocaleString(window.i18n ? (window.i18n.getCurrentLanguage() === 'zh' ? 'zh-CN' : 'en-US') : 'zh-CN')}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // 初始化抽屉组件
+        let operationDrawer;
+        
+        // 查看操作记录详情
+        function viewOperationDetails(operationId) {
+            const operation = allOperations.find(op => op.id === operationId);
+            if (!operation) {
+                showErrorToast(window.i18n ? window.i18n.getText('error') : '错误', window.i18n ? window.i18n.getText('operationLog.notFound') : '找不到操作记录');
+                return;
+            }
+            
+            if (!operationDrawer) {
+                operationDrawer = new OperationDrawer();
+            }
+            
+            operationDrawer.open(operation);
+        }
+
+
+        // Date Picker Functions
+        function initDatePicker() {
+            const dateInput = document.getElementById('timeRange');
+            const dropdown = document.getElementById('datePickerDropdown');
+            
+            // Click on input to show picker
+            dateInput.addEventListener('click', function(e) {
+                e.stopPropagation();
+                showDatePicker();
+            });
+            
+            // Close picker when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.date-picker-container')) {
+                    closeDatePicker();
+                }
+            });
+            
+            // Prevent dropdown from closing when clicking inside
+            dropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Close on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && isDatePickerOpen) {
+                    closeDatePicker();
+                }
+            });
+            
+            // Initialize calendar
+            updateCalendar();
+        }
+        
+        function showDatePicker() {
+            const dropdown = document.getElementById('datePickerDropdown');
+            
+            isDatePickerOpen = true;
+            dropdown.classList.add('show');
+            updateCalendar();
+        }
+        
+        function closeDatePicker() {
+            const dropdown = document.getElementById('datePickerDropdown');
+            dropdown.classList.remove('show');
+            isDatePickerOpen = false;
+        }
+        
+        function updateCalendar() {
+            const monthSpan = document.getElementById('currentMonth');
+            const daysContainer = document.getElementById('calendarDays');
+            
+            // Update month display
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            monthSpan.textContent = `${year}年 ${month + 1}月`;
+            
+            // Clear previous days
+            daysContainer.innerHTML = '';
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+            
+            // Get previous month's last days
+            const prevMonth = new Date(year, month, 0);
+            const daysInPrevMonth = prevMonth.getDate();
+            
+            // Add previous month's trailing days
+            for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+                const day = daysInPrevMonth - i;
+                const dayElement = createDayElement(day, true, year, month - 1);
+                daysContainer.appendChild(dayElement);
+            }
+            
+            // Add current month's days
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = createDayElement(day, false, year, month);
+                
+                // Mark today
+                if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Mark selected date
+                if (selectedDate && year === selectedDate.getFullYear() && 
+                    month === selectedDate.getMonth() && day === selectedDate.getDate()) {
+                    dayElement.classList.add('selected');
+                }
+                
+                daysContainer.appendChild(dayElement);
+            }
+            
+            // Add next month's leading days
+            const totalCells = daysContainer.children.length;
+            const remainingCells = 42 - totalCells; // 6 rows * 7 days
+            for (let day = 1; day <= remainingCells && day <= 14; day++) {
+                const dayElement = createDayElement(day, true, year, month + 1);
+                daysContainer.appendChild(dayElement);
+            }
+        }
+        
+        function createDayElement(day, isOtherMonth, year, month) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'calendar-day';
+            dayElement.textContent = day;
+            
+            if (isOtherMonth) {
+                dayElement.classList.add('other-month');
+            }
+            
+            dayElement.addEventListener('click', function() {
+                // Remove previous selection
+                document.querySelectorAll('.calendar-day.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+                // Add selection to clicked day
+                dayElement.classList.add('selected');
+                
+                // Store selected date
+                selectedDate = new Date(year, month, day);
+            });
+            
+            return dayElement;
+        }
+        
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            updateCalendar();
+        }
+        
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            updateCalendar();
+        }
+        
+        function clearDate() {
+            selectedDate = null;
+            document.getElementById('timeRange').value = '';
+            document.querySelectorAll('.calendar-day.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            closeDatePicker();
+        }
+        
+        function confirmDate() {
+            if (selectedDate) {
+                // Format date as YYYY-MM-DD to match operation data format
+                const year = selectedDate.getFullYear();
+                const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                const day = String(selectedDate.getDate()).padStart(2, '0');
+                const formattedDate = `${year}-${month}-${day}`;
+                
+                document.getElementById('timeRange').value = formattedDate;
+                showInfoToast('日期选择', `已选择日期: ${formattedDate}`);
+            }
+            closeDatePicker();
+        }
+
+        // Tab switching function
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.tab === tabName) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            if (tabName === 'task') {
+                document.getElementById('taskTab').classList.add('active');
+                loadTaskRecords();
+            } else {
+                document.getElementById('operationTab').classList.add('active');
+                loadOperationLogs();
+            }
+        }
+        
+        // Task sorting state
+        let taskSortColumn = null;
+        let taskSortDirection = 'asc';
+        let sortedTaskRecords = [];
+        
+        // Task records data
+        const taskRecords = [
+            { 
+                id: 'F-NSW-202403151945',
+                region: 'NSW',
+                time: '2024-03-15 19:45:00',
+                startTime: '2024-03-15 19:45:00',
+                endTime: '2024-03-15 22:30:00',
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 450,
+                participants: 425,
+                participationRate: 94.4, 
+                dischargeAmount: 12580.6, 
+                netProfit: 2012.90, 
+                profitPerKwh: 0.16,
+                userDetails: [
+                    { userName: '陈建国', discharged: 125.3, earnings: 20.05, status: '已完成' },
+                    { userName: '刘晓明', discharged: 98.7, earnings: 15.79, status: '已完成' },
+                    { userName: '王秀英', discharged: 112.4, earnings: 17.98, status: '已完成' },
+                    { userName: '张伟', discharged: 87.6, earnings: 14.02, status: '放电中' },
+                    { userName: '李娜', discharged: 95.2, earnings: 15.23, status: '已完成' },
+                    { userName: '赵强', discharged: 108.9, earnings: 17.42, status: '已完成' },
+                    { userName: '孙丽', discharged: 0, earnings: 0, status: '未参与' },
+                    { userName: '周涛', discharged: 89.3, earnings: 14.29, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-VIC-202403151830',
+                region: 'VIC',
+                time: '2024-03-15 18:30:00', 
+                dischargeType: '手动', 
+                taskIssuer: '放电', 
+                taskCount: 280,
+                participants: 256,
+                participationRate: 91.4, 
+                dischargeAmount: 6789.2, 
+                netProfit: 1357.84, 
+                profitPerKwh: 0.20,
+                userDetails: [
+                    { userName: '马腾飞', discharged: 145.8, earnings: 29.16, status: '已完成' },
+                    { userName: '杨帆', discharged: 132.6, earnings: 26.52, status: '放电中' },
+                    { userName: '黄鑫', discharged: 119.7, earnings: 23.94, status: '已完成' },
+                    { userName: '林静', discharged: 0, earnings: 0, status: '未参与' },
+                    { userName: '吴昊', discharged: 107.3, earnings: 21.46, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-QLD-202403151715',
+                region: 'QLD',
+                time: '2024-03-15 17:15:00', 
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 420,
+                participants: 387,
+                participationRate: 92.1, 
+                dischargeAmount: 9876.5, 
+                netProfit: 1678.01, 
+                profitPerKwh: 0.17,
+                userDetails: [
+                    { userName: '徐明远', discharged: 156.2, earnings: 26.55, status: '已完成' },
+                    { userName: '朱雨晴', discharged: 143.8, earnings: 24.45, status: '已完成' },
+                    { userName: '唐磊', discharged: 128.5, earnings: 21.85, status: '已完成' },
+                    { userName: '韩雪', discharged: 117.9, earnings: 20.04, status: '已完成' },
+                    { userName: '郭涛', discharged: 136.7, earnings: 23.24, status: '已完成' },
+                    { userName: '梁超', discharged: 124.3, earnings: 21.13, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-SA-202403151600',
+                region: 'SA',
+                time: '2024-03-15 16:00:00', 
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 550,
+                participants: 512,
+                participationRate: 93.1, 
+                dischargeAmount: 15678.3, 
+                netProfit: 2351.75, 
+                profitPerKwh: 0.15,
+                userDetails: [
+                    { userName: '邱志伟', discharged: 189.4, earnings: 28.41, status: '已完成' },
+                    { userName: '范文博', discharged: 176.8, earnings: 26.52, status: '已完成' },
+                    { userName: '汪小芳', discharged: 165.2, earnings: 24.78, status: '已完成' },
+                    { userName: '贾鹏飞', discharged: 158.7, earnings: 23.81, status: '已完成' },
+                    { userName: '沈阳', discharged: 147.9, earnings: 22.19, status: '已完成' },
+                    { userName: '钟楠', discharged: 139.6, earnings: 20.94, status: '已完成' },
+                    { userName: '魏强', discharged: 152.3, earnings: 22.85, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-WA-202403151445',
+                region: 'WA',
+                time: '2024-03-15 14:45:00', 
+                dischargeType: '手动', 
+                taskIssuer: '放电', 
+                taskCount: 320,
+                participants: 298,
+                participationRate: 93.1, 
+                dischargeAmount: 7234.9, 
+                netProfit: 1302.28, 
+                profitPerKwh: 0.18,
+                userDetails: [
+                    { userName: '蒋海波', discharged: 134.7, earnings: 24.25, status: '已完成' },
+                    { userName: '秦丽华', discharged: 128.3, earnings: 23.09, status: '已完成' },
+                    { userName: '尤明', discharged: 115.6, earnings: 20.81, status: '已完成' },
+                    { userName: '许志刚', discharged: 142.8, earnings: 25.70, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-NSW-202403151330',
+                region: 'NSW',
+                time: '2024-03-15 13:30:00', 
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 480,
+                participants: 445,
+                participationRate: 92.7, 
+                dischargeAmount: 13456.7, 
+                netProfit: 2018.51, 
+                profitPerKwh: 0.15,
+                userDetails: [
+                    { userName: '何晓军', discharged: 167.9, earnings: 25.19, status: '已完成' },
+                    { userName: '吕春梅', discharged: 154.2, earnings: 23.13, status: '已完成' },
+                    { userName: '施伟', discharged: 148.6, earnings: 22.29, status: '已完成' },
+                    { userName: '陶然', discharged: 139.8, earnings: 20.97, status: '已完成' },
+                    { userName: '曹磊', discharged: 161.5, earnings: 24.23, status: '已完成' },
+                    { userName: '严莉', discharged: 125.7, earnings: 18.86, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-TAS-202403151215',
+                region: 'TAS',
+                time: '2024-03-15 12:15:00', 
+                dischargeType: '手动', 
+                taskIssuer: '放电', 
+                taskCount: 210,
+                participants: 189,
+                participationRate: 90.0, 
+                dischargeAmount: 4567.8, 
+                netProfit: 868.88, 
+                profitPerKwh: 0.19,
+                userDetails: [
+                    { userName: '金峰', discharged: 112.3, earnings: 21.34, status: '已完成' },
+                    { userName: '魏娜', discharged: 98.7, earnings: 18.75, status: '已完成' },
+                    { userName: '董明辉', discharged: 105.4, earnings: 20.03, status: '已完成' },
+                    { userName: '石敏', discharged: 89.6, earnings: 17.02, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-VIC-202403151100',
+                region: 'VIC',
+                time: '2024-03-15 11:00:00', 
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 400,
+                participants: 367,
+                participationRate: 91.8, 
+                dischargeAmount: 10234.5, 
+                netProfit: 1637.52, 
+                profitPerKwh: 0.16,
+                userDetails: [
+                    { userName: '龚志远', discharged: 145.6, earnings: 23.30, status: '已完成' },
+                    { userName: '邹晓红', discharged: 132.8, earnings: 21.25, status: '已完成' },
+                    { userName: '熊伟', discharged: 128.4, earnings: 20.54, status: '已完成' },
+                    { userName: '廖芳', discharged: 119.7, earnings: 19.15, status: '已完成' },
+                    { userName: '薛强', discharged: 137.9, earnings: 22.06, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-QLD-202403150945',
+                region: 'QLD',
+                time: '2024-03-15 09:45:00', 
+                dischargeType: '手动', 
+                taskIssuer: '放电', 
+                taskCount: 300,
+                participants: 278,
+                participationRate: 92.7, 
+                dischargeAmount: 6789.3, 
+                netProfit: 1221.47, 
+                profitPerKwh: 0.18,
+                userDetails: [
+                    { userName: '姚建军', discharged: 156.8, earnings: 28.22, status: '已完成' },
+                    { userName: '谢丽丽', discharged: 142.3, earnings: 25.61, status: '已完成' },
+                    { userName: '邓超', discharged: 134.5, earnings: 24.21, status: '已完成' },
+                    { userName: '潘静', discharged: 125.9, earnings: 22.66, status: '已完成' },
+                    { userName: '戴峰', discharged: 118.6, earnings: 21.35, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-NSW-202403150830',
+                region: 'NSW',
+                time: '2024-03-15 08:30:00', 
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 560,
+                participants: 523,
+                participationRate: 93.4, 
+                dischargeAmount: 16789.4, 
+                netProfit: 2686.30, 
+                profitPerKwh: 0.16,
+                userDetails: [
+                    { userName: '蔡文斌', discharged: 198.7, earnings: 31.79, status: '已完成' },
+                    { userName: '田雨', discharged: 185.4, earnings: 29.66, status: '已完成' },
+                    { userName: '夏明', discharged: 176.8, earnings: 28.29, status: '已完成' },
+                    { userName: '于洋', discharged: 168.2, earnings: 26.91, status: '已完成' },
+                    { userName: '冯娟', discharged: 159.6, earnings: 25.54, status: '已完成' },
+                    { userName: '顾鹏', discharged: 151.3, earnings: 24.21, status: '已完成' },
+                    { userName: '卢晓峰', discharged: 143.7, earnings: 22.99, status: '已完成' },
+                    { userName: '汤敏', discharged: 135.8, earnings: 21.73, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-SA-202403150715',
+                region: 'SA',
+                time: '2024-03-15 07:15:00', 
+                dischargeType: '手动', 
+                taskIssuer: '放电', 
+                taskCount: 380,
+                participants: 342,
+                participationRate: 90.0, 
+                dischargeAmount: 8976.5, 
+                netProfit: 1615.77, 
+                profitPerKwh: 0.18,
+                userDetails: [
+                    { userName: '任志强', discharged: 167.3, earnings: 30.11, status: '已完成' },
+                    { userName: '史丽萍', discharged: 154.8, earnings: 27.86, status: '已完成' },
+                    { userName: '方明', discharged: 146.2, earnings: 26.32, status: '已完成' },
+                    { userName: '毛晓东', discharged: 138.5, earnings: 24.93, status: '已完成' },
+                    { userName: '倪雨', discharged: 129.7, earnings: 23.35, status: '已完成' }
+                ]
+            },
+            { 
+                id: 'F-ACT-202403150600',
+                region: 'ACT',
+                time: '2024-03-15 06:00:00', 
+                dischargeType: '自动', 
+                taskIssuer: '放电', 
+                taskCount: 500,
+                participants: 456,
+                participationRate: 91.2, 
+                dischargeAmount: 14567.8, 
+                netProfit: 2185.17, 
+                profitPerKwh: 0.15,
+                userDetails: [
+                    { userName: '孟祥云', discharged: 189.6, earnings: 28.44, status: '已完成' },
+                    { userName: '常丽', discharged: 176.3, earnings: 26.45, status: '已完成' },
+                    { userName: '程浩', discharged: 168.7, earnings: 25.31, status: '已完成' },
+                    { userName: '康明', discharged: 159.4, earnings: 23.91, status: '已完成' },
+                    { userName: '鲍晓芳', discharged: 151.8, earnings: 22.77, status: '已完成' },
+                    { userName: '成龙', discharged: 143.2, earnings: 21.48, status: '已完成' }
+                ]
+            }
+        ];
+        
+        // Sort task table - matching family page logic
+        function sortTaskTable(column, direction, element) {
+            console.log('sortTaskTable called:', column, direction);
+            
+            // Check if data is available
+            if (!taskRecords || taskRecords.length === 0) {
+                console.error('No data to sort');
+                return;
+            }
+            
+            // Check if clicking the same sort button
+            const isCurrentSort = taskSortColumn === column && taskSortDirection === direction;
+            
+            // Remove active class from all sort buttons
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (isCurrentSort) {
+                // Cancel sort - restore original order
+                taskSortColumn = null;
+                taskSortDirection = null;
+                sortedTaskRecords = [];
+                
+                // Reload original data
+                loadTaskRecords(false);
+                console.log('Sort cancelled, restored original order');
+                return;
+            }
+            
+            // Set active state
+            element.classList.add('active');
+            taskSortColumn = column;
+            taskSortDirection = direction;
+            
+            // Sort the records
+            sortedTaskRecords = [...taskRecords].sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+                
+                // Handle numeric comparisons
+                if (typeof aVal === 'number' && typeof bVal === 'number') {
+                    return direction === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+                
+                // Handle string comparisons
+                return direction === 'asc' 
+                    ? String(aVal).localeCompare(String(bVal))
+                    : String(bVal).localeCompare(String(aVal));
+            });
+            
+            console.log(`Sorted by ${column} (${direction})`);
+            
+            // Reload table with sorted data
+            loadTaskRecords(true);
+        }
+        
+        // Load task records
+        function loadTaskRecords(useSorted = false) {
+            const tbody = document.getElementById('taskTableBody');
+            if (!tbody) return;
+            
+            // Use sorted records if available and requested, otherwise use original
+            const dataToDisplay = (useSorted && sortedTaskRecords.length > 0) ? sortedTaskRecords : taskRecords;
+            
+            tbody.innerHTML = dataToDisplay.map(task => `
+                <tr>
+                    <td>${task.time}</td>
+                    <td>${task.region}</td>
+                    <td>
+                        <span class="discharge-type-badge ${task.dischargeType === '自动' ? 'auto' : 'manual'}">
+                            ${task.dischargeType}
+                        </span>
+                    </td>
+                    <td>${task.taskIssuer}</td>
+                    <td>${task.taskCount}</td>
+                    <td>${task.participants}</td>
+                    <td>${task.participationRate.toFixed(1)}%</td>
+                    <td>${task.dischargeAmount.toFixed(1)}</td>
+                    <td class="profit-positive">$${task.netProfit.toFixed(2)}</td>
+                    <td>$${task.profitPerKwh.toFixed(3)}</td>
+                    <td>
+                        <a href="#" class="action-link" onclick="viewTaskDetails('${task.id}'); return false;">
+                            ${window.i18n ? window.i18n.getText('operationLog.buttons.viewDetails') : '查看详情'}
+                        </a>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // View task details - navigates to detail page
+        function viewTaskDetails(taskId) {
+            const task = taskRecords.find(t => t.id === taskId);
+            if (!task) return;
+            
+            // Store task data in localStorage and navigate to detail page
+            localStorage.setItem('taskDetailData', JSON.stringify(task));
+            window.location.href = `task-detail.html?id=${taskId}`;
+        }
+        
+        // Force translate function (can be called from console)
+        window.forceTranslate = function() {
+            console.log('Forcing translation update...');
+            
+            if (!window.i18n) {
+                console.error('i18n not initialized!');
+                return;
+            }
+            
+            // Update all elements with data-i18n attribute
+            const elements = document.querySelectorAll('[data-i18n]');
+            let updated = 0;
+            
+            elements.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (key) {
+                    const translation = window.i18n.getText(key);
+                    if (translation && translation !== key) {
+                        element.textContent = translation;
+                        updated++;
+                        console.log(`Updated: ${key} -> ${translation}`);
+                    } else {
+                        console.warn(`No translation found for: ${key}`);
+                    }
+                }
+            });
+            
+            // Update all placeholders
+            const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
+            placeholders.forEach(element => {
+                const key = element.getAttribute('data-i18n-placeholder');
+                if (key) {
+                    const translation = window.i18n.getText(key);
+                    if (translation && translation !== key) {
+                        element.placeholder = translation;
+                        updated++;
+                        console.log(`Updated placeholder: ${key} -> ${translation}`);
+                    }
+                }
+            });
+            
+            console.log(`Translation complete! Updated ${updated} elements.`);
+            
+            // Special handling for tabs that might not update properly
+            const specialElements = [
+                { selector: '[data-i18n="operationLog.tabs.task"]', key: 'operationLog.tabs.task' },
+                { selector: '[data-i18n="operationLog.tabs.operation"]', key: 'operationLog.tabs.operation' }
+            ];
+            
+            specialElements.forEach(item => {
+                const element = document.querySelector(item.selector);
+                if (element) {
+                    const translation = window.i18n.getText(item.key);
+                    if (translation && translation !== item.key) {
+                        element.textContent = translation;
+                        console.log(`Special update: ${item.key} -> ${translation}`);
+                        updated++;
+                    }
+                }
+            });
+            
+            // Also refresh dynamic content
+            if (typeof updateTableDisplay === 'function') {
+                updateTableDisplay();
+            }
+            
+            return `Updated ${updated} translations`;
+        };
+        
+        // Export task logs
+        function exportTaskLogs() {
+            const csv = '时间,地区,放电类型,下发任务,下发任务数,参与人数,参与率(%),放电量(kWh),净利润($),每度电净利润($/kWh)\n' +
+                taskRecords.map(task => `${task.time},${task.region},${task.dischargeType},${task.taskIssuer},${task.taskCount},${task.participants},${task.participationRate.toFixed(1)},${task.dischargeAmount.toFixed(1)},${task.netProfit.toFixed(2)},${task.profitPerKwh.toFixed(3)}`).join('\n');
+            
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `放电任务记录_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showSuccessToast('导出成功', `已导出 ${taskRecords.length} 条放电任务记录`);
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize i18n
+            window.i18n = new I18n({
+                containerId: 'languageSelector',
+                defaultLanguage: localStorage.getItem('app_language') || 'zh'
+            });
+            
+            // Force update all translations after initialization
+            setTimeout(() => {
+                if (window.i18n && window.i18n.updatePageTexts) {
+                    console.log('Force updating page translations...');
+                    window.i18n.updatePageTexts();
+                    
+                    // Also update any dynamic content
+                    document.querySelectorAll('[data-i18n]').forEach(element => {
+                        const key = element.getAttribute('data-i18n');
+                        if (key && window.i18n.getText) {
+                            const translation = window.i18n.getText(key);
+                            if (translation && translation !== key) {
+                                element.textContent = translation;
+                            }
+                        }
+                    });
+                    
+                    // Update placeholders
+                    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                        const key = element.getAttribute('data-i18n-placeholder');
+                        if (key && window.i18n.getText) {
+                            const translation = window.i18n.getText(key);
+                            if (translation && translation !== key) {
+                                element.placeholder = translation;
+                            }
+                        }
+                    });
+                    
+                    console.log('Page translations updated successfully');
+                }
+            }, 100);
+            
+            // Force update again after a longer delay to catch any late-loading content
+            setTimeout(() => {
+                if (window.i18n && window.i18n.updatePageTexts) {
+                    window.i18n.updatePageTexts();
+                    
+                    // Specifically force update the tabs
+                    const taskTabSpan = document.querySelector('[data-i18n="operationLog.tabs.task"]');
+                    const operationTabSpan = document.querySelector('[data-i18n="operationLog.tabs.operation"]');
+                    
+                    if (taskTabSpan) {
+                        const taskText = window.i18n.getText('operationLog.tabs.task');
+                        if (taskText) {
+                            taskTabSpan.textContent = taskText;
+                            console.log('Force updated task tab to:', taskText);
+                        }
+                    }
+                    
+                    if (operationTabSpan) {
+                        const operationText = window.i18n.getText('operationLog.tabs.operation');
+                        if (operationText) {
+                            operationTabSpan.textContent = operationText;
+                            console.log('Force updated operation tab to:', operationText);
+                        }
+                    }
+                }
+            }, 500);
+            
+            // Initialize HeaderNav component
+            const headerNav = new HeaderNav({
+                currentPage: 'operationLog',
+                containerId: 'headerContainer'
+            });
+            
+            // Initialize pagination
+            pagination = new Pagination({
+                containerId: 'operationLogPaginationContainer',
+                currentPage: currentPage,
+                pageSize: pageSize,
+                totalItems: filteredData.length,
+                onPageChange: (page, size) => {
+                    currentPage = page;
+                    updateTableDisplay();
+                },
+                onPageSizeChange: (size) => {
+                    pageSize = size;
+                    currentPage = 1;
+                    updateTableDisplay();
+                }
+            });
+            
+            // Load task records first since it's the default active tab
+            loadTaskRecords();
+            
+            updateTableDisplay();
+            updatePaginationDisplay();
+            initDatePicker();
+
+            // Add language change observer to refresh content
+            if (window.i18n) {
+                window.i18n.addObserver((newLang, oldLang) => {
+                    console.log(`Language changed from ${oldLang} to ${newLang}`);
+                    
+                    // Force update tabs immediately
+                    setTimeout(() => {
+                        const taskTab = document.querySelector('[data-i18n="operationLog.tabs.task"]');
+                        const operationTab = document.querySelector('[data-i18n="operationLog.tabs.operation"]');
+                        
+                        if (taskTab) {
+                            const taskText = window.i18n.getText('operationLog.tabs.task');
+                            taskTab.textContent = taskText || (newLang === 'en' ? 'Task Records' : '任务记录');
+                            console.log('Updated task tab on language change:', taskText);
+                        }
+                        
+                        if (operationTab) {
+                            const operationText = window.i18n.getText('operationLog.tabs.operation');
+                            operationTab.textContent = operationText || (newLang === 'en' ? 'Operation Records' : '操作记录');
+                            console.log('Updated operation tab on language change:', operationText);
+                        }
+                    }, 50);
+                    
+                    // Refresh table display with new language
+                    updateTableDisplay();
+                    updatePaginationDisplay();
+                    
+                    // Update drawer if it's open
+                    if (operationDrawer && operationDrawer.isOpen) {
+                        const currentData = operationDrawer.currentData;
+                        if (currentData) {
+                            operationDrawer.setContent(currentData, operationDrawer.activeTab);
+                        }
+                    }
+                });
+            }
+
+            // Load initial tab content
+            loadTaskRecords();
+            
+            console.log('操作记录页面初始化完成');
+        });
+    </script>
+    <script src="components/global-notifications.js"></script>
+</body>
+</html>

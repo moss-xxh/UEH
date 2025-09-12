@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>基础测试</title>
+</head>
+<body>
+    <h1>基础点击测试</h1>
+    
+    <button onclick="alert('按钮1被点击')">测试按钮1 - Alert</button>
+    <br><br>
+    
+    <button onclick="console.log('按钮2被点击')">测试按钮2 - Console</button>
+    <br><br>
+    
+    <button onclick="testFunction()">测试按钮3 - 函数调用</button>
+    <br><br>
+    
+    <div style="background: #f0f0f0; padding: 20px; cursor: pointer;" onclick="alert('DIV被点击')">
+        点击这个DIV
+    </div>
+    
+    <script>
+        function testFunction() {
+            alert('testFunction被调用');
+            console.log('testFunction被调用');
+        }
+        
+        // 测试JavaScript是否正常工作
+        console.log('JavaScript正在运行');
+    </script>
+</body>
+</html>

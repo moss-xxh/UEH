@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>工控数据管理系统 - 移动版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
+            font-size: 14px;
+            color: #444;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        /* 顶部导航栏 */
+        .mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(180deg, #5DD5E1 0%, #4ECAE3 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .menu-toggle {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .menu-toggle span {
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .mobile-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        /* 侧边菜单 */
+        .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            z-index: 200;
+            transition: left 0.3s;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-sidebar.active {
+            left: 0;
+        }
+        
+        .sidebar-header {
+            height: 50px;
+            background: linear-gradient(180deg, #5DD5E1 0%, #4ECAE3 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            color: white;
+        }
+        
+        .close-sidebar {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            gap: 15px;
+            color: #333;
+        }
+        
+        .menu-item:active {
+            background: #f0f0f0;
+        }
+        
+        .menu-item.active {
+            background: #E8F8FA;
+            color: #4ECAE3;
+            border-left: 3px solid #4ECAE3;
+        }
+        
+        .menu-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+        }
+        
+        .menu-item.active .menu-icon {
+            opacity: 1;
+        }
+        
+        /* 遮罩层 */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 150;
+            display: none;
+        }
+        
+        .sidebar-overlay.active {
+            display: block;
+        }
+        
+        /* 主内容区 */
+        .mobile-content {
+            padding-top: 50px;
+            min-height: 100vh;
+            background: #f5f5f5;
+        }
+        
+        /* 功能卡片网格 */
+        .function-grid {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .function-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px 15px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .function-card:active {
+            transform: scale(0.98);
+        }
+        
+        .function-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 10px;
+            background: #E8F8FA;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .function-name {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        /* 状态概览卡片 */
+        .status-overview {
+            margin: 0 15px 15px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .status-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+        
+        .status-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .status-value {
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-indicator.online {
+            background: #10B981;
+        }
+        
+        .status-indicator.warning {
+            background: #F59E0B;
+        }
+        
+        /* 语言切换器 */
+        .lang-switch {
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 320px) {
+            .function-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 底部导航栏（可选） */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 55px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #4ECAE3;
+        }
+        
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            opacity: 0.6;
+        }
+        
+        .nav-item.active .nav-icon {
+            opacity: 1;
+        }
+        
+        .nav-text {
+            font-size: 11px;
+        }
+        
+        /* 调整内容区域以适应底部导航 */
+        .mobile-content.with-bottom-nav {
+            padding-bottom: 70px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="mobile-header">
+        <div class="menu-toggle" onclick="toggleSidebar()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="mobile-title" data-lang="systemTitle">工控系统</div>
+        <div class="header-actions">
+            <div class="lang-switch" onclick="toggleLanguage()">
+                <span data-lang="langText">中文</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 侧边菜单 -->
+    <div class="mobile-sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div style="font-size: 16px; font-weight: 500;">菜单</div>
+            <div class="close-sidebar" onclick="toggleSidebar()">✕</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item active" onclick="navigateTo('mobile-index.html')">
+                <div class="menu-icon">🏠</div>
+                <span data-lang="home">首页</span>
+            </div>
+            <div class="menu-item" onclick="navigateTo('mobile-device.html')">
+                <div class="menu-icon">📱</div>
+                <span data-lang="deviceManagement">设备管理</span>
+            </div>
+            <div class="menu-item" onclick="navigateTo('mobile-data.html')">
+                <div class="menu-icon">📊</div>
+                <span data-lang="data">数据</span>
+            </div>
+            <div class="menu-item" onclick="navigateTo('mobile-gateway.html')">
+                <div class="menu-icon">📡</div>
+                <span data-lang="gatewayStatus">网关状态</span>
+            </div>
+            <div class="menu-item" onclick="navigateTo('mobile-alert.html')">
+                <div class="menu-icon">⚠️</div>
+                <span data-lang="alertInfo">告警信息</span>
+            </div>
+            <div class="menu-item" onclick="navigateTo('mobile-maintenance.html')">
+                <div class="menu-icon">🔧</div>
+                <span data-lang="systemMaintenance">系统维护</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 遮罩层 -->
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+    
+    <!-- 主内容区 -->
+    <div class="mobile-content with-bottom-nav">
+        <!-- 状态概览 -->
+        <div class="status-overview">
+            <div class="status-title" data-lang="statusOverview">状态概览</div>
+            <div class="status-item">
+                <span class="status-label" data-lang="systemStatus">系统状态</span>
+                <span class="status-value">
+                    <span class="status-indicator online"></span>
+                    <span data-lang="normal">正常</span>
+                </span>
+            </div>
+            <div class="status-item">
+                <span class="status-label" data-lang="connectedDevices">连接设备</span>
+                <span class="status-value">12</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label" data-lang="cpuUsage">CPU使用率</span>
+                <span class="status-value">35%</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label" data-lang="memoryUsage">内存使用率</span>
+                <span class="status-value">
+                    <span class="status-indicator warning"></span>
+                    62%
+                </span>
+            </div>
+        </div>
+        
+        <!-- 功能网格 -->
+        <div class="function-grid">
+            <div class="function-card" onclick="navigateTo('mobile-device.html')">
+                <div class="function-icon">📱</div>
+                <div class="function-name" data-lang="deviceManagement">设备管理</div>
+            </div>
+            <div class="function-card" onclick="navigateTo('mobile-data.html')">
+                <div class="function-icon">📊</div>
+                <div class="function-name" data-lang="dataQuery">数据查询</div>
+            </div>
+            <div class="function-card" onclick="navigateTo('mobile-gateway.html')">
+                <div class="function-icon">📡</div>
+                <div class="function-name" data-lang="gatewayStatus">网关状态</div>
+            </div>
+            <div class="function-card" onclick="navigateTo('mobile-alert.html')">
+                <div class="function-icon">⚠️</div>
+                <div class="function-name" data-lang="alertInfo">告警信息</div>
+            </div>
+            <div class="function-card" onclick="navigateTo('mobile-command.html')">
+                <div class="function-icon">⚙️</div>
+                <div class="function-name" data-lang="commandConfig">指令配置</div>
+            </div>
+            <div class="function-card" onclick="navigateTo('mobile-maintenance.html')">
+                <div class="function-icon">🔧</div>
+                <div class="function-name" data-lang="systemMaintenance">系统维护</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 底部导航栏 -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="navigateTo('mobile-index.html')">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-text" data-lang="home">首页</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('mobile-device.html')">
+            <div class="nav-icon">📱</div>
+            <div class="nav-text" data-lang="device">设备</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('mobile-gateway.html')">
+            <div class="nav-icon">📡</div>
+            <div class="nav-text" data-lang="status">状态</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('mobile-alert.html')">
+            <div class="nav-icon">⚠️</div>
+            <div class="nav-text" data-lang="alert">告警</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('mobile-maintenance.html')">
+            <div class="nav-icon">🔧</div>
+            <div class="nav-text" data-lang="more">更多</div>
+        </div>
+    </div>
+    
+    <script>
+        // 多语言配置
+        const translations = {
+            zh: {
+                systemTitle: '工控系统',
+                langText: '中文',
+                home: '首页',
+                deviceManagement: '设备管理',
+                data: '数据',
+                gatewayStatus: '网关状态',
+                alertInfo: '告警信息',
+                systemMaintenance: '系统维护',
+                statusOverview: '状态概览',
+                systemStatus: '系统状态',
+                normal: '正常',
+                connectedDevices: '连接设备',
+                cpuUsage: 'CPU使用率',
+                memoryUsage: '内存使用率',
+                dataQuery: '数据查询',
+                commandConfig: '指令配置',
+                device: '设备',
+                status: '状态',
+                alert: '告警',
+                more: '更多'
+            },
+            en: {
+                systemTitle: 'Control System',
+                langText: 'EN',
+                home: 'Home',
+                deviceManagement: 'Device Management',
+                data: 'Data',
+                gatewayStatus: 'Gateway Status',
+                alertInfo: 'Alert Info',
+                systemMaintenance: 'System Maintenance',
+                statusOverview: 'Status Overview',
+                systemStatus: 'System Status',
+                normal: 'Normal',
+                connectedDevices: 'Connected Devices',
+                cpuUsage: 'CPU Usage',
+                memoryUsage: 'Memory Usage',
+                dataQuery: 'Data Query',
+                commandConfig: 'Command Config',
+                device: 'Device',
+                status: 'Status',
+                alert: 'Alert',
+                more: 'More'
+            }
+        };
+        
+        let currentLang = 'zh';
+        
+        // 切换语言
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            updateLanguage();
+        }
+        
+        // 更新页面语言
+        function updateLanguage() {
+            document.querySelectorAll('[data-lang]').forEach(element => {
+                const key = element.getAttribute('data-lang');
+                if (translations[currentLang][key]) {
+                    element.textContent = translations[currentLang][key];
+                }
+            });
+        }
+        
+        // 切换侧边栏
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        
+        // 导航函数
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateLanguage();
+        });
+    </script>
+</body>
+</html>

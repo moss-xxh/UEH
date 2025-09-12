@@ -1,0 +1,2359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>规则引擎 - 储能柜管理系统</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 页面布局 */
+        .main-content {
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* 页面标题 */
+        .page-header {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        /* Tab导航样式移动到新增样式中 */
+        .tabs-container {
+            margin-bottom: 24px;
+        }
+        
+        .tab-content {
+            padding: 0;
+        }
+        
+        .tab-panel {
+            display: none;
+        }
+        
+        .tab-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+        }
+
+        /* 规则模版样式 */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .template-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        [data-theme="dark"] .template-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        
+        .template-card:hover {
+            border-color: #3562E3;
+            box-shadow: 0 4px 12px rgba(53, 98, 227, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .template-card.selected {
+            border-color: #3562E3;
+            background: #eff6ff;
+        }
+        
+        [data-theme="dark"] .template-card.selected {
+            background: #1e3a8a;
+        }
+        
+        .template-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .template-info {
+            flex: 1;
+        }
+        
+        .template-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .template-actions-group {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .template-icon-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            padding: 0;
+            font-size: 16px;
+        }
+        
+        .template-icon-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .template-icon-btn.copy {
+            color: #3562E3;
+        }
+        
+        .template-icon-btn.copy:hover {
+            color: #2c51c9;
+        }
+        
+        .template-icon-btn.delete {
+            color: #dc2626;
+        }
+        
+        .template-icon-btn.delete:hover {
+            color: #b91c1c;
+        }
+        
+        [data-theme="dark"] .template-icon-btn.copy {
+            color: #60a5fa;
+        }
+        
+        [data-theme="dark"] .template-icon-btn.copy:hover {
+            color: #3b82f6;
+        }
+        
+        [data-theme="dark"] .template-icon-btn.delete {
+            color: #ef4444;
+        }
+        
+        [data-theme="dark"] .template-icon-btn.delete:hover {
+            color: #dc2626;
+        }
+        
+        .template-icon-btn[disabled] {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .template-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        
+        .template-features {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .template-feature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .template-feature i {
+            color: #10b981;
+            width: 16px;
+        }
+        
+        .template-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        /* 新增优化样式 */
+        .template-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-badge.active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-badge.inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        [data-theme="dark"] .status-badge.active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+        
+        [data-theme="dark"] .status-badge.inactive {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+        
+        .template-remark {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        /* 移除旧的template-btn样式 */
+        
+        /* 模版元信息样式 */
+        .template-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 4px;
+        }
+        
+        .template-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .template-meta-item i {
+            opacity: 0.7;
+        }
+        
+        /* 统计数据样式 */
+        .template-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        [data-theme="dark"] .template-stats {
+            background: #0f172a;
+        }
+        
+        /* 优化卡片动画 */
+        .template-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .template-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3562E3 0%, #60a5fa 100%);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .template-card:hover::before {
+            transform: translateX(0);
+        }
+        
+        /* 开关组件样式 */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+        
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        
+        .switch input:checked + .switch-slider {
+            background-color: #3562E3;
+        }
+        
+        .switch input:checked + .switch-slider:before {
+            transform: translateX(20px);
+        }
+        
+        [data-theme="dark"] .switch-slider {
+            background-color: #4b5563;
+        }
+        
+        [data-theme="dark"] .switch input:checked + .switch-slider {
+            background-color: #3562E3;
+        }
+        
+        /* Tab样式优化 */
+        .tabs-wrapper {
+            background: white;
+            border-radius: 12px;
+            padding: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: inline-flex;
+            gap: 4px;
+            margin-bottom: 24px;
+        }
+        
+        [data-theme="dark"] .tabs-wrapper {
+            background: #1e293b;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tab-button:hover {
+            background: rgba(53, 98, 227, 0.08);
+            color: #3562E3;
+        }
+        
+        .tab-button.active {
+            background: #3562E3;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(53, 98, 227, 0.25);
+        }
+        
+        .tab-button.active:hover {
+            background: #2c51c9;
+        }
+        
+        /* 规则引擎容器 */
+        .rule-engine-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            height: calc(100vh - 260px);
+        }
+
+        /* 规则列表面板 */
+        .rule-list-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        [data-theme="dark"] .rule-list-panel {
+            background: #1e293b;
+        }
+
+        .rule-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .rule-list-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* 规则搜索 */
+        .rule-search {
+            margin-bottom: 16px;
+        }
+
+        .rule-search input {
+            width: 100%;
+            height: 36px;
+            padding: 0 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .rule-search input {
+            background: #0f172a;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        /* 规则列表 */
+        .rule-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .rule-item {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        [data-theme="dark"] .rule-item {
+            background: #0f172a;
+            border-color: #334155;
+        }
+
+        .rule-item:hover {
+            border-color: #3562E3;
+            background: #f8fafc;
+        }
+
+        [data-theme="dark"] .rule-item:hover {
+            background: #1e293b;
+        }
+
+        .rule-item.active {
+            border-color: #3562E3;
+            background: #eff6ff;
+        }
+
+        [data-theme="dark"] .rule-item.active {
+            background: #1e3a8a;
+        }
+
+        .rule-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .rule-item-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .rule-item-status {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.active {
+            background: #10b981;
+        }
+
+        .status-dot.inactive {
+            background: #ef4444;
+        }
+
+        .rule-item-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* 规则编辑器面板 */
+        .rule-editor-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        [data-theme="dark"] .rule-editor-panel {
+            background: #1e293b;
+        }
+
+        .rule-editor-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        [data-theme="dark"] .rule-editor-header {
+            border-bottom-color: #334155;
+        }
+
+        .rule-editor-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .rule-editor-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 规则编辑器内容 */
+        .rule-editor-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* 规则流程图 */
+        .rule-flow-diagram {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        [data-theme="dark"] .rule-flow-diagram {
+            background: #0f172a;
+            border-color: #334155;
+        }
+
+        /* 规则节点 */
+        .flow-node {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] .flow-node {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .flow-node-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .flow-node-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .flow-node-icon.trigger {
+            background: #dbeafe;
+            color: #3b82f6;
+        }
+
+        .flow-node-icon.condition {
+            background: #fef3c7;
+            color: #f59e0b;
+        }
+
+        .flow-node-icon.action {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        [data-theme="dark"] .flow-node-icon.trigger {
+            background: #1e3a8a;
+        }
+
+        [data-theme="dark"] .flow-node-icon.condition {
+            background: #78350f;
+        }
+
+        [data-theme="dark"] .flow-node-icon.action {
+            background: #064e3b;
+        }
+
+        .flow-node-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .flow-node-content {
+            font-size: 13px;
+            color: var(--text-secondary);
+            background: #f8fafc;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        [data-theme="dark"] .flow-node-content {
+            background: #0f172a;
+        }
+
+        /* 连接线 */
+        .flow-connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -10px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .flow-connector-line {
+            width: 2px;
+            height: 40px;
+            background: var(--border-color);
+        }
+
+        .flow-connector-arrow {
+            position: absolute;
+            bottom: -8px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid var(--border-color);
+        }
+
+        /* 规则属性 */
+        .rule-properties {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        [data-theme="dark"] .rule-properties {
+            background: #0f172a;
+            border-color: #334155;
+        }
+
+        .property-group {
+            margin-bottom: 20px;
+        }
+
+        .property-group-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .property-row {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .property-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .property-value {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* 按钮样式 - 与系统保持一致 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 40px;
+            padding: 0 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+
+        .btn-primary {
+            background: #3562E3;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2c51c9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(53, 98, 227, 0.25);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            color: var(--text-primary);
+            border-color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .btn-secondary {
+            background: #334155;
+            color: #e2e8f0;
+            border-color: #475569;
+        }
+        
+        [data-theme="dark"] .btn-secondary:hover {
+            background: #475569;
+            border-color: var(--primary-color);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        
+        /* 模版卡片内的按钮特殊样式 */
+        .template-actions .btn {
+            flex: 1;
+            height: 36px;
+            font-size: 13px;
+        }
+        
+        .template-actions .btn-secondary {
+            background: white;
+            border: 1px solid #e5e7eb;
+            color: var(--text-primary);
+        }
+        
+        .template-actions .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .template-actions .btn-secondary {
+            background: #334155;
+            border-color: #475569;
+            color: #e2e8f0;
+        }
+        
+        [data-theme="dark"] .template-actions .btn-secondary:hover {
+            background: #475569;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        /* 通知方式样式 */
+        .notification-methods {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .notification-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .notification-list {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .notification-item {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            font-size: 12px;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            white-space: nowrap;
+        }
+        
+        [data-theme="dark"] .notification-badge {
+            background: #0f172a;
+            border-color: #374151;
+            color: #9ca3af;
+        }
+        
+        [data-theme="dark"] .notification-badge.active {
+            background: rgba(53, 98, 227, 0.1);
+            border-color: #60a5fa;
+            color: #60a5fa;
+        }
+
+        /* 输入框样式 */
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        [data-theme="dark"] .form-input,
+        [data-theme="dark"] .form-select,
+        [data-theme="dark"] .form-textarea {
+            background: #0f172a;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3562E3;
+            box-shadow: 0 0 0 3px rgba(53, 98, 227, 0.1);
+        }
+
+        /* 开关组件 */
+        .switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .switch input:checked + .switch-slider {
+            background-color: #3562E3;
+        }
+
+        .switch input:checked + .switch-slider:before {
+            transform: translateX(20px);
+        }
+
+        /* 空状态 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-subtext {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .rule-engine-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .rule-list-panel {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-trigger" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <img src="logo.png" alt="AlwaysControl Technology" />
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <button class="theme-btn" onclick="toggleTheme()" title="切换主题">
+                <i class="fas fa-moon" id="headerThemeIcon"></i>
+            </button>
+            <button class="lang-btn" onclick="toggleLanguage()" title="切换语言">
+                <i class="fas fa-globe"></i>
+            </button>
+            <a href="alarm-management.html" class="notification-badge" style="text-decoration: none;">
+                <i class="fas fa-bell" style="font-size: 18px; color: var(--text-secondary);"></i>
+            </a>
+            <div class="user-menu" onclick="logout()">
+                <div class="avatar">A</div>
+                <span class="user-name" id="userName">管理员</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 侧边栏 -->
+    <nav class="sidebar" id="sidebar">
+        <div class="menu">
+            <a href="dashboard.html" class="menu-item" data-menu="dashboard">
+                <span style="font-size: 18px; margin-right: 12px;">📊</span>
+                <span id="menuDashboard">仪表盘</span>
+            </a>
+            <a href="site1.html" class="menu-item" data-menu="site1">
+                <span style="font-size: 18px; margin-right: 12px;">🏢</span>
+                <span>站点管理</span>
+            </a>
+            <a href="devices.html" class="menu-item" data-menu="devices">
+                <span style="font-size: 18px; margin-right: 12px;">⚙️</span>
+                <span id="menuDevices">设备管理</span>
+            </a>
+            <a href="alarm-management.html" class="menu-item" data-menu="alarm-management">
+                <span style="font-size: 18px; margin-right: 12px;">🔔</span>
+                <span id="menuAlarms">告警管理</span>
+            </a>
+            <a href="rule-engine.html" class="menu-item active" data-menu="rule-engine" style="display: none;">
+                <i class="fas fa-code-branch"></i>
+                <span>规则引擎</span>
+            </a>
+            <div class="menu-item-group">
+                <a href="javascript:void(0)" class="menu-item" data-menu="system-management" onclick="toggleSubmenu(this)">
+                    <span style="font-size: 18px; margin-right: 12px;">🔧</span>
+                    <span id="menuSystem">系统管理</span>
+                    <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 12px;"></i>
+                </a>
+                <div class="submenu" style="display: none;">
+                    <a href="system-management.html?module=menus" class="menu-item submenu-item">
+                        <span style="font-size: 16px; margin-right: 10px;">📋</span>
+                        <span>菜单管理</span>
+                    </a>
+                    <a href="system-management.html?module=roles" class="menu-item submenu-item">
+                        <span style="font-size: 16px; margin-right: 10px;">👥</span>
+                        <span>角色管理</span>
+                    </a>
+                    <a href="system-management.html?module=personnel" class="menu-item submenu-item">
+                        <span style="font-size: 16px; margin-right: 10px;">👤</span>
+                        <span>人员管理</span>
+                    </a>
+                    <a href="system-management.html?module=logs" class="menu-item submenu-item">
+                        <span style="font-size: 16px; margin-right: 10px;">📄</span>
+                        <span>日志管理</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main class="main-content" id="mainContent">
+        <div class="page-header">
+            <h1 class="page-title">规则引擎</h1>
+        </div>
+
+        <!-- Tab导航容器 -->
+        <div class="tabs-container">
+            <div class="tabs-wrapper">
+                <button class="tab-button active" onclick="switchTab('template')">
+                    <i class="fas fa-cube"></i>
+                    规则模版
+                </button>
+                <button class="tab-button" onclick="switchTab('application')">
+                    <i class="fas fa-cogs"></i>
+                    规则应用
+                </button>
+            </div>
+            
+            <div class="tab-content">
+                <!-- 规则模版面板 -->
+                <div id="template-panel" class="tab-panel active">
+                    <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2 style="margin: 0; font-size: 20px; font-weight: 600;">规则模版</h2>
+                        <button class="btn btn-primary" onclick="createNewTemplate()" style="padding: 8px 16px; font-size: 14px;">
+                            <i class="fas fa-plus"></i>
+                            新建模版
+                        </button>
+                    </div>
+                    <div class="template-grid">
+                        <!-- 温度监控模版 -->
+                        <div class="template-card" onclick="selectTemplate('temperature')">
+                            <div class="template-actions-group">
+                                <button class="template-icon-btn copy" onclick="copyTemplate('temperature', event)" title="复制模版">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="template-icon-btn delete" disabled title="标准模版不可删除">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <div class="template-header">
+                                <div class="template-info">
+                                    <h3 class="template-title">标准模版</h3>
+                                </div>
+                            </div>
+                            <div class="notification-methods">
+                                <div class="notification-label">通知方式：</div>
+                                <div class="notification-list">
+                                    <span class="notification-item">消息弹窗</span>
+                                    <span class="notification-item">邮箱</span>
+                                </div>
+                            </div>
+                            <div class="template-status" style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 14px; color: var(--text-secondary);">状态：</span>
+                                <label class="switch">
+                                    <input type="checkbox" checked onchange="toggleTemplateStatus('temperature', this.checked)">
+                                    <span class="switch-slider"></span>
+                                </label>
+                                <span class="status-text" style="font-size: 14px; color: #10b981;">启用</span>
+                            </div>
+                            <div class="template-time" style="margin-bottom: 24px; font-size: 13px; color: var(--text-secondary);">
+                                修改时间：2024-01-15 14:30:25
+                            </div>
+                            <div class="template-actions">
+                                <button class="btn btn-secondary" onclick="viewTemplateDetails('temperature', event)">
+                                    详情
+                                </button>
+                                <button class="btn btn-primary" onclick="applyTemplate('temperature', event)">
+                                    应用
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 电池健康模版 -->
+                        <div class="template-card" onclick="selectTemplate('battery')">
+                            <div class="template-actions-group">
+                                <button class="template-icon-btn copy" onclick="copyTemplate('battery', event)" title="复制模版">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="template-icon-btn delete" onclick="confirmDeleteTemplate('battery', event)" title="删除模版">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <div class="template-header">
+                                <div class="template-info">
+                                    <h3 class="template-title">自定义模版 1</h3>
+                                </div>
+                            </div>
+                            <div class="notification-methods">
+                                <div class="notification-label">通知方式：</div>
+                                <div class="notification-list">
+                                    <span class="notification-item">消息弹窗</span>
+                                    <span class="notification-item">邮箱</span>
+                                </div>
+                            </div>
+                            <div class="template-status" style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 14px; color: var(--text-secondary);">状态：</span>
+                                <label class="switch">
+                                    <input type="checkbox" checked onchange="toggleTemplateStatus('battery', this.checked)">
+                                    <span class="switch-slider"></span>
+                                </label>
+                                <span class="status-text" style="font-size: 14px; color: #10b981;">启用</span>
+                            </div>
+                            <div class="template-time" style="margin-bottom: 24px; font-size: 13px; color: var(--text-secondary);">
+                                修改时间：2024-01-16 09:45:12
+                            </div>
+                            <div class="template-actions">
+                                <button class="btn btn-secondary" onclick="viewTemplateDetails('battery', event)">
+                                    详情
+                                </button>
+                                <button class="btn btn-primary" onclick="applyTemplate('battery', event)">
+                                    应用
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 峰谷电价模版 -->
+                        <div class="template-card" onclick="selectTemplate('pricing')">
+                            <div class="template-actions-group">
+                                <button class="template-icon-btn copy" onclick="copyTemplate('pricing', event)" title="复制模版">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="template-icon-btn delete" onclick="confirmDeleteTemplate('pricing', event)" title="删除模版">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <div class="template-header">
+                                <div class="template-info">
+                                    <h3 class="template-title">自定义模版 2</h3>
+                                </div>
+                            </div>
+                            <div class="notification-methods">
+                                <div class="notification-label">通知方式：</div>
+                                <div class="notification-list">
+                                    <span class="notification-item">邮箱</span>
+                                    <span class="notification-item">站内信</span>
+                                </div>
+                            </div>
+                            <div class="template-status" style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 14px; color: var(--text-secondary);">状态：</span>
+                                <label class="switch">
+                                    <input type="checkbox" onchange="toggleTemplateStatus('pricing', this.checked)">
+                                    <span class="switch-slider"></span>
+                                </label>
+                                <span class="status-text" style="font-size: 14px; color: #dc2626;">禁用</span>
+                            </div>
+                            <div class="template-time" style="margin-bottom: 24px; font-size: 13px; color: var(--text-secondary);">
+                                修改时间：2024-01-17 16:22:08
+                            </div>
+                            <div class="template-actions">
+                                <button class="btn btn-secondary" onclick="viewTemplateDetails('pricing', event)">
+                                    详情
+                                </button>
+                                <button class="btn btn-primary" onclick="applyTemplate('pricing', event)">
+                                    应用
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 安全保护模版 -->
+                        <div class="template-card" onclick="selectTemplate('safety')">
+                            <div class="template-actions-group">
+                                <button class="template-icon-btn copy" onclick="copyTemplate('safety', event)" title="复制模版">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="template-icon-btn delete" onclick="confirmDeleteTemplate('safety', event)" title="删除模版">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <div class="template-header">
+                                <div class="template-info">
+                                    <h3 class="template-title">自定义模版 3</h3>
+                                </div>
+                            </div>
+                            <div class="notification-methods">
+                                <div class="notification-label">通知方式：</div>
+                                <div class="notification-list">
+                                    <span class="notification-item">消息弹窗</span>
+                                    <span class="notification-item">站内信</span>
+                                </div>
+                            </div>
+                            <div class="template-status" style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 14px; color: var(--text-secondary);">状态：</span>
+                                <label class="switch">
+                                    <input type="checkbox" checked onchange="toggleTemplateStatus('safety', this.checked)">
+                                    <span class="switch-slider"></span>
+                                </label>
+                                <span class="status-text" style="font-size: 14px; color: #10b981;">启用</span>
+                            </div>
+                            <div class="template-time" style="margin-bottom: 24px; font-size: 13px; color: var(--text-secondary);">
+                                创建时间：2024-01-18
+                            </div>
+                            <div class="template-actions">
+                                <button class="btn btn-secondary" onclick="viewTemplateDetails('safety', event)">
+                                    详情
+                                </button>
+                                <button class="btn btn-primary" onclick="applyTemplate('safety', event)">
+                                    应用
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 设备联动模版 -->
+                        <div class="template-card" onclick="selectTemplate('linkage')">
+                            <div class="template-actions-group">
+                                <button class="template-icon-btn copy" onclick="copyTemplate('linkage', event)" title="复制模版">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="template-icon-btn delete" onclick="confirmDeleteTemplate('linkage', event)" title="删除模版">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <div class="template-header">
+                                <div class="template-info">
+                                    <h3 class="template-title">自定义模版 4</h3>
+                                </div>
+                            </div>
+                            <div class="notification-methods">
+                                <div class="notification-label">通知方式：</div>
+                                <div class="notification-list">
+                                    <span class="notification-item">消息弹窗</span>
+                                    <span class="notification-item">邮箱</span>
+                                    <span class="notification-item">站内信</span>
+                                </div>
+                            </div>
+                            <div class="template-status" style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 14px; color: var(--text-secondary);">状态：</span>
+                                <label class="switch">
+                                    <input type="checkbox" checked onchange="toggleTemplateStatus('linkage', this.checked)">
+                                    <span class="switch-slider"></span>
+                                </label>
+                                <span class="status-text" style="font-size: 14px; color: #10b981;">启用</span>
+                            </div>
+                            <div class="template-time" style="margin-bottom: 24px; font-size: 13px; color: var(--text-secondary);">
+                                创建时间：2024-01-19
+                            </div>
+                            <div class="template-actions">
+                                <button class="btn btn-secondary" onclick="viewTemplateDetails('linkage', event)">
+                                    详情
+                                </button>
+                                <button class="btn btn-primary" onclick="applyTemplate('linkage', event)">
+                                    应用
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 能耗优化模版 -->
+                        <div class="template-card" onclick="selectTemplate('energy')">
+                            <div class="template-actions-group">
+                                <button class="template-icon-btn copy" onclick="copyTemplate('energy', event)" title="复制模版">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="template-icon-btn delete" onclick="confirmDeleteTemplate('energy', event)" title="删除模版">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <div class="template-header">
+                                <div class="template-info">
+                                    <h3 class="template-title">自定义模版 5</h3>
+                                </div>
+                            </div>
+                            <div class="notification-methods">
+                                <div class="notification-label">通知方式：</div>
+                                <div class="notification-list">
+                                    <span class="notification-item">邮箱</span>
+                                </div>
+                            </div>
+                            <div class="template-status" style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 14px; color: var(--text-secondary);">状态：</span>
+                                <label class="switch">
+                                    <input type="checkbox" onchange="toggleTemplateStatus('energy', this.checked)">
+                                    <span class="switch-slider"></span>
+                                </label>
+                                <span class="status-text" style="font-size: 14px; color: #dc2626;">禁用</span>
+                            </div>
+                            <div class="template-time" style="margin-bottom: 24px; font-size: 13px; color: var(--text-secondary);">
+                                创建时间：2024-01-20
+                            </div>
+                            <div class="template-actions">
+                                <button class="btn btn-secondary" onclick="viewTemplateDetails('energy', event)">
+                                    详情
+                                </button>
+                                <button class="btn btn-primary" onclick="applyTemplate('energy', event)">
+                                    应用
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 规则应用面板 -->
+                <div id="application-panel" class="tab-panel">
+                    <div class="rule-engine-container">
+                        <!-- 规则列表面板 -->
+                        <div class="rule-list-panel">
+                            <div class="rule-list-header">
+                                <h3 class="rule-list-title">规则列表</h3>
+                                <button class="btn" onclick="refreshRuleList()" title="刷新">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+
+                            <div class="rule-search">
+                                <input type="text" placeholder="搜索规则..." onkeyup="searchRules(this.value)">
+                            </div>
+
+                            <div class="rule-list" id="ruleList">
+                                <!-- 规则列表动态生成 -->
+                            </div>
+                            
+                            <div style="padding: 16px;">
+                                <button class="btn btn-primary" style="width: 100%;" onclick="createNewRule()">
+                                    <i class="fas fa-plus"></i>
+                                    新建规则
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 规则编辑器面板 -->
+                        <div class="rule-editor-panel">
+                            <div id="ruleEditorContent">
+                                <!-- 默认空状态 -->
+                                <div class="empty-state">
+                                    <i class="fas fa-code-branch empty-state-icon"></i>
+                                    <div class="empty-state-text">选择或创建规则</div>
+                                    <div class="empty-state-subtext">从左侧列表选择规则进行编辑，或创建新规则</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 移动端遮罩 -->
+    <div id="mobileOverlay" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 998;" onclick="closeMobileSidebar()"></div>
+
+    <script src="common.js"></script>
+    <script src="notification-fix.js"></script>
+    <script>
+        // Toggle submenu
+        function toggleSubmenu(element) {
+            element.classList.toggle('expanded');
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                submenu.style.display = submenu.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+        
+        // 检查登录状态
+        checkAuth();
+        
+        // 设置当前页面菜单项
+        setActiveMenuItem('rule-engine');
+
+        // 规则数据
+        let rulesData = [
+            {
+                id: 'rule001',
+                name: '电池过温自动降功率',
+                description: '当电池温度超过阈值时自动降低充放电功率',
+                status: 'active',
+                type: 'safety',
+                trigger: {
+                    type: 'parameter',
+                    condition: '电池温度 > 55°C'
+                },
+                conditions: [
+                    {
+                        type: 'time',
+                        value: '持续时间 > 5分钟'
+                    },
+                    {
+                        type: 'status',
+                        value: '系统状态 = 运行中'
+                    }
+                ],
+                actions: [
+                    {
+                        type: 'control',
+                        value: '降低充放电功率至50%'
+                    },
+                    {
+                        type: 'notification',
+                        value: '发送告警通知'
+                    }
+                ]
+            },
+            {
+                id: 'rule002',
+                name: 'SOC低自动充电',
+                description: '当SOC低于设定值时自动启动充电',
+                status: 'active',
+                type: 'optimization',
+                trigger: {
+                    type: 'parameter',
+                    condition: 'SOC < 20%'
+                },
+                conditions: [
+                    {
+                        type: 'time',
+                        value: '时间段: 23:00-06:00'
+                    },
+                    {
+                        type: 'price',
+                        value: '电价 < 0.5元/kWh'
+                    }
+                ],
+                actions: [
+                    {
+                        type: 'control',
+                        value: '启动充电模式'
+                    },
+                    {
+                        type: 'parameter',
+                        value: '设置充电功率100kW'
+                    }
+                ]
+            },
+            {
+                id: 'rule003',
+                name: '通信中断重连',
+                description: 'BMS通信中断时自动重连',
+                status: 'active',
+                type: 'maintenance',
+                trigger: {
+                    type: 'event',
+                    condition: 'BMS通信中断'
+                },
+                conditions: [
+                    {
+                        type: 'count',
+                        value: '重试次数 < 3'
+                    }
+                ],
+                actions: [
+                    {
+                        type: 'system',
+                        value: '重启通信模块'
+                    },
+                    {
+                        type: 'wait',
+                        value: '等待30秒'
+                    },
+                    {
+                        type: 'system',
+                        value: '重新建立连接'
+                    }
+                ]
+            },
+            {
+                id: 'rule004',
+                name: '峰谷电价优化',
+                description: '根据峰谷电价自动调整充放电策略',
+                status: 'inactive',
+                type: 'optimization',
+                trigger: {
+                    type: 'schedule',
+                    condition: '每日00:00执行'
+                },
+                conditions: [],
+                actions: [
+                    {
+                        type: 'analysis',
+                        value: '分析次日电价曲线'
+                    },
+                    {
+                        type: 'planning',
+                        value: '生成充放电计划'
+                    },
+                    {
+                        type: 'execution',
+                        value: '执行优化策略'
+                    }
+                ]
+            },
+            {
+                id: 'rule005',
+                name: '消防联动',
+                description: '检测到火灾告警时的应急处理',
+                status: 'active',
+                type: 'safety',
+                trigger: {
+                    type: 'alarm',
+                    condition: '火灾告警触发'
+                },
+                conditions: [],
+                actions: [
+                    {
+                        type: 'emergency',
+                        value: '立即切断主电源'
+                    },
+                    {
+                        type: 'system',
+                        value: '启动消防系统'
+                    },
+                    {
+                        type: 'notification',
+                        value: '发送紧急通知'
+                    },
+                    {
+                        type: 'log',
+                        value: '记录事件日志'
+                    }
+                ]
+            }
+        ];
+
+        let currentRule = null;
+
+        // 初始化页面
+        function initializePage() {
+            renderRuleList();
+        }
+
+        // Tab切换功能
+        function switchTab(tabName) {
+            // 更新按钮状态
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // 更新内容显示
+            const panels = document.querySelectorAll('.tab-panel');
+            panels.forEach(panel => panel.classList.remove('active'));
+            
+            if (tabName === 'template') {
+                buttons[0].classList.add('active');
+                document.getElementById('template-panel').classList.add('active');
+            } else if (tabName === 'application') {
+                buttons[1].classList.add('active');
+                document.getElementById('application-panel').classList.add('active');
+            }
+        }
+
+        // 删除模版确认
+        function confirmDeleteTemplate(templateType, event) {
+            event.stopPropagation();
+            const templateName = getTemplateName(templateType);
+            
+            // 创建自定义确认对话框
+            const confirmDialog = document.createElement('div');
+            confirmDialog.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                animation: fadeIn 0.2s ease;
+            `;
+            
+            const dialogContent = document.createElement('div');
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            dialogContent.style.cssText = `
+                background: ${isDark ? '#1e293b' : 'white'};
+                border-radius: 12px;
+                padding: 24px;
+                max-width: 400px;
+                width: 90%;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                animation: slideUp 0.3s ease;
+            `;
+            
+            dialogContent.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                    <div style="width: 48px; height: 48px; background: ${isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2'}; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 16px;">
+                        <i class="fas fa-exclamation-triangle" style="color: ${isDark ? '#ef4444' : '#dc2626'}; font-size: 24px;"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: ${isDark ? '#f3f4f6' : '#111827'};">删除确认</h3>
+                        <p style="margin: 4px 0 0 0; font-size: 14px; color: ${isDark ? '#9ca3af' : '#6b7280'};">此操作不可恢复</p>
+                    </div>
+                </div>
+                <p style="margin-bottom: 24px; color: ${isDark ? '#d1d5db' : '#374151'}; line-height: 1.5;">
+                    确定要删除规则模版 "<strong style="color: ${isDark ? '#f3f4f6' : '#111827'};">${templateName}</strong>" 吗？删除后，基于此模版创建的规则不会受到影响。
+                </p>
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button onclick="this.closest('[style*=\"z-index: 10000\"]').remove()" class="btn btn-secondary" style="height: 36px; padding: 0 20px; background: ${isDark ? '#334155' : 'white'}; border: 1px solid ${isDark ? '#475569' : '#e5e7eb'}; color: ${isDark ? '#e2e8f0' : '#6b7280'};">
+                        取消
+                    </button>
+                    <button onclick="deleteTemplate('${templateType}', event)" class="btn btn-danger" style="height: 36px; padding: 0 20px; background: #ef4444; color: white; border: none;">
+                        确认删除
+                    </button>
+                </div>
+            `;
+            
+            confirmDialog.appendChild(dialogContent);
+            document.body.appendChild(confirmDialog);
+        }
+        
+        // 删除模版
+        function deleteTemplate(templateType, event) {
+            // 先关闭确认对话框
+            const dialog = document.querySelector('[style*="z-index: 10000"]');
+            if (dialog) {
+                dialog.remove();
+            }
+            
+            // 查找并删除对应的模版卡片
+            const allCards = document.querySelectorAll('.template-card');
+            let deleted = false;
+            
+            allCards.forEach(card => {
+                // 检查卡片中是否包含对应的删除按钮
+                const deleteBtn = card.querySelector('.template-icon-btn.delete');
+                if (deleteBtn && deleteBtn.getAttribute('onclick') && 
+                    deleteBtn.getAttribute('onclick').includes(`confirmDeleteTemplate('${templateType}'`)) {
+                    card.style.animation = 'fadeOut 0.3s ease';
+                    setTimeout(() => {
+                        card.remove();
+                    }, 300);
+                    deleted = true;
+                }
+            });
+            
+            if (deleted) {
+                showNotification(`${getTemplateName(templateType)} 已成功删除`, 'success');
+            }
+        }
+
+        // 查看模版详情
+        function viewTemplateDetails(templateType, event) {
+            event.stopPropagation();
+            // 跳转到模版详情页面
+            window.location.href = `template-details.html?type=${templateType}`;
+        }
+
+        // 应用模版
+        function applyTemplate(templateType, event) {
+            event.stopPropagation();
+            // 切换到规则应用tab
+            switchTab('application');
+            // 创建基于模版的新规则
+            createRuleFromTemplate(templateType);
+        }
+
+        // 获取模版名称
+        function getTemplateName(templateType) {
+            const names = {
+                'temperature': '标准模版',
+                'battery': '自定义模版 1',
+                'pricing': '自定义模版 2',
+                'safety': '自定义模版 3',
+                'linkage': '自定义模版 4',
+                'energy': '自定义模版 5'
+            };
+            return names[templateType] || '未知模版';
+        }
+
+        // 搜索模版
+        function searchTemplates(keyword) {
+            const cards = document.querySelectorAll('.template-card');
+            cards.forEach(card => {
+                const name = card.querySelector('.template-name').textContent.toLowerCase();
+                const remark = card.querySelector('.template-remark').textContent.toLowerCase();
+                const searchTerm = keyword.toLowerCase();
+                
+                if (name.includes(searchTerm) || remark.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // 按类型筛选
+        function filterTemplates(type) {
+            const cards = document.querySelectorAll('.template-card');
+            cards.forEach(card => {
+                if (type === 'all') {
+                    card.style.display = 'block';
+                } else {
+                    const category = card.querySelector('.template-meta-item').textContent;
+                    if (type === 'safety' && category.includes('安全防护')) {
+                        card.style.display = 'block';
+                    } else if (type === 'optimization' && category.includes('优化控制')) {
+                        card.style.display = 'block';
+                    } else if (type === 'maintenance' && category.includes('运维管理')) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // 按状态筛选
+        function filterByStatus(status) {
+            const cards = document.querySelectorAll('.template-card');
+            cards.forEach(card => {
+                const badge = card.querySelector('.status-badge');
+                const isActive = badge.classList.contains('active');
+                
+                if (status === 'all') {
+                    card.style.display = 'block';
+                } else if (status === 'active' && isActive) {
+                    card.style.display = 'block';
+                } else if (status === 'inactive' && !isActive) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // 创建新模版
+        function createNewTemplate() {
+            showNotification('打开新建模版对话框', 'info');
+            // 这里可以打开一个模态框来创建新模版
+        }
+
+        // 切换模版状态
+        function toggleTemplateStatus(templateType, isChecked) {
+            const card = event.target.closest('.template-card');
+            const statusText = card.querySelector('.status-text');
+            
+            if (isChecked) {
+                statusText.textContent = '启用';
+                statusText.style.color = '#10b981';
+            } else {
+                statusText.textContent = '禁用';
+                statusText.style.color = '#dc2626';
+            }
+            
+            showNotification(`${getTemplateName(templateType)} 已${isChecked ? '启用' : '禁用'}`, 'success');
+        }
+
+        // 复制模版
+        function copyTemplate(templateType, event) {
+            event.stopPropagation();
+            console.log('复制模版被点击:', templateType);
+            
+            // 获取当前模版卡片数量
+            const templateCards = document.querySelectorAll('.template-card');
+            console.log('找到模版卡片数量:', templateCards.length);
+            const customCount = templateCards.length - 1; // 减去标准模版
+            const newNumber = customCount + 1;
+            console.log('新模版编号:', newNumber);
+            
+            // 创建新的模版ID
+            const newTemplateType = 'custom_' + Date.now();
+            
+            // 获取原模版的状态
+            const originalCard = event.target.closest('.template-card');
+            const isEnabled = originalCard.querySelector('.switch input').checked;
+            
+            // 创建新的模版卡片
+            const newCard = document.createElement('div');
+            newCard.className = 'template-card';
+            newCard.setAttribute('onclick', `selectTemplate('${newTemplateType}')`);
+            
+            newCard.innerHTML = `
+                <div class="template-actions-group">
+                    <button class="template-icon-btn copy" onclick="copyTemplate('${newTemplateType}', event)" title="复制模版">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <button class="template-icon-btn delete" onclick="confirmDeleteTemplate('${newTemplateType}', event)" title="删除模版">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+                <div class="template-header">
+                    <div class="template-info">
+                        <h3 class="template-title">自定义模版复制${newNumber}</h3>
+                    </div>
+                </div>
+                <div class="notification-methods">
+                    <div class="notification-label">通知方式：</div>
+                    <div class="notification-list">
+                        <span class="notification-item">消息弹窗</span>
+                        <span class="notification-item">邮箱</span>
+                    </div>
+                </div>
+                <div class="template-status" style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 14px; color: var(--text-secondary);">状态：</span>
+                    <label class="switch">
+                        <input type="checkbox" ${isEnabled ? 'checked' : ''} onchange="toggleTemplateStatus('${newTemplateType}', this.checked)">
+                        <span class="switch-slider"></span>
+                    </label>
+                    <span class="status-text" style="font-size: 14px; color: ${isEnabled ? '#10b981' : '#dc2626'};">${isEnabled ? '启用' : '禁用'}</span>
+                </div>
+                <div class="template-time" style="margin-bottom: 24px; font-size: 13px; color: var(--text-secondary);">
+                    修改时间：${new Date().toLocaleString('zh-CN', {year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false}).replace(/\//g, '-')}
+                </div>
+                <div class="template-actions">
+                    <button class="btn btn-secondary" onclick="viewTemplateDetails('${newTemplateType}', event)">
+                        详情
+                    </button>
+                    <button class="btn btn-primary" onclick="applyTemplate('${newTemplateType}', event)">
+                        应用
+                    </button>
+                </div>
+            `;
+            
+            // 添加到模版列表末尾
+            const templateGrid = document.querySelector('.template-grid');
+            console.log('模版网格容器:', templateGrid);
+            if (templateGrid) {
+                templateGrid.appendChild(newCard);
+                console.log('新模版已添加到DOM');
+                
+                // 添加淡入动画
+                newCard.style.animation = 'fadeIn 0.5s ease';
+                
+                showNotification(`成功复制为"自定义模版复制${newNumber}"`, 'success');
+            } else {
+                console.error('未找到.template-grid容器');
+            }
+        }
+
+        // 新建模版
+        function createNewTemplate() {
+            window.location.href = 'template-create.html';
+        }
+
+        // 基于模版创建规则
+        function createRuleFromTemplate(templateType) {
+            const templates = {
+                'temperature': {
+                    name: '温度异常保护规则',
+                    description: '基于温度异常监控模版创建的规则',
+                    type: 'safety',
+                    trigger: { type: 'parameter', condition: '温度 > 45°C' },
+                    conditions: [{ type: 'time', value: '持续时间 > 3分钟' }],
+                    actions: [
+                        { type: 'control', value: '降低充放电功率至70%' },
+                        { type: 'notification', value: '发送温度告警通知' }
+                    ]
+                },
+                'battery': {
+                    name: '电池健康保护规则',
+                    description: '基于电池健康管理模版创建的规则',
+                    type: 'optimization',
+                    trigger: { type: 'parameter', condition: 'SOH < 80%' },
+                    conditions: [],
+                    actions: [
+                        { type: 'control', value: '限制充电功率' },
+                        { type: 'notification', value: '发送电池健康告警' }
+                    ]
+                },
+                'pricing': {
+                    name: '峰谷电价优化规则',
+                    description: '基于峰谷电价策略模版创建的规则',
+                    type: 'optimization',
+                    trigger: { type: 'schedule', condition: '每日执行' },
+                    conditions: [],
+                    actions: [
+                        { type: 'analysis', value: '分析电价时段' },
+                        { type: 'control', value: '调整充放电策略' }
+                    ]
+                }
+            };
+
+            const template = templates[templateType] || templates['temperature'];
+            const newRule = {
+                id: 'rule' + Date.now(),
+                status: 'inactive',
+                ...template
+            };
+            
+            rulesData.unshift(newRule);
+            currentRule = newRule;
+            renderRuleList();
+            renderRuleEditor();
+            showNotification(`已基于${getTemplateName(templateType)}模版创建新规则`, 'success');
+        }
+
+        // 渲染规则列表
+        function renderRuleList() {
+            const ruleList = document.getElementById('ruleList');
+            
+            ruleList.innerHTML = rulesData.map(rule => `
+                <div class="rule-item ${currentRule && currentRule.id === rule.id ? 'active' : ''}" 
+                     onclick="selectRule('${rule.id}')">
+                    <div class="rule-item-header">
+                        <span class="rule-item-name">${rule.name}</span>
+                        <div class="rule-item-status">
+                            <span class="status-dot ${rule.status}"></span>
+                            <span>${rule.status === 'active' ? '启用' : '停用'}</span>
+                        </div>
+                    </div>
+                    <div class="rule-item-desc">${rule.description}</div>
+                </div>
+            `).join('');
+        }
+
+        // 选择规则
+        function selectRule(ruleId) {
+            currentRule = rulesData.find(r => r.id === ruleId);
+            renderRuleList();
+            renderRuleEditor();
+        }
+
+        // 渲染规则编辑器
+        function renderRuleEditor() {
+            if (!currentRule) return;
+
+            const editorContent = document.getElementById('ruleEditorContent');
+            
+            editorContent.innerHTML = `
+                <div class="rule-editor-header">
+                    <h2 class="rule-editor-title">${currentRule.name}</h2>
+                    <div class="rule-editor-actions">
+                        <button class="btn ${currentRule.status === 'active' ? 'btn-danger' : 'btn-success'}" 
+                                onclick="toggleRuleStatus('${currentRule.id}')">
+                            <i class="fas ${currentRule.status === 'active' ? 'fa-pause' : 'fa-play'}"></i>
+                            ${currentRule.status === 'active' ? '停用' : '启用'}
+                        </button>
+                        <button class="btn" onclick="saveRule()">
+                            <i class="fas fa-save"></i>
+                            保存
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteRule('${currentRule.id}')">
+                            <i class="fas fa-trash"></i>
+                            删除
+                        </button>
+                    </div>
+                </div>
+                <div class="rule-editor-content">
+                    <!-- 规则流程图 -->
+                    <div class="rule-flow-diagram">
+                        <!-- 触发器 -->
+                        <div class="flow-node">
+                            <div class="flow-node-header">
+                                <div class="flow-node-icon trigger">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <div class="flow-node-title">触发器</div>
+                            </div>
+                            <div class="flow-node-content">
+                                ${currentRule.trigger.condition}
+                            </div>
+                        </div>
+                        
+                        ${currentRule.conditions.length > 0 ? `
+                            <div class="flow-connector">
+                                <div class="flow-connector-line"></div>
+                                <div class="flow-connector-arrow"></div>
+                            </div>
+                            
+                            <!-- 条件 -->
+                            <div class="flow-node">
+                                <div class="flow-node-header">
+                                    <div class="flow-node-icon condition">
+                                        <i class="fas fa-filter"></i>
+                                    </div>
+                                    <div class="flow-node-title">条件判断</div>
+                                </div>
+                                <div class="flow-node-content">
+                                    ${currentRule.conditions.map(c => c.value).join(' 且 ')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="flow-connector">
+                            <div class="flow-connector-line"></div>
+                            <div class="flow-connector-arrow"></div>
+                        </div>
+                        
+                        <!-- 动作 -->
+                        <div class="flow-node">
+                            <div class="flow-node-header">
+                                <div class="flow-node-icon action">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                                <div class="flow-node-title">执行动作</div>
+                            </div>
+                            <div class="flow-node-content">
+                                ${currentRule.actions.map((a, i) => `${i + 1}. ${a.value}`).join('<br>')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 规则属性 -->
+                    <div class="rule-properties">
+                        <div class="property-group">
+                            <h4 class="property-group-title">基本信息</h4>
+                            <div class="property-row">
+                                <label class="property-label">规则名称</label>
+                                <div class="property-value">
+                                    <input type="text" class="form-input" value="${currentRule.name}" 
+                                           onchange="updateRuleName(this.value)">
+                                </div>
+                            </div>
+                            <div class="property-row">
+                                <label class="property-label">规则描述</label>
+                                <div class="property-value">
+                                    <textarea class="form-textarea" rows="2" 
+                                              onchange="updateRuleDescription(this.value)">${currentRule.description}</textarea>
+                                </div>
+                            </div>
+                            <div class="property-row">
+                                <label class="property-label">规则类型</label>
+                                <div class="property-value">
+                                    <select class="form-select" onchange="updateRuleType(this.value)">
+                                        <option value="safety" ${currentRule.type === 'safety' ? 'selected' : ''}>安全保护</option>
+                                        <option value="optimization" ${currentRule.type === 'optimization' ? 'selected' : ''}>优化控制</option>
+                                        <option value="maintenance" ${currentRule.type === 'maintenance' ? 'selected' : ''}>运维管理</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="property-group">
+                            <h4 class="property-group-title">执行设置</h4>
+                            <div class="property-row">
+                                <label class="property-label">优先级</label>
+                                <div class="property-value">
+                                    <select class="form-select">
+                                        <option value="high">高</option>
+                                        <option value="medium" selected>中</option>
+                                        <option value="low">低</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="property-row">
+                                <label class="property-label">执行间隔</label>
+                                <div class="property-value">
+                                    <input type="number" class="form-input" value="60" style="width: 100px;">
+                                    <span style="color: var(--text-secondary); font-size: 13px;">秒</span>
+                                </div>
+                            </div>
+                            <div class="property-row">
+                                <label class="property-label">失败重试</label>
+                                <div class="property-value">
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 创建新规则
+        function createNewRule() {
+            const newRule = {
+                id: 'rule' + Date.now(),
+                name: '新规则',
+                description: '请输入规则描述',
+                status: 'inactive',
+                type: 'optimization',
+                trigger: {
+                    type: 'parameter',
+                    condition: '请设置触发条件'
+                },
+                conditions: [],
+                actions: [
+                    {
+                        type: 'control',
+                        value: '请设置执行动作'
+                    }
+                ]
+            };
+            
+            rulesData.unshift(newRule);
+            currentRule = newRule;
+            renderRuleList();
+            renderRuleEditor();
+            showNotification('新规则创建成功', 'success');
+        }
+
+        // 切换规则状态
+        function toggleRuleStatus(ruleId) {
+            const rule = rulesData.find(r => r.id === ruleId);
+            if (rule) {
+                rule.status = rule.status === 'active' ? 'inactive' : 'active';
+                renderRuleList();
+                renderRuleEditor();
+                showNotification(`规则已${rule.status === 'active' ? '启用' : '停用'}`, 'success');
+            }
+        }
+
+        // 保存规则
+        function saveRule() {
+            // 这里应该有实际的保存逻辑
+            showNotification('规则保存成功', 'success');
+        }
+
+        // 删除规则
+        function deleteRule(ruleId) {
+            if (confirm('确定要删除这个规则吗？')) {
+                rulesData = rulesData.filter(r => r.id !== ruleId);
+                currentRule = null;
+                renderRuleList();
+                document.getElementById('ruleEditorContent').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-code-branch empty-state-icon"></i>
+                        <div class="empty-state-text">选择或创建规则</div>
+                        <div class="empty-state-subtext">从左侧列表选择规则进行编辑，或创建新规则</div>
+                    </div>
+                `;
+                showNotification('规则删除成功', 'success');
+            }
+        }
+
+        // 搜索规则
+        function searchRules(keyword) {
+            const filteredRules = keyword 
+                ? rulesData.filter(r => 
+                    r.name.includes(keyword) || 
+                    r.description.includes(keyword)
+                  )
+                : rulesData;
+            
+            const ruleList = document.getElementById('ruleList');
+            ruleList.innerHTML = filteredRules.map(rule => `
+                <div class="rule-item ${currentRule && currentRule.id === rule.id ? 'active' : ''}" 
+                     onclick="selectRule('${rule.id}')">
+                    <div class="rule-item-header">
+                        <span class="rule-item-name">${rule.name}</span>
+                        <div class="rule-item-status">
+                            <span class="status-dot ${rule.status}"></span>
+                            <span>${rule.status === 'active' ? '启用' : '停用'}</span>
+                        </div>
+                    </div>
+                    <div class="rule-item-desc">${rule.description}</div>
+                </div>
+            `).join('');
+        }
+
+        // 刷新规则列表
+        function refreshRuleList() {
+            // 这里应该有实际的刷新逻辑
+            renderRuleList();
+            showNotification('规则列表已刷新', 'success');
+        }
+
+        // 更新规则名称
+        function updateRuleName(value) {
+            if (currentRule) {
+                currentRule.name = value;
+                renderRuleList();
+            }
+        }
+
+        // 更新规则描述
+        function updateRuleDescription(value) {
+            if (currentRule) {
+                currentRule.description = value;
+                renderRuleList();
+            }
+        }
+
+        // 更新规则类型
+        function updateRuleType(value) {
+            if (currentRule) {
+                currentRule.type = value;
+            }
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 16px 24px;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                info: 'fa-info-circle',
+                warning: 'fa-exclamation-triangle'
+            };
+            
+            const colors = {
+                success: '#10b981',
+                error: '#ef4444',
+                info: '#3b82f6',
+                warning: '#f59e0b'
+            };
+            
+            notification.innerHTML = `
+                <i class="fas ${icons[type]}" style="color: ${colors[type]}; font-size: 20px;"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // 添加动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+        });
+    </script>
+</body>
+</html>
