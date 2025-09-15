@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联系我们 - 管理系统</title>
+    <link rel="stylesheet" href="components/common.css">
+    <style>
+        .contact-container {
+            padding: 24px;
+            background: #f5f5f5;
+            min-height: calc(100vh - 56px);
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .contact-info, .contact-form {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 32px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 24px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .info-icon {
+            width: 40px;
+            height: 40px;
+            background: #1890ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 16px;
+            font-size: 18px;
+        }
+
+        .info-content h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .info-content p {
+            color: #666;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #1890ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #40a9ff;
+        }
+
+        .map-container {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 32px;
+            margin-top: 24px;
+        }
+
+        .map-placeholder {
+            width: 100%;
+            height: 300px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .contact-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Navigation menu styles */
+        .nav-group.expanded .nav-arrow {
+            transform: rotate(90deg);
+        }
+
+        .nav-submenu {
+            display: none;
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .nav-group.expanded .nav-submenu {
+            display: block;
+        }
+
+        .nav-subitem {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px 0 40px;
+            color: rgba(0, 0, 0, 0.5);
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .nav-subitem:hover {
+            color: #000;
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .nav-subitem.active {
+            color: #000;
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-subitem.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 3px;
+            height: 100%;
+            background: #000;
+        }
+
+        /* User Menu Styles */
+        .user-menu {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #000;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 8px;
+            position: relative;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 45px;
+            right: 0;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            min-width: 160px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+
+        .user-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #374151;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.15s ease;
+            border: none;
+            background: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+
+        /* Custom Modal Styles */
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .custom-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.2s ease;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .custom-modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #fef2f2;
+            color: #dc2626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 24px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0 0 12px 0;
+        }
+
+        .modal-message {
+            color: #6b7280;
+            line-height: 1.5;
+            margin: 0 0 32px 0;
+            font-size: 16px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            min-width: 100px;
+        }
+
+        .modal-btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .modal-btn-confirm {
+            background: #dc2626;
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            background: #b91c1c;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Universal Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <img src="logo.png" alt="Logo">
+                </div>
+            </div>
+            
+            <nav class="nav">
+                <!-- 首页 -->
+                <a href="首页.html" class="nav-item" data-page="home">
+                    <span class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9,22 9,12 15,12 15,22"/>
+                        </svg>
+                    </span>
+                    <span class="nav-text">首页</span>
+                </a>
+                <!-- 产品中心 -->
+                <a href="产品.html" class="nav-item" data-page="products">
+                    <span class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <rect x="7" y="7" width="3" height="3"/>
+                            <rect x="14" y="7" width="3" height="3"/>
+                            <rect x="7" y="14" width="3" height="3"/>
+                            <rect x="14" y="14" width="3" height="3"/>
+                        </svg>
+                    </span>
+                    <span class="nav-text">产品中心</span>
+                </a>
+                <!-- 解决方案 -->
+                <div class="nav-group" id="solutionsGroup">
+                    <a href="#" class="nav-item" id="solutionsNav" data-page="solutions" onclick="toggleSubmenu('solutionsGroup', this)">
+                        <span class="nav-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                        </span>
+                        <span class="nav-text">解决方案</span>
+                        <span class="nav-arrow">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M6 4l4 4-4 4"/>
+                            </svg>
+                        </span>
+                    </a>
+                    <div class="nav-submenu" id="solutionsSubmenu">
+                        <a href="解决方案.html?type=banner" class="nav-subitem" data-section="banner">
+                            <span class="nav-text">banner</span>
+                        </a>                        <a href="解决方案.html?type=residential" class="nav-subitem" data-section="residential">
+                            <span class="nav-text">户用</span>
+                        </a>
+                        <a href="解决方案.html?type=commercial" class="nav-subitem" data-section="commercial">
+                            <span class="nav-text">工商储</span>
+                        </a>
+                        <a href="解决方案.html?type=charging" class="nav-subitem" data-section="charging">
+                            <span class="nav-text">充电站</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- 帮助中心 -->
+                <div class="nav-group" id="helpCenterGroup">
+                    <a href="#" class="nav-item" id="helpCenterNav" data-page="help-center" onclick="toggleSubmenu('helpCenterGroup', this)">
+                        <span class="nav-icon">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                                <circle cx="12" cy="17" r="0.5"/>
+                            </svg>
+                        </span>
+                        <span class="nav-text">帮助中心</span>
+                        <span class="nav-arrow">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M6 4l4 4-4 4"/>
+                            </svg>
+                        </span>
+                    </a>
+                    <div class="nav-submenu" id="helpSubmenu">
+                        <a href="文档资料.html" class="nav-subitem" data-section="documents">
+                            <span class="nav-text">文档资料</span>
+                        </a>
+                        <a href="在线帮助.html" class="nav-subitem" data-section="online-help">
+                            <span class="nav-text">在线帮助</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- 关于我们 -->
+                <div class="nav-group" id="aboutUsGroup">
+                    <a href="#" class="nav-item" id="aboutUsNav" data-page="about-us" onclick="toggleSubmenu('aboutUsGroup', this)">
+                        <span class="nav-icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="8.5" cy="7" r="4"/>
+                                <path d="M20 8v6M23 11h-6"/>
+                            </svg>
+                        </span>
+                        <span class="nav-text">关于我们</span>
+                        <span class="nav-arrow">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M6 4l4 4-4 4"/>
+                            </svg>
+                        </span>
+                    </a>
+                    <div class="nav-submenu" id="aboutSubmenu">
+                        <a href="关于我们.html" class="nav-subitem" data-section="about-xuhenew">
+                            <span class="nav-text">关于旭衡</span>
+                        </a>
+                        <a href="联系我们.html" class="nav-subitem" data-section="contact-us">
+                            <span class="nav-text">联系我们</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main -->
+        <main class="main">
+            <!-- Header -->
+            <header class="header">
+                <h1 class="header-title">联系我们</h1>
+                <div class="header-actions">
+                    <div class="user-menu" id="userAvatar">A
+                        <div class="user-dropdown" id="userDropdown">
+                            <button class="dropdown-item" id="logoutBtn">退出登录</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div style="display: flex; align-items: center; justify-content: center; min-height: 70vh;">
+                <div style="text-align: center; color: rgba(0, 0, 0, 0.6);">
+                    <div style="font-size: 48px; margin-bottom: 20px;">🚧</div>
+                    <h2 style="font-size: 24px; margin-bottom: 10px; color: #000;">联系我们待开发中</h2>
+                    <p style="font-size: 16px;">页面正在开发中，敬请期待</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toggle submenu function
+        function toggleSubmenu(groupId, navItem) {
+            console.log('Toggle submenu called:', groupId, navItem);
+            const navGroup = document.getElementById(groupId);
+            if (navGroup) {
+                navGroup.classList.toggle('expanded');
+                console.log('Group expanded:', navGroup.classList.contains('expanded'));
+                
+                // 如果展开，设置为活跃状态
+                if (navGroup.classList.contains('expanded')) {
+                    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                    navItem.classList.add('active');
+                }
+            }
+            return false;
+        }
+
+        // Universal Sidebar Functions
+        function initUniversalSidebar() {
+            // 获取当前页面路径
+            const currentPath = window.location.pathname;
+            const currentPage = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+            
+            // 设置当前页面对应的导航项为活跃状态
+            setActiveNavigation(currentPage);
+            
+            // 初始化导航项点击事件 - 已使用onclick属性，无需额外绑定
+            // initNavigationEvents();
+        }
+
+        function setActiveNavigation(currentPage) {
+            // 清除所有活跃状态
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-subitem').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-group').forEach(group => group.classList.remove('expanded'));
+            
+            // 根据当前页面设置活跃状态
+            switch(currentPage) {
+                case '首页.html':
+                case '':
+                    document.querySelector('.nav-item[data-page="home"]')?.classList.add('active');
+                    break;
+                case '产品.html':
+                    document.querySelector('.nav-item[data-page="products"]')?.classList.add('active');
+                    break;
+                case '解决方案.html':
+                    document.getElementById('solutionsGroup').classList.add('expanded');
+                    document.getElementById('solutionsNav').classList.add('active');
+                    
+                    // 根据URL参数决定激活哪个子菜单项
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const solutionType = urlParams.get('type');
+                    if (solutionType) {
+                        document.querySelector(`.nav-subitem[data-section="${solutionType}"]`)?.classList.add('active');
+                    }
+                    break;
+                case '文档资料.html':
+                    document.getElementById('helpCenterGroup').classList.add('expanded');
+                    document.getElementById('helpCenterNav').classList.add('active');
+                    document.querySelector('.nav-subitem[data-section="documents"]')?.classList.add('active');
+                    break;
+                case '在线帮助.html':
+                    document.getElementById('helpCenterGroup').classList.add('expanded');
+                    document.getElementById('helpCenterNav').classList.add('active');
+                    document.querySelector('.nav-subitem[data-section="online-help"]')?.classList.add('active');
+                    break;
+                case '关于我们.html':
+                    document.getElementById('aboutUsGroup').classList.add('expanded');
+                    document.getElementById('aboutUsNav').classList.add('active');
+                    document.querySelector('.nav-subitem[data-section="about-xuhenew"]')?.classList.add('active');
+                    break;
+                    document.getElementById('aboutUsGroup').classList.add('expanded');
+                    document.getElementById('aboutUsNav').classList.add('active');
+                    document.querySelector('.nav-subitem[data-section="join-us"]')?.classList.add('active');
+                    break;
+                case '联系我们.html':
+                    document.getElementById('aboutUsGroup').classList.add('expanded');
+                    document.getElementById('aboutUsNav').classList.add('active');
+                    document.querySelector('.nav-subitem[data-section="contact-us"]')?.classList.add('active');
+                    break;
+                    document.getElementById('aboutUsGroup').classList.add('expanded');
+                    document.getElementById('aboutUsNav').classList.add('active');
+                    document.querySelector('.nav-subitem[data-section="latest-news"]')?.classList.add('active');
+                    break;
+                    document.querySelector('.nav-item[data-page="cloud-demo"]')?.classList.add('active');
+                    break;
+            }
+        }
+
+        function initNavigationEvents() {
+            // 一级菜单点击事件
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    const textElement = this.querySelector('.nav-text');
+                    if (!textElement) return;
+                    
+                    const title = textElement.textContent.trim();
+                    
+                    if (title === '帮助中心') {
+                        const href = this.getAttribute('href');
+                        
+                        // 如果是跳转到其他页面的链接，允许默认行为
+                        if (href && (href.endsWith('.html') && href !== window.location.pathname.split('/').pop())) {
+                            // 不阻止默认行为，让浏览器正常跳转
+                            return;
+                        }
+                        
+                        e.preventDefault();
+                        // 切换帮助中心子菜单展开状态
+                        const navGroup = this.closest('.nav-group');
+                        navGroup.classList.toggle('expanded');
+                        
+                        // 如果展开，设置为活跃状态
+                        if (navGroup.classList.contains('expanded')) {
+                            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                            this.classList.add('active');
+                        }
+                    } else if (title === '解决方案') {
+                        e.preventDefault();
+                        // 切换解决方案子菜单展开状态
+                        const navGroup = this.closest('.nav-group');
+                        navGroup.classList.toggle('expanded');
+                        
+                        // 如果展开，设置为活跃状态
+                        if (navGroup.classList.contains('expanded')) {
+                            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                            this.classList.add('active');
+                        }
+                    } else if (title === '关于我们') {
+                        const href = this.getAttribute('href');
+                        
+                        // 如果是跳转到其他页面的链接，允许默认行为
+                        if (href && (href.endsWith('.html') && href !== window.location.pathname.split('/').pop())) {
+                            // 不阻止默认行为，让浏览器正常跳转
+                            return;
+                        }
+                        
+                        e.preventDefault();
+                        // 切换关于我们子菜单展开状态
+                        const navGroup = this.closest('.nav-group');
+                        navGroup.classList.toggle('expanded');
+                        
+                        // 如果展开，设置为活跃状态
+                        if (navGroup.classList.contains('expanded')) {
+                            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                            this.classList.add('active');
+                        }
+                    }
+                });
+            });
+        }
+
+        // 处理表单提交
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                company: document.getElementById('company').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value
+            };
+
+            // 简单验证
+            if (!formData.name || !formData.phone || !formData.email || !formData.message) {
+                alert('请填写必填字段');
+                return;
+            }
+
+            // 模拟提交
+            alert('咨询信息已提交，我们会尽快与您联系！');
+            document.getElementById('contactForm').reset();
+        }
+
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', async function() {
+            initUniversalSidebar();
+            
+            // 强制确保关于我们菜单展开（联系我们是其子项）
+            setTimeout(() => {
+                const aboutUsGroup = document.getElementById('aboutUsGroup');
+                const aboutUsNav = document.getElementById('aboutUsNav');
+                const contactUsSubitem = document.querySelector('.nav-subitem[data-section="contact-us"]');
+                if (aboutUsGroup && aboutUsNav) {
+                    aboutUsGroup.classList.add('expanded');
+                    aboutUsNav.classList.add('active');
+                    if (contactUsSubitem) {
+                        contactUsSubitem.classList.add('active');
+                    }
+                    console.log('Force expanded about us menu for contact page');
+                }
+            }, 100);
+            
+            // 绑定表单提交事件
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', handleFormSubmit);
+            }
+        });
+
+        // User Authentication and Logout
+        // No authentication required - direct access
+        const userName = 'Admin'; // 默认用户名
+
+        // Set avatar
+        const userAvatar = document.getElementById('userAvatar');
+        userAvatar.childNodes[0].textContent = userName.charAt(0).toUpperCase();
+        
+        // User menu functionality
+        const userDropdown = document.getElementById('userDropdown');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        // Toggle dropdown on avatar click
+        userAvatar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('show');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userAvatar.contains(e.target)) {
+                userDropdown.classList.remove('show');
+            }
+        });
+        
+        // Logout button click
+        logoutBtn.addEventListener('click', () => {
+            // Close dropdown first
+            userDropdown.classList.remove('show');
+            
+            // Show custom modal
+            const logoutModal = document.getElementById('logoutModal');
+            logoutModal.classList.add('show');
+        });
+        
+        // Modal event listeners
+        const logoutModal = document.getElementById('logoutModal');
+        const cancelLogout = document.getElementById('cancelLogout');
+        const confirmLogout = document.getElementById('confirmLogout');
+        
+        // Cancel logout function
+        function hideLogoutModal() {
+            const logoutModal = document.getElementById('logoutModal');
+            logoutModal.classList.remove('show');
+        }
+        
+        // Cancel logout event listener (backup)
+        cancelLogout.addEventListener('click', () => {
+            logoutModal.classList.remove('show');
+        });
+        
+        // Logout function
+        function performLogout() {
+            console.log('performLogout called!');
+            // Clear all login tokens
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUser');
+            sessionStorage.removeItem('adminToken');
+            sessionStorage.removeItem('adminUser');
+            
+            console.log('Tokens cleared, redirecting...');
+            // Redirect to login page
+            window.location.href = '登录页面.html';
+        }
+
+        // Confirm logout
+        if (confirmLogout) {
+            confirmLogout.addEventListener('click', performLogout);
+        } else {
+            console.error('confirmLogout element not found!');
+        }
+        
+        // Close modal when clicking backdrop
+        logoutModal.addEventListener('click', (e) => {
+            if (e.target === logoutModal) {
+                logoutModal.classList.remove('show');
+            }
+        });
+        
+    </script>
+    
+    <!-- Custom Logout Confirmation Modal -->
+    <div class="custom-modal" id="logoutModal">
+        <div class="modal-content">
+            <div class="modal-icon">⚠️</div>
+            <h3 class="modal-title">确认退出</h3>
+            <p class="modal-message">确定要退出登录吗？退出后需要重新登录才能使用系统。</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" id="cancelLogout" onclick="hideLogoutModal()">取消</button>
+                <button class="modal-btn modal-btn-confirm" id="confirmLogout" onclick="performLogout()">确认退出</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

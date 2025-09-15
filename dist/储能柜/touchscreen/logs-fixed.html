@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日志管理 - 储能柜管理系统</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="common-header-styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 简化背景 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, #1a1a1a 0%, #222 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 头部导航 */
+        .header {
+            background: #2a2a2a;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            border-bottom: 2px solid #00d4ff;
+            position: relative;
+            z-index: 100;
+            gap: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 主内容区 */
+        .main-content {
+            height: calc(100vh - 70px);
+            margin-top: 0px;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* 子标签页 */
+        .sub-tabs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #333;
+        }
+
+        .sub-tab {
+            padding: 12px 24px;
+            background: #2a2a2a;
+            border: 2px solid #444;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+            position: relative;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .sub-tab.active {
+            color: #fff;
+            background: #00d4ff;
+            border-color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+
+        /* 日志列表区域 */
+        .log-list-section {
+            background: #2a2a2a;
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 表格样式 */
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1a1a1a;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #444;
+        }
+
+        .log-table th {
+            background: #333;
+            color: #fff;
+            font-weight: 700;
+            padding: 20px 16px;
+            text-align: left;
+            font-size: 16px;
+            border-bottom: 2px solid #00d4ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .log-table td {
+            padding: 18px 16px;
+            border-bottom: 1px solid #333;
+            font-size: 15px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .log-table tbody tr:hover {
+            background: #333;
+            transition: background 0.2s;
+        }
+
+        /* 操作按钮 */
+        .action-btn {
+            padding: 10px 20px;
+            border: 2px solid #00d4ff;
+            border-radius: 6px;
+            background: #2a2a2a;
+            color: #00d4ff;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-right: 8px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .action-btn:hover {
+            background: #00d4ff;
+            color: #1a1a1a;
+            transform: scale(1.05);
+        }
+
+        /* 分页控件 */
+        .log-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid #444;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .pagination-info {
+            font-size: 16px;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .pagination-btn {
+            height: 45px;
+            padding: 0 20px;
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            background: #2a2a2a;
+            color: #00d4ff;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 15px;
+            font-weight: 600;
+            min-width: 120px;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: #00d4ff;
+            color: #1a1a1a;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: #444;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-text">储能柜管理系统 - 日志</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 子标签页 -->
+        <div class="sub-tabs">
+            <button class="sub-tab active" onclick="switchLogType('login')">登录日志</button>
+            <button class="sub-tab" onclick="switchLogType('operation')">操作日志</button>
+        </div>
+
+        <!-- 日志列表区域 -->
+        <div class="log-list-section">
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th width="150">用户名</th>
+                        <th width="250">操作</th>
+                        <th width="150">IP地址</th>
+                        <th width="100">结果</th>
+                        <th width="200">时间</th>
+                        <th width="120">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="logTableBody">
+                    <!-- 动态生成日志数据 -->
+                </tbody>
+            </table>
+
+            <!-- 分页控件 -->
+            <div class="log-pagination">
+                <div class="pagination-info" id="paginationInfo">
+                    第 1-10 条，共 0 条记录
+                </div>
+                <div class="pagination-controls">
+                    <button class="pagination-btn" id="prevPageBtn" onclick="previousPage()" disabled>
+                        上一页
+                    </button>
+                    <span id="pageInfo" style="padding: 12px 20px; color: #fff; font-size: 16px; font-weight: 600; background: #333; border-radius: 6px;">第 1 页，共 1 页</span>
+                    <button class="pagination-btn" id="nextPageBtn" onclick="nextPage()" disabled>
+                        下一页
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentLogType = 'login';
+        let allLogs = [];
+        let filteredLogs = [];
+        let currentPage = 1;
+        const pageSize = 10;
+
+        // 日志数据
+        const logData = {
+            login: [
+                { user: 'admin', action: '用户登录成功', ip: '192.168.1.100', result: '成功', time: '2024-01-31 14:30:00' },
+                { user: 'operator', action: '用户登出', ip: '192.168.1.101', result: '成功', time: '2024-01-31 14:25:00' },
+                { user: 'viewer', action: '登录失败', ip: '192.168.1.102', result: '失败', time: '2024-01-31 14:20:00' },
+                { user: 'manager', action: '密码修改', ip: '192.168.1.103', result: '成功', time: '2024-01-31 14:15:00' },
+                { user: 'engineer', action: '权限验证通过', ip: '192.168.1.104', result: '成功', time: '2024-01-31 14:10:00' },
+                { user: 'admin', action: '会话刷新', ip: '192.168.1.100', result: '成功', time: '2024-01-31 14:05:00' },
+                { user: 'operator', action: '异地登录检测', ip: '10.0.0.1', result: '成功', time: '2024-01-31 14:00:00' },
+                { user: 'viewer', action: '账户锁定', ip: '192.168.1.102', result: '失败', time: '2024-01-31 13:55:00' },
+                { user: 'manager', action: '用户登录成功', ip: '192.168.1.103', result: '成功', time: '2024-01-31 13:50:00' },
+                { user: 'engineer', action: '会话超时', ip: '192.168.1.104', result: '失败', time: '2024-01-31 13:45:00' },
+                { user: 'admin', action: '用户登录成功', ip: '192.168.1.100', result: '成功', time: '2024-01-31 13:40:00' },
+                { user: 'operator', action: '密码即将过期', ip: '192.168.1.101', result: '成功', time: '2024-01-31 13:35:00' }
+            ],
+            operation: [
+                { user: 'admin', action: '启动储能柜01充电模式', ip: '192.168.1.100', result: '成功', time: '2024-01-31 14:30:00' },
+                { user: 'operator', action: '修改充电功率限制为250kW', ip: '192.168.1.101', result: '成功', time: '2024-01-31 14:25:00' },
+                { user: 'engineer', action: '储能柜04启动失败', ip: '192.168.1.104', result: '失败', time: '2024-01-31 14:20:00' },
+                { user: 'manager', action: '导出7月运行数据报表', ip: '192.168.1.103', result: '成功', time: '2024-01-31 14:15:00' },
+                { user: 'admin', action: '更新EMS控制策略配置', ip: '192.168.1.100', result: '成功', time: '2024-01-31 14:10:00' },
+                { user: 'operator', action: '停止储能柜03放电', ip: '192.168.1.101', result: '成功', time: '2024-01-31 14:05:00' },
+                { user: 'engineer', action: 'BMS通讯连接中断', ip: '192.168.1.104', result: '失败', time: '2024-01-31 14:00:00' },
+                { user: 'manager', action: '设置放电停止SOC为10%', ip: '192.168.1.103', result: '成功', time: '2024-01-31 13:55:00' },
+                { user: 'admin', action: '启用消防联动系统', ip: '192.168.1.100', result: '成功', time: '2024-01-31 13:50:00' },
+                { user: 'operator', action: '充电参数设置越界', ip: '192.168.1.101', result: '失败', time: '2024-01-31 13:45:00' },
+                { user: 'engineer', action: '查询储能柜实时数据', ip: '192.168.1.104', result: '成功', time: '2024-01-31 13:40:00' },
+                { user: 'manager', action: '检查系统运行状态', ip: '192.168.1.103', result: '成功', time: '2024-01-31 13:35:00' }
+            ]
+        };
+
+        // 页面初始化
+        window.onload = function() {
+            console.log('Page loaded');
+            generateLogData();
+            renderLogTable();
+        };
+
+        // 生成日志数据
+        function generateLogData() {
+            allLogs = [];
+            const data = logData[currentLogType];
+            
+            // 生成更多数据
+            for (let i = 0; i < 50; i++) {
+                const baseData = data[i % data.length];
+                const logTime = new Date();
+                logTime.setMinutes(logTime.getMinutes() - i * 5);
+                
+                allLogs.push({
+                    id: i + 1,
+                    ...baseData,
+                    time: logTime.toLocaleString('zh-CN')
+                });
+            }
+            
+            filteredLogs = [...allLogs];
+            console.log('Generated', filteredLogs.length, 'logs');
+        }
+
+        // 渲染日志表格
+        function renderLogTable() {
+            const tbody = document.getElementById('logTableBody');
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const pageData = filteredLogs.slice(startIndex, endIndex);
+            
+            let html = '';
+            pageData.forEach(log => {
+                html += `
+                    <tr>
+                        <td style="font-weight: 600;">${log.user}</td>
+                        <td style="color: #00d4ff;">${log.action}</td>
+                        <td>${log.ip}</td>
+                        <td style="color: ${log.result === '成功' ? '#00ff00' : '#ff4444'}; font-weight: 700;">
+                            ${log.result}
+                        </td>
+                        <td>${log.time}</td>
+                        <td>
+                            <button class="action-btn" onclick="viewLogDetail(${log.id})">
+                                详情
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+            updatePagination();
+        }
+
+        // 更新分页信息
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredLogs.length / pageSize);
+            const startIndex = (currentPage - 1) * pageSize + 1;
+            const endIndex = Math.min(currentPage * pageSize, filteredLogs.length);
+            
+            document.getElementById('paginationInfo').textContent = 
+                `第 ${startIndex}-${endIndex} 条，共 ${filteredLogs.length} 条记录`;
+            
+            document.getElementById('pageInfo').textContent = 
+                `第 ${currentPage} 页，共 ${totalPages} 页`;
+            
+            document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+            document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+        }
+
+        // 切换日志类型
+        function switchLogType(type) {
+            currentLogType = type;
+            currentPage = 1;
+            
+            // 更新标签状态
+            const tabs = document.querySelectorAll('.sub-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 重新生成并渲染数据
+            generateLogData();
+            renderLogTable();
+        }
+
+        // 上一页
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderLogTable();
+            }
+        }
+
+        // 下一页
+        function nextPage() {
+            const totalPages = Math.ceil(filteredLogs.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderLogTable();
+            }
+        }
+
+        // 查看详情
+        function viewLogDetail(id) {
+            const log = filteredLogs.find(l => l.id === id);
+            if (log) {
+                alert(`日志详情：\n\n用户: ${log.user}\n操作: ${log.action}\nIP: ${log.ip}\n结果: ${log.result}\n时间: ${log.time}`);
+            }
+        }
+    </script>
+</body>
+</html>

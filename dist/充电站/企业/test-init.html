@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试初始化</title>
+</head>
+<body>
+    <h1>测试 system 对象初始化</h1>
+    <div id="output" style="padding: 20px; background: #f0f0f0; margin: 20px; font-family: monospace;"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(msg) {
+            output.innerHTML += msg + '<br>';
+            console.log(msg);
+        }
+        
+        log('1. 开始加载 enterprise-enhanced.js...');
+    </script>
+    
+    <script src="js/enterprise-enhanced.js"></script>
+    
+    <script>
+        log('2. enterprise-enhanced.js 已加载');
+        
+        // 检查全局变量
+        log('3. 检查 window.system: ' + (typeof window.system));
+        log('4. 检查 system: ' + (typeof system));
+        
+        // 检查类
+        log('5. 检查 EnterpriseSystem 类: ' + (typeof EnterpriseSystem));
+        
+        // 如果类存在但system不存在，手动创建
+        if (typeof EnterpriseSystem !== 'undefined' && typeof system === 'undefined') {
+            log('6. EnterpriseSystem 类存在但 system 未初始化，手动创建...');
+            try {
+                window.system = new EnterpriseSystem();
+                log('7. ✅ system 对象已手动创建');
+                log('8. 测试 showDeviceDetail: ' + (typeof system.showDeviceDetail));
+            } catch (error) {
+                log('7. ❌ 创建失败: ' + error.message);
+                log('   错误详情: ' + error.stack);
+            }
+        }
+        
+        // 检查浏览器控制台错误
+        window.addEventListener('error', function(event) {
+            log('❌ JavaScript错误: ' + event.message);
+            log('   文件: ' + event.filename);
+            log('   行号: ' + event.lineno);
+        });
+    </script>
+</body>
+</html>

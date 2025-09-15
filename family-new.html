@@ -1,0 +1,3693 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n-key="family.title">家庭 - U Energy</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="components/common-styles.css">
+    <link rel="stylesheet" href="components/i18n.css">
+    <link rel="stylesheet" href="components/notification-center.css">
+    <link rel="stylesheet" href="components/header-nav.css">
+    <link rel="stylesheet" href="components/pagination.css">
+    <link rel="stylesheet" href="components/standard-layout.css">
+    <link rel="stylesheet" href="components/user-dropdown.css">
+    <script src="components/i18n.js"></script>
+    <script src="components/user-menu-link.js"></script>
+    <script src="components/simple-message-icon.js"></script>
+    <script src="components/user-dropdown-simple-new.js"></script>
+    <script src="components/header-nav.js"></script>
+    <script>
+        // Test script loading
+        console.log('Script section loaded');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, HeaderNav type:', typeof HeaderNav);
+        });
+    </script>
+    <script src="components/pagination.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Page-specific styles */
+        body {
+            background: #000 !important;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 100px 20px 24px;
+            min-height: calc(100vh - 200px);
+        }
+        
+        /* Fixed Header Area */
+        .fixed-header {
+            position: sticky;
+            top: 80px;
+            background: #000;
+            z-index: 100;
+            padding-bottom: 20px;
+        }
+        
+        /* Scrollable Content Area */
+        .scrollable-content {
+            margin-top: 0px;
+        }
+        
+        /* Table Actions Header */
+        .table-actions-header {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        /* Table Card */
+        .table-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--color-shadow);
+            border: 1.5px solid var(--color-border);
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        
+        /* Table Wrapper with Fixed Action Column */
+        .table-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius);
+            border: 1px solid var(--color-border);
+        }
+        
+        /* Scrollable table container */
+        .table-scrollable {
+            overflow-x: auto;
+            width: 100%;
+            position: relative;
+        }
+        
+        /* Table with fixed action column */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            position: relative;
+            min-width: 1200px; /* Ensure horizontal scrolling */
+        }
+        
+        /* Fixed action column */
+        .data-table .fixed-action-column {
+            position: sticky;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95) !important;
+            z-index: 10;
+            border-left: 1px solid var(--color-border);
+            min-width: 200px;
+            max-width: 200px;
+            width: 200px;
+            text-align: center;
+        }
+        
+        /* Ensure header has solid background */
+        .data-table thead .fixed-action-column {
+            background: rgba(255, 255, 255, 0.08) !important;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Ensure table rows have solid background */
+        .data-table tbody .fixed-action-column {
+            background: rgba(0, 0, 0, 0.95) !important;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Override hover effects to maintain background */
+        .data-table tr:hover .fixed-action-column {
+            background: rgba(0, 0, 0, 0.98) !important;
+        }
+        
+        /* Shadow for fixed column */
+        .data-table .fixed-action-column::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -15px;
+            width: 15px;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(0,0,0,0.3));
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Ensure other columns have proper widths */
+        .data-table th:not(.fixed-action-column),
+        .data-table td:not(.fixed-action-column) {
+            min-width: 100px;
+            white-space: nowrap;
+        }
+        
+        /* Specific column widths for better layout */
+        .data-table th:nth-child(1),
+        .data-table td:nth-child(1) { min-width: 80px; }
+        .data-table th:nth-child(2),
+        .data-table td:nth-child(2) { min-width: 100px; }
+        .data-table th:nth-child(3),
+        .data-table td:nth-child(3) { min-width: 120px; }
+        .data-table th:nth-child(4),
+        .data-table td:nth-child(4) { min-width: 120px; }
+        .data-table th:nth-child(5),
+        .data-table td:nth-child(5) { min-width: 120px; }
+        .data-table th:nth-child(6),
+        .data-table td:nth-child(6) { min-width: 120px; }
+        .data-table th:nth-child(7),
+        .data-table td:nth-child(7) { min-width: 100px; }
+        .data-table th:nth-child(8),
+        .data-table td:nth-child(8) { min-width: 80px; }
+        .data-table th:nth-child(9),
+        .data-table td:nth-child(9) { min-width: 120px; }
+        .data-table th:nth-child(10),
+        .data-table td:nth-child(10) { min-width: 200px; }
+        .data-table th:nth-child(11),
+        .data-table td:nth-child(11) { min-width: 100px; }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: -24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-header-left {
+            text-align: left;
+        }
+
+        .page-title {
+            font-size: 48px;
+            font-weight: 500;
+            color: var(--color-text);
+            margin: 0;
+            letter-spacing: -2px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            margin-top: 4px;
+        }
+
+
+
+        /* Search Section */
+        .search-filter-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 60px;  /* 向下移动20px，从40px改为60px */
+            margin-bottom: 16px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+        
+
+        .search-input {
+            width: 180px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+
+        .filter-select {
+            width: 180px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23fff' fill-opacity='0.5' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+
+        .filter-select option {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 8px;
+        }
+
+        .filter-btn {
+            padding: 10px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-btn.primary {
+            background: #00ff88;
+            border-color: #00ff88;
+            color: #000;
+            font-weight: 500;
+        }
+
+        .filter-btn.secondary {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .filter-btn.export {
+            background: rgba(30, 127, 255, 0.1);
+            border: 1px solid rgba(30, 127, 255, 0.3);
+            color: var(--color-accent);
+        }
+
+        .filter-btn.primary:hover {
+            background: #00e67a;
+            border-color: #00e67a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+        }
+
+        .filter-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .filter-btn.export:hover {
+            background: rgba(30, 127, 255, 0.15);
+        }
+
+        .filter-btn.refresh {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+        }
+
+        .filter-btn.refresh:hover {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: rgba(0, 255, 136, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.primary:hover {
+            background: #00e67a;
+            border-color: #00e67a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+        }
+
+        .filter-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .search-filter-section {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .filter-select,
+            .search-input {
+                flex: 1 1 calc(50% - 8px);
+                min-width: 160px;
+            }
+            
+            .filter-actions {
+                flex: 1 1 100%;
+                justify-content: flex-end;
+                margin-left: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 100px 10px 24px;
+            }
+
+            .page-title {
+                font-size: 28px;
+            }
+
+            .search-filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                min-width: auto;
+            }
+
+            .filter-actions {
+                justify-content: stretch;
+            }
+
+            .filter-btn {
+                flex: 1;
+            }
+
+            .table-scrollable {
+                overflow-x: auto;
+            }
+            
+            /* Adjust table for mobile */
+            .data-table {
+                min-width: 900px;
+            }
+            
+            /* Reduce column widths on mobile */
+            .data-table th:nth-child(1),
+            .data-table td:nth-child(1) { min-width: 60px; }
+            .data-table th:nth-child(2),
+            .data-table td:nth-child(2) { min-width: 80px; }
+            .data-table th:nth-child(3),
+            .data-table td:nth-child(3) { min-width: 100px; }
+            .data-table th:nth-child(4),
+            .data-table td:nth-child(4) { min-width: 100px; }
+            .data-table th:nth-child(5),
+            .data-table td:nth-child(5) { min-width: 100px; }
+            .data-table th:nth-child(6),
+            .data-table td:nth-child(6) { min-width: 100px; }
+            .data-table th:nth-child(7),
+            .data-table td:nth-child(7) { min-width: 80px; }
+            .data-table th:nth-child(8),
+            .data-table td:nth-child(8) { min-width: 60px; }
+            .data-table th:nth-child(9),
+            .data-table td:nth-child(9) { min-width: 100px; }
+            .data-table th:nth-child(10),
+            .data-table td:nth-child(10) { min-width: 150px; }
+            .data-table th:nth-child(11),
+            .data-table td:nth-child(11) { min-width: 80px; }
+            
+            /* Fixed action column on mobile */
+            .data-table .fixed-action-column {
+                min-width: 180px;
+                max-width: 180px;
+                width: 180px;
+            }
+        }
+
+        
+        /* Table Section */
+        .table-section {
+            background: var(--color-bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--color-shadow);
+            border: 1.5px solid var(--color-border);
+            overflow: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        /* Table Header */
+        .table-header {
+            padding: 20px 24px;
+            background: var(--color-bg-card);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        
+        .table-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        
+
+        /* Remove duplicate data-table definition */
+
+        .data-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .data-table th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px 24px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            color: var(--color-text);
+            font-size: 14px;
+        }
+
+        .data-table tr:hover td {
+            background: var(--color-bg);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-badge.active {
+            background: rgba(0, 185, 107, 0.1);
+            color: var(--color-primary);
+        }
+
+        .status-badge.inactive {
+            background: rgba(255, 149, 0, 0.1);
+            color: #ff9500;
+        }
+
+        .status-badge.not-participating {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+        }
+
+        .status-badge.charging {
+            background: rgba(0, 185, 107, 0.1);
+            color: var(--color-primary);
+        }
+
+        .status-badge.discharging {
+            background: rgba(30, 127, 255, 0.1);
+            color: var(--color-accent);
+        }
+
+        .status-badge.standby {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .status-badge.offline {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+        }
+
+        .status-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .action-btn {
+            padding: 4px 12px;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+
+        .action-btn.edit {
+            color: #00ff88;
+        }
+
+        .action-btn.view {
+            color: #4a9eff;
+        }
+
+        .action-btn.delete {
+            color: #ff6b6b;
+        }
+
+        .action-button {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, rgba(0, 185, 107, 0.1), rgba(30, 127, 255, 0.1));
+            border: 1px solid var(--color-primary);
+            border-radius: 8px;
+            color: var(--color-primary);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .action-button:hover {
+            background: var(--color-primary);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 185, 107, 0.3);
+        }
+
+        /* Sort buttons */
+        .sort-buttons {
+            margin-left: 6px;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            vertical-align: middle;
+            position: relative;
+            top: -2px;
+        }
+
+        .sort-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            width: 16px;
+            height: 14px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            padding: 0;
+            margin: 0;
+            line-height: 1;
+            opacity: 0.8;
+        }
+
+        .sort-btn:hover {
+            color: rgba(255, 255, 255, 0.8);
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .sort-btn.active {
+            color: var(--color-primary);
+            opacity: 1;
+            text-shadow: 0 0 8px rgba(0, 255, 136, 0.6);
+        }
+
+
+
+        .action-button {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, rgba(0, 185, 107, 0.1), rgba(30, 127, 255, 0.1));
+            border: 1px solid var(--color-primary);
+            border-radius: 8px;
+            color: var(--color-primary);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .action-button:hover {
+            background: var(--color-primary);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 185, 107, 0.3);
+        }
+
+
+
+        /* Drawer Styles */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(3px);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .drawer-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .drawer-container {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 680px;
+            height: 100vh;
+            background: rgba(15, 15, 15, 0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drawer-overlay.show .drawer-container {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--color-border);
+            flex-shrink: 0;
+        }
+
+        .drawer-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .drawer-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--color-text-secondary);
+        }
+
+        .drawer-close:hover {
+            background: var(--color-bg);
+            color: var(--color-text);
+        }
+
+        .drawer-tabs {
+            display: flex;
+            padding: 0 24px;
+            gap: 32px;
+            border-bottom: 1px solid var(--color-border);
+            flex-shrink: 0;
+        }
+
+        .drawer-tab {
+            padding: 16px 0;
+            position: relative;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: color 0.3s;
+            font-size: 14px;
+        }
+
+        .drawer-tab:hover {
+            color: var(--color-text);
+        }
+
+        .drawer-tab.active {
+            color: var(--color-primary);
+        }
+
+        .drawer-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--color-primary);
+        }
+
+        .drawer-content {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+            background: var(--color-bg-card);
+            padding-bottom: 80px; /* Add space for fixed actions */
+        }
+
+        /* Info Section Container */
+        .info-section-container {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding-bottom: 18px;
+            margin-bottom: 18px;
+        }
+        .info-section-container:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        /* Info Section Divider */
+        .info-section-divider {
+            display: flex;
+            align-items: center;
+            margin: 0 0 14px 0;
+            padding: 0;
+            border: none;
+        }
+        .info-section-icon {
+            font-size: 14px;
+            margin-right: 6px;
+        }
+        .info-section-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Info Grid 3 Columns */
+        .info-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px 14px;
+            margin-bottom: 14px;
+            padding: 0 2px;
+        }
+
+        /* Info Items */
+        .info-item {
+            text-align: left;
+        }
+        .info-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 5px;
+            font-weight: 400;
+            line-height: 1.2;
+        }
+        .info-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 1.3;
+        }
+
+        /* Drawer Info Grid */
+        .drawer-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 0;
+        }
+
+        .drawer-info-item {
+            text-align: left;
+        }
+
+        .drawer-info-item.full-width {
+            grid-column: span 2;
+        }
+
+        .drawer-info-label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+        
+        /* Status styles */
+        .status-active {
+            color: #4ade80 !important;
+            font-weight: 400;
+            font-size: 10px;
+            margin-left: 6px;
+            padding: 2px 6px;
+            background: rgba(74, 222, 128, 0.15);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 10px;
+            display: inline-block;
+        }
+        .status-discharge {
+            color: #f97316 !important;
+            font-weight: 600;
+        }
+
+        /* Device Flow Indicators */
+        .device-status-container {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .device-code-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+        
+        .flow-indicators {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .flow-item {
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+            transition: all 0.3s ease;
+        }
+        
+        .flow-item.active {
+            color: #4ade80;
+        }
+        
+        .flow-item.inactive {
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .flow-indicator-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .flow-item.active .flow-indicator-dot {
+            background: #4ade80;
+            box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+        }
+        
+        .flow-item.inactive .flow-indicator-dot {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .battery-missing {
+            color: #ef4444;
+            font-size: 11px;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .battery-missing .flow-indicator-dot {
+            background: #ef4444;
+            margin-right: 6px;
+        }
+
+        /* Profit Details Drawer */
+        .profit-drawer {
+            position: fixed;
+            top: 0;
+            right: -600px;
+            width: 600px;
+            height: 100vh;
+            background: rgba(15, 15, 15, 0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .profit-drawer.open {
+            right: 0;
+        }
+        
+        /* Fixed Header */
+        .profit-drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--color-border);
+            background: rgba(15, 15, 15, 0.98);
+            flex-shrink: 0;
+        }
+        
+        .profit-drawer-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+        
+        .profit-drawer-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            padding: 4px;
+        }
+        
+        .profit-export-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(30, 127, 255, 0.1);
+            border: 1px solid rgba(30, 127, 255, 0.3);
+            color: #1e7fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .profit-export-btn:hover {
+            background: rgba(30, 127, 255, 0.2);
+            border-color: rgba(30, 127, 255, 0.5);
+        }
+        
+        /* Fixed Summary Cards */
+        .profit-summary-fixed {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 24px;
+            background: rgba(15, 15, 15, 0.98);
+            flex-shrink: 0;
+        }
+        
+        .profit-summary-item {
+            text-align: center;
+            padding: 20px;
+            background: #000000;
+            border: none;
+            border-radius: 12px;
+        }
+        
+        .profit-summary-label {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .profit-summary-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #4ade80;
+        }
+        
+        /* Table Container */
+        .profit-table-container {
+            flex: 1;
+            margin: 0 24px 24px 24px;
+            background: #000000;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Fixed Table Header */
+        .profit-table-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            background: #000000;
+            border-bottom: 1px solid var(--color-border);
+            flex-shrink: 0;
+        }
+        
+        .header-cell {
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header-cell:last-child {
+            border-right: none;
+        }
+        
+        /* Scrollable Content */
+        .profit-table-content {
+            flex: 1;
+            overflow-y: auto;
+            background: #000000;
+        }
+        
+        .profit-table-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .profit-table-row:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        .table-cell {
+            padding: 12px;
+            font-size: 13px;
+            color: var(--color-text);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .table-cell:last-child {
+            border-right: none;
+        }
+
+        /* Clickable profit cells */
+        .clickable-profit {
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        .clickable-profit:hover {
+            color: #4ade80;
+        }
+
+        /* Drawer overlay */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        
+        .drawer-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .drawer-info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-text);
+            line-height: 1.4;
+        }
+
+        /* Fixed Action Buttons at Bottom of Drawer */
+        .drawer-actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--color-bg-card);
+            border-top: 1px solid var(--color-border);
+            padding: 16px 24px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .drawer-action-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            background: var(--color-bg-secondary);
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            min-width: 80px;
+        }
+
+        .drawer-action-btn:hover {
+            background: var(--color-bg-hover);
+            border-color: var(--color-primary);
+            transform: translateY(-1px);
+        }
+
+        .drawer-action-btn.primary {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #000;
+        }
+
+        .drawer-action-btn.primary:hover {
+            background: #00e67a;
+            border-color: #00e67a;
+            color: #000;
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+        }
+
+        .drawer-action-btn.danger {
+            background: #ff4757;
+            border-color: #ff4757;
+            color: #fff;
+        }
+
+        .drawer-action-btn.danger:hover {
+            background: #ff3742;
+            border-color: #ff3742;
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        }
+
+        /* Revenue Cards */
+        .revenue-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .revenue-card {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .revenue-card-label {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .revenue-card-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        /* Operating Stats */
+        .operating-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .operating-stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .operating-stat-label {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            opacity: 0.8;
+            font-weight: 400;
+        }
+
+        /* Chart Container in Drawer */
+        .drawer-chart-container {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .drawer-chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .drawer-chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .drawer-chart-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .drawer-chart-control {
+            padding: 6px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            background: var(--color-bg-card);
+            color: var(--color-text-secondary);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .drawer-chart-control.active {
+            background: var(--color-primary);
+            color: #000;
+            border-color: var(--color-primary);
+        }
+
+        .drawer-chart {
+            height: 300px;
+        }
+
+        /* Date Picker in Drawer */
+        .drawer-date-picker {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            color: var(--color-text);
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .family-grid {
+                grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            }
+        }
+
+
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            .stats-section {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container.full-width {
+                grid-column: span 1;
+            }
+            
+            .family-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-filter-section {
+                flex-direction: column;
+            }
+            
+            .drawer-container {
+                width: 100%;
+                max-width: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Container -->
+    <div id="headerContainer"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Fixed Header Area -->
+        <div class="fixed-header">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1 class="page-title" data-i18n-key="family.title">家庭</h1>
+                </div>
+            </div>
+
+            <!-- Search Section -->
+            <div class="search-filter-section">
+                    <!-- Region Select as First Filter -->
+                    <select class="filter-select" id="regionFilter" onchange="handleRegionFilter(this.value)">
+                        <option value="" data-i18n-key="family.placeholder.allRegions">所有地区</option>
+                        <option value="NSW">NSW - 新南威尔士州</option>
+                        <option value="VIC">VIC - 维多利亚州</option>
+                        <option value="QLD">QLD - 昆士兰州</option>
+                        <option value="SA">SA - 南澳大利亚州</option>
+                        <option value="WA">WA - 西澳大利亚州</option>
+                        <option value="TAS">TAS - 塔斯马尼亚州</option>
+                        <option value="NT">NT - 北领地</option>
+                        <option value="ACT">ACT - 首都领地</option>
+                    </select>
+                    
+                    <input type="text" class="search-input" id="searchInput" data-i18n-placeholder="family.placeholder.userName" placeholder="请输入用户名称..." onkeyup="handleSearch(this.value)">
+                    
+                    <input type="text" class="search-input" id="meterInput" data-i18n-placeholder="family.placeholder.meterNumber" placeholder="请输入电表编号..." onkeyup="handleMeterSearch(this.value)">
+                    
+                    <input type="text" class="search-input" id="deviceCodeInput" data-i18n-placeholder="family.placeholder.deviceCode" placeholder="请输入设备编码..." onkeyup="handleDeviceCodeSearch(this.value)">
+                    
+                    <select class="filter-select" id="deviceStatusFilter" onchange="handleDeviceStatusFilter(this.value)">
+                        <option value="" data-i18n-key="family.placeholder.deviceStatus">所有设备状态</option>
+                        <option value="charging" data-i18n-key="family.deviceStates.charging">充电</option>
+                        <option value="discharging" data-i18n-key="family.deviceStates.discharging">放电</option>
+                        <option value="standby" data-i18n-key="family.deviceStates.standby">待机</option>
+                        <option value="offline" data-i18n-key="family.deviceStates.offline">离线</option>
+                        <option disabled>──────────</option>
+                        <option value="missing-battery">缺少电池</option>
+                    </select>
+                    
+                    <select class="filter-select" id="deviceModeFilter" onchange="handleDeviceModeFilter(this.value)">
+                        <option value="" data-i18n-key="family.placeholder.allModes">所有模式</option>
+                        <option value="0" data-i18n-key="family.deviceModes.0">自用模式</option>
+                        <option value="1" data-i18n-key="family.deviceModes.1">并网优先模式</option>
+                        <option value="2" data-i18n-key="family.deviceModes.2">预留模式</option>
+                        <option value="3" data-i18n-key="family.deviceModes.3">备用模式</option>
+                    </select>
+                    
+                    <div class="filter-actions">
+                        <button class="filter-btn primary" onclick="applyFilters()">
+                            <span>🔍</span>
+                            <span data-i18n-key="family.buttons.search">查询</span>
+                        </button>
+                        <button class="filter-btn secondary" onclick="resetFilters()">
+                            <span>🔄</span>
+                            <span data-i18n-key="family.buttons.reset">重置</span>
+                        </button>
+                    </div>
+            </div>
+        </div>
+
+        <!-- Scrollable Content Area -->
+        <div class="scrollable-content">
+            <!-- Table Card -->
+            <div class="table-card">
+                <!-- Table Actions Header -->
+                <div class="table-actions-header">
+                    <button class="filter-btn export" onclick="exportData()">
+                        <span>📥</span>
+                        <span data-i18n-key="family.buttons.export">导出</span>
+                    </button>
+                    <button class="filter-btn export-detail" onclick="exportDetailData()" style="background: rgba(30, 127, 255, 0.1); border-color: rgba(30, 127, 255, 0.3);">
+                        <span>📊</span>
+                        <span data-i18n-key="family.buttons.exportDetail">导出明细</span>
+                    </button>
+                    <button class="filter-btn refresh" onclick="refreshData()">
+                        <span>🔄</span>
+                        <span data-i18n-key="family.buttons.refresh">刷新</span>
+                    </button>
+                </div>
+                
+                <!-- Table -->
+                <div class="table-wrapper">
+                    <div class="table-scrollable">
+                        <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n-key="family.table.user">用户</th>
+                                <th data-i18n-key="family.table.meterNumber">表号</th>
+                                <th>
+                                    <span data-i18n-key="family.table.yesterdayProfit">昨日获利 ($)</span>
+                                    <span class="sort-buttons">
+                                        <button class="sort-btn sort-asc" onclick="sortTable('yesterdayProfit', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('yesterdayProfit', 'desc', this)" title="降序">▼</button>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span data-i18n-key="family.table.todayProfit">今日获利 ($)</span>
+                                    <span class="sort-buttons">
+                                        <button class="sort-btn sort-asc" onclick="sortTable('todayProfit', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('todayProfit', 'desc', this)" title="降序">▼</button>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span data-i18n-key="family.table.totalProfit">累计获利 ($)</span>
+                                    <span class="sort-buttons">
+                                        <button class="sort-btn sort-asc" onclick="sortTable('totalProfit', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('totalProfit', 'desc', this)" title="降序">▼</button>
+                                    </span>
+                                </th>
+                                <th data-i18n-key="family.table.deviceCode">设备编码</th>
+                                <th data-i18n-key="family.table.deviceStatus">设备状态</th>
+                                <th data-i18n-key="family.table.deviceMode">模式</th>
+                                <th>
+                                    <span data-i18n-key="family.table.soc">SOC</span>
+                                    <span class="sort-buttons">
+                                        <button class="sort-btn sort-asc" onclick="sortTable('soc', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('soc', 'desc', this)" title="降序">▼</button>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span data-i18n-key="family.table.socValue">电池价值</span>
+                                    <span class="sort-buttons">
+                                        <button class="sort-btn sort-asc" onclick="sortTable('socValue', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('socValue', 'desc', this)" title="降序">▼</button>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span data-i18n-key="family.table.batteryCost">每kWh成本</span>
+                                    <span class="sort-buttons">
+                                        <button class="sort-btn sort-asc" onclick="sortTable('batteryCost', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('batteryCost', 'desc', this)" title="降序">▼</button>
+                                    </span>
+                                </th>
+                                <th data-i18n-key="family.table.action" class="fixed-action-column">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="familyTableBody">
+                            <!-- Table data will be dynamically generated -->
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div id="familyPaginationContainer"></div>
+        </div>
+    </div>
+
+    <!-- Family Detail Drawer -->
+    <div class="drawer-overlay" id="familyDrawer" onclick="closeFamilyDrawerOnMask(event)">
+        <div class="drawer-container" onclick="event.stopPropagation()">
+            <div class="drawer-header">
+                <h3 class="drawer-title" data-i18n-key="family.drawer.title">详情</h3>
+                <button class="drawer-close" onclick="closeFamilyDrawer()">✕</button>
+            </div>
+            
+            <div class="drawer-tabs">
+                <div class="drawer-tab active" onclick="switchDrawerTab('basicInfo', this)" data-i18n-key="family.drawer.tabs.basicInfo">基本信息</div>
+                <div class="drawer-tab" onclick="switchDrawerTab('revenueInfo', this)" data-i18n-key="family.drawer.tabs.revenueInfo">收益信息</div>
+                <div class="drawer-tab" onclick="switchDrawerTab('dispatchRecords', this)" data-i18n-key="family.drawer.tabs.dispatchRecords">调度记录</div>
+            </div>
+            
+            <div class="drawer-content" id="drawerContent">
+                <!-- Drawer content will be dynamically populated -->
+            </div>
+            
+            <!-- Fixed Action Buttons -->
+            <div class="drawer-actions">
+                <button class="drawer-action-btn" onclick="closeFamilyDrawer()" data-i18n-key="family.drawer.actions.cancel">取消</button>
+                <button class="drawer-action-btn primary" onclick="confirmFamilyDetails()" data-i18n-key="family.drawer.actions.confirm">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Define sortTable globally immediately - SIMPLE AND DIRECT
+        window.currentSortColumn = null;
+        window.currentSortDirection = null;
+        window.familyData = [];
+        window.filteredData = [];
+        
+        window.sortTable = function(column, direction, element) {
+            console.log('sortTable called:', column, direction);
+            
+            // Check if data is available
+            if (!window.filteredData || window.filteredData.length === 0) {
+                console.error('No data to sort');
+                return;
+            }
+            
+            // Check if clicking the same sort button
+            const isCurrentSort = window.currentSortColumn === column && window.currentSortDirection === direction;
+            
+            // Remove active class from all sort buttons
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (isCurrentSort) {
+                // Cancel sort - restore original order
+                window.currentSortColumn = null;
+                window.currentSortDirection = null;
+                
+                // Reset to original order
+                window.filteredData = [...window.familyData];
+                
+                // Reapply filters if any
+                const searchValue = document.getElementById('searchInput')?.value?.toLowerCase();
+                if (searchValue) {
+                    window.filteredData = window.filteredData.filter(family => 
+                        family.name.toLowerCase().includes(searchValue) ||
+                        family.deviceCode.toLowerCase().includes(searchValue)
+                    );
+                }
+            } else {
+                // Apply new sort
+                window.currentSortColumn = column;
+                window.currentSortDirection = direction;
+                
+                // Add active class to clicked button
+                if (element) element.classList.add('active');
+                
+                // Sort the data
+                window.filteredData.sort((a, b) => {
+                    let aVal, bVal;
+                    
+                    switch(column) {
+                        case 'todayProfit':
+                            aVal = parseFloat(a.todayProfit);
+                            bVal = parseFloat(b.todayProfit);
+                            break;
+                        case 'totalProfit':
+                            aVal = parseFloat(a.totalProfit);
+                            bVal = parseFloat(b.totalProfit);
+                            break;
+                        case 'avgProfit':
+                            aVal = parseFloat(a.avgProfit);
+                            bVal = parseFloat(b.avgProfit);
+                            break;
+                        case 'soc':
+                            aVal = a.soc;
+                            bVal = b.soc;
+                            break;
+                        case 'socValue':
+                            aVal = a.soc * 15;
+                            bVal = b.soc * 15;
+                            break;
+                        case 'batteryCost':
+                            aVal = a.soc * 0.5;
+                            bVal = b.soc * 0.5;
+                            break;
+                        case 'usageDays':
+                            aVal = a.usageDays;
+                            bVal = b.usageDays;
+                            break;
+                        default:
+                            aVal = a[column];
+                            bVal = b[column];
+                    }
+                    
+                    if (direction === 'asc') {
+                        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                    } else {
+                        return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+                    }
+                });
+            }
+            
+            // Re-render the table
+            if (window.renderTable) {
+                window.renderTable();
+            } else {
+                console.error('renderTable function not found');
+            }
+        };
+        
+        // Generate family data immediately
+        function generateFamilyData() {
+            const names = ['张明', '李华', '王芳', '赵强', '陈晓', '刘静', '周涛', '吴敏', '郑伟', '林丽'];
+            const locations = ['NSW', 'NSW', 'NSW', 'Perth WA', 'Adelaide SA', 'Gold Coast QLD', 'Canberra ACT', 'Newcastle NSW', 'Hobart TAS', 'Darwin NT'];
+            const statuses = ['active', 'inactive'];
+            const deviceStatuses = ['charging', 'discharging', 'standby', 'offline'];
+            
+            const data = [];
+            let offlineCount = 0;
+            let standbyCount = 0;
+            
+            for (let i = 0; i < 6; i++) {
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+                const isActive = status === 'active';
+                
+                // Determine device status - only allow 3 offline, 2 standby, rest discharging
+                let deviceStatus;
+                if (offlineCount < 3 && i < 3) {
+                    deviceStatus = 'offline';
+                    offlineCount++;
+                } else if (standbyCount < 2 && i < 5) {
+                    deviceStatus = 'standby';
+                    standbyCount++;
+                } else {
+                    // All others are discharging
+                    deviceStatus = 'discharging';
+                }
+                
+                data.push({
+                    id: i + 1,
+                    name: names[i % names.length],
+                    nameKey: `family.userName${(i % 10) + 1}`,
+                    meterNumber: `M${String(i + 1).padStart(6, '0')}`,
+                    location: deviceStatus === 'offline' ? 'NSW' : locations[i % locations.length],
+                    status: status,
+                    soc: isActive ? Math.floor(Math.random() * 40 + 60) : Math.floor(Math.random() * 50),
+                    todayDischarge: isActive ? (Math.random() * 50 + 10).toFixed(1) : 0,
+                    todayProfit: isActive ? (Math.random() * 20 + 5).toFixed(1) : 0,
+                    totalProfit: (Math.random() * 500 + 100).toFixed(1),
+                    avgProfit: (Math.random() * 15 + 3).toFixed(1),
+                    deviceCode: `DEVICE${String(i + 1).padStart(3, '0')}`,
+                    deviceStatus: deviceStatus,
+                    deviceMode: Math.floor(Math.random() * 4), // 0-3 随机模式
+                    usageDays: Math.floor(Math.random() * 300 + 30)
+                });
+            }
+            
+            // Sort data by device status: discharging first, then standby, then offline
+            data.sort((a, b) => {
+                const statusOrder = {
+                    'discharging': 1,
+                    'standby': 2,
+                    'offline': 3,
+                    'charging': 4
+                };
+                return (statusOrder[a.deviceStatus] || 5) - (statusOrder[b.deviceStatus] || 5);
+            });
+            
+            return data;
+        }
+        
+        // Generate data immediately
+        window.familyData = generateFamilyData();
+        let currentPage = 1;
+        let pageSize = 20;
+        window.filteredData = [...window.familyData];
+        let pagination = null;
+        
+        // Ensure data loads even if other methods fail
+        window.onload = function() {
+            setTimeout(() => {
+                if (document.getElementById('familyTableBody') && document.getElementById('familyTableBody').children.length === 0) {
+                    loadFamilyCards();
+                }
+            }, 100);
+        };
+        
+        // Functions will be made globally accessible after they are defined
+        
+        // Initialize components
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize i18n
+            window.i18n = new I18n({
+                containerId: 'languageSelector',
+                defaultLanguage: localStorage.getItem('app_language') || 'zh'
+            });
+            
+            // Update page title
+            const updateTitle = () => {
+                const titleElement = document.querySelector('title');
+                const titleKey = titleElement.getAttribute('data-i18n-key');
+                if (titleKey && window.i18n) {
+                    titleElement.textContent = window.i18n.getText(titleKey) + ' - U Energy';
+                }
+            };
+            
+            // Function to update all i18n elements
+            const updateI18nElements = () => {
+                // Update all elements with data-i18n-key
+                document.querySelectorAll('[data-i18n-key]').forEach(element => {
+                    const key = element.getAttribute('data-i18n-key');
+                    if (key && window.i18n) {
+                        element.textContent = window.i18n.getText(key);
+                    }
+                });
+                
+                // Update all elements with data-i18n-placeholder
+                document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                    const key = element.getAttribute('data-i18n-placeholder');
+                    if (key && window.i18n) {
+                        element.placeholder = window.i18n.getText(key);
+                    }
+                });
+            };
+            
+            // Listen for language changes
+            window.i18n.addObserver(() => {
+                updateTitle();
+                updateI18nElements();
+                // Reload data to update dynamic content
+                loadFamilyCards(1);
+            });
+            
+            updateTitle();
+            updateI18nElements();
+            
+            // Update drawer elements specifically (they might be outside the initial DOM scan)
+            setTimeout(() => {
+                updateI18nElements();
+                
+                // Force update all filter options specifically
+                document.querySelectorAll('select option[data-i18n-key]').forEach(option => {
+                    const key = option.getAttribute('data-i18n-key');
+                    if (key && window.i18n) {
+                        const text = window.i18n.getText(key);
+                        if (text && text !== key) {
+                            option.textContent = text;
+                        }
+                        console.log('Updated option:', key, '->', text);
+                    }
+                });
+                
+                // Special check for allModes specifically
+                const deviceModeSelect = document.getElementById('deviceModeFilter');
+                if (deviceModeSelect) {
+                    const allModesOption = deviceModeSelect.querySelector('option[value=""]');
+                    if (allModesOption && window.i18n) {
+                        const key = allModesOption.getAttribute('data-i18n-key');
+                        const text = window.i18n.getText(key);
+                        console.log('AllModes translation check:', key, '->', text);
+                        // Force Chinese text if translation exists
+                        if (text && text !== key) {
+                            allModesOption.textContent = text;
+                        } else {
+                            // Fallback to hardcoded Chinese text
+                            allModesOption.textContent = '所有模式';
+                        }
+                        console.log('Final allModes text:', allModesOption.textContent);
+                    }
+                }
+                
+                console.log('Force updated all select options with i18n keys');
+            }, 1000);
+            
+            // Additional check after i18n is fully loaded
+            setTimeout(() => {
+                updateI18nElements();
+                
+                // Force update allModes option again
+                const deviceModeSelect = document.getElementById('deviceModeFilter');
+                if (deviceModeSelect) {
+                    const allModesOption = deviceModeSelect.querySelector('option[value=""]');
+                    if (allModesOption) {
+                        allModesOption.textContent = '所有模式';
+                        console.log('Force set allModes to Chinese text');
+                    }
+                }
+                
+                console.log('Final i18n update check');
+            }, 2000);
+            
+            // Extra fallback - force update after 3 seconds
+            setTimeout(() => {
+                const deviceModeSelect = document.getElementById('deviceModeFilter');
+                if (deviceModeSelect) {
+                    const allModesOption = deviceModeSelect.querySelector('option[value=""]');
+                    if (allModesOption && allModesOption.textContent.includes('family.placeholder')) {
+                        allModesOption.textContent = '所有模式';
+                        console.log('Final fallback: forced allModes to Chinese');
+                    }
+                }
+            }, 3000);
+            
+            // Initialize header navigation after DOM is ready
+            function initializeHeaderNav() {
+                console.log('Checking HeaderNav availability:', typeof HeaderNav);
+                console.log('headerContainer exists:', document.getElementById('headerContainer'));
+                
+                if (typeof HeaderNav !== 'undefined') {
+                    console.log('Initializing HeaderNav...');
+                    try {
+                        window.headerNav = new HeaderNav({
+                            containerId: 'headerContainer',
+                            currentPage: 'family'
+                        });
+                        console.log('HeaderNav initialized successfully');
+                    } catch (error) {
+                        console.error('HeaderNav initialization failed:', error);
+                    }
+                } else {
+                    console.error('HeaderNav class not found! Check if header-nav.js is loaded properly.');
+                }
+            }
+            
+            // Call immediately and also after a delay
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initializeHeaderNav);
+            } else {
+                initializeHeaderNav();
+            }
+            
+            // Also try after a short delay as fallback
+            setTimeout(initializeHeaderNav, 100);
+
+
+            // Initialize pagination for table view
+            pagination = new Pagination({
+                containerId: 'familyPaginationContainer',
+                currentPage: currentPage,
+                pageSize: pageSize,
+                totalItems: familyData.length,
+                onPageChange: (page, size) => {
+                    currentPage = page;
+                    loadFamilyCards();
+                },
+                onPageSizeChange: (size) => {
+                    pageSize = size;
+                    currentPage = 1;
+                    loadFamilyCards();
+                }
+            });
+
+            // Load initial data immediately with multiple attempts
+            loadFamilyCards();
+            
+            // Fallback: ensure data is loaded
+            setTimeout(() => {
+                const tbody = document.getElementById('familyTableBody');
+                if (tbody && tbody.children.length === 0) {
+                    // Force load data if table is still empty
+                    console.log('Force loading family data...');
+                    loadFamilyCards();
+                }
+                
+                // 检查排序按钮是否存在
+                const sortButtons = document.querySelectorAll('.sort-btn');
+                console.log('找到排序按钮数量:', sortButtons.length);
+                
+                // 检查表格是否存在
+                const table = document.querySelector('.data-table');
+                console.log('表格存在:', !!table);
+                
+                // 检查表头是否存在
+                const tableHeaders = document.querySelectorAll('.data-table th');
+                console.log('表头数量:', tableHeaders.length);
+                
+                // 检查具体的排序按钮容器
+                const sortContainers = document.querySelectorAll('.sort-buttons');
+                console.log('排序按钮容器数量:', sortContainers.length);
+                
+                // 直接检查HTML内容
+                const tableContainer = document.querySelector('.table-container');
+                if (tableContainer) {
+                    console.log('表格容器HTML长度:', tableContainer.innerHTML.length);
+                }
+                
+                if (sortButtons.length === 0) {
+                    console.error('排序按钮未找到！请检查HTML结构');
+                } else {
+                    console.log('排序按钮已正确加载');
+                }
+            }, 200);
+            
+            // 再次延迟检查，确保所有内容都加载完成
+            setTimeout(() => {
+                console.log('=== 延迟检查 (1秒后) ===');
+                const sortButtons2 = document.querySelectorAll('.sort-btn');
+                console.log('第二次检查 - 找到排序按钮数量:', sortButtons2.length);
+                
+                // 手动检查每个应该有排序按钮的列
+                const thElements = document.querySelectorAll('th');
+                thElements.forEach((th, index) => {
+                    const text = th.textContent.trim();
+                    const hasSortButtons = th.querySelector('.sort-buttons');
+                    console.log(`列${index}: ${text} - 有排序按钮: ${!!hasSortButtons}`);
+                });
+                
+                // 检查原始HTML模板
+                const tableHTML = document.querySelector('.table-container').innerHTML;
+                console.log('表格HTML包含sort-buttons:', tableHTML.includes('sort-buttons'));
+                console.log('表格HTML包含sort-btn:', tableHTML.includes('sort-btn'));
+                
+                // 获取第3个th的innerHTML（应该是"今日获利"）
+                if (thElements[2]) {
+                    console.log('今日获利列的HTML:', thElements[2].innerHTML);
+                }
+            }, 1000);
+        });
+
+        // Create family table row
+        function createFamilyTableRow(family) {
+            console.log('Creating row for family:', family);
+            const row = document.createElement('tr');
+            
+            const statusClass = family.status === 'active' ? 'active' : 'inactive';
+            
+            const statusText = family.status === 'active' ? (window.i18n ? window.i18n.getText('family.activityStatus.active') : '活跃') :
+                              (window.i18n ? window.i18n.getText('family.activityStatus.inactive') : '非活跃');
+
+            const deviceStatusClass = family.deviceStatus === 'charging' ? 'charging' :
+                                    family.deviceStatus === 'discharging' ? 'discharging' :
+                                    family.deviceStatus === 'standby' ? 'standby' : 'offline';
+
+            const deviceStatusText = family.deviceStatus === 'charging' ? (window.i18n ? window.i18n.getText('family.deviceStates.charging') : '充电') :
+                                   family.deviceStatus === 'discharging' ? (window.i18n ? window.i18n.getText('family.deviceStates.discharging') : '放电') :
+                                   family.deviceStatus === 'standby' ? (window.i18n ? window.i18n.getText('family.deviceStates.standby') : '待机') :
+                                   (window.i18n ? window.i18n.getText('family.deviceStates.offline') : '离线');
+
+            const userName = window.i18n ? window.i18n.getText(family.nameKey) : family.name;
+            const todayDate = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+            const yesterdayDate = new Date(Date.now() - 86400000).toISOString().split('T')[0].replace(/-/g, '/');
+            
+            // Build flow indicators separately to avoid nested template literal issues
+            let flowIndicators = '';
+            if (family.deviceStatus === 'charging' || family.deviceStatus === 'discharging') {
+                const loadColor = family.deviceStatus === 'discharging' ? '#4ade80' : 'rgba(255, 255, 255, 0.2)';
+                const gridColor = family.deviceStatus === 'charging' ? '#4ade80' : 'rgba(255, 255, 255, 0.2)';
+                flowIndicators = '<div><span style="color: ' + loadColor + ';">●</span>电池→负载</div>' +
+                               '<div><span style="color: ' + gridColor + ';">●</span>电池→电网</div>';
+            }
+            
+            const missingBattery = family.deviceStatus === 'offline' ? '<div style="color: #ef4444; margin-top: 2px;">缺少电池</div>' : '';
+            
+            row.innerHTML = 
+                '<td>' + userName + '</td>' +
+                '<td>' + family.meterNumber + '</td>' +
+                '<td class="clickable-profit" onclick="openProfitDrawer(\'' + userName + '\', \'' + yesterdayDate + '\', \'yesterday\')">$' + (family.avgProfit || Math.floor(family.todayProfit * 0.8)) + '</td>' +
+                '<td class="clickable-profit" onclick="openProfitDrawer(\'' + userName + '\', \'' + todayDate + '\', \'today\')">$' + family.todayProfit + '</td>' +
+                '<td>$' + (family.totalProfit || Math.floor(family.todayProfit * 30)) + '</td>' +
+                '<td>' + family.deviceCode + '</td>' +
+                '<td>' +
+                    '<div style="display: flex; align-items: flex-start; gap: 12px;">' +
+                        '<span class="status-badge ' + deviceStatusClass + '">' +
+                            '<span class="status-indicator"></span>' +
+                            deviceStatusText +
+                        '</span>' +
+                        '<div style="display: flex; flex-direction: column; font-size: 10px; color: rgba(255, 255, 255, 0.4); line-height: 1.4;">' +
+                            flowIndicators +
+                            missingBattery +
+                        '</div>' +
+                    '</div>' +
+                '</td>' +
+                '<td>' + (window.i18n ? window.i18n.getText('family.deviceModes.' + family.deviceMode) : 'Mode ' + family.deviceMode) + '</td>' +
+                '<td>' + family.soc + '%</td>' +
+                '<td>$' + (family.soc * 15).toFixed(2) + '</td>' +
+                '<td>$' + (family.soc * 0.5).toFixed(2) + '</td>' +
+                '<td class="fixed-action-column">' +
+                    '<div class="action-buttons">' +
+                        '<button class="action-btn edit" onclick="viewFamilyDetails(' + family.id + ')">' +
+                            (window.i18n ? window.i18n.getText('family.buttons.viewDetails') : '查看详情') +
+                        '</button>' +
+                        '<button class="action-btn view" onclick="viewRunningData(' + family.id + ', \'' + family.meterNumber + '\')">' +
+                            (window.i18n ? window.i18n.getText('family.buttons.runningData') : '运行数据') +
+                        '</button>' +
+                    '</div>' +
+                '</td>';
+            
+            return row;
+        }
+
+        // Load family table data
+        function loadFamilyCards() {
+            const tbody = document.getElementById('familyTableBody');
+            if (!tbody) {
+                console.error('Table body not found');
+                return;
+            }
+            
+            console.log('=== DEBUG loadFamilyCards ===');
+            console.log('familyData length:', window.familyData ? window.familyData.length : 'undefined');
+            console.log('filteredData length:', window.filteredData ? window.filteredData.length : 'undefined');
+            console.log('Current sort:', window.currentSortColumn, window.currentSortDirection);
+            console.log('familyData sample:', window.familyData ? window.familyData[0] : 'none');
+            tbody.innerHTML = '';
+
+            // Initialize filteredData if not set or if familyData changed
+            if (!window.filteredData || window.filteredData.length === 0) {
+                window.filteredData = [...window.familyData];
+                console.log('Initialized filteredData with', window.filteredData.length, 'items');
+            }
+            
+            // Apply search filter
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            if (searchValue) {
+                window.filteredData = window.filteredData.filter(family => 
+                    family.name.toLowerCase().includes(searchValue) ||
+                    family.deviceCode.toLowerCase().includes(searchValue)
+                );
+            }
+            
+            // Apply meter number filter
+            const meterValue = document.getElementById('meterInput').value.toLowerCase();
+            if (meterValue) {
+                window.filteredData = window.filteredData.filter(family => 
+                    family.meterNumber.toLowerCase().includes(meterValue)
+                );
+            }
+            
+            // Activity filter removed - element doesn't exist
+            
+            // Apply device status filter
+            const deviceStatusFilter = document.getElementById('deviceStatusFilter').value;
+            if (deviceStatusFilter) {
+                window.filteredData = window.filteredData.filter(family => family.deviceStatus === deviceStatusFilter);
+            }
+
+            // Update pagination
+            if (pagination) {
+                pagination.updateTotal(window.filteredData.length);
+                pagination.currentPage = currentPage;
+                pagination.pageSize = pageSize;
+                pagination.refresh();
+            }
+
+            // Get page data
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+            const pageData = window.filteredData.slice(start, end);
+            
+            if (pageData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="12" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
+                            ${window.i18n ? window.i18n.getText('noData') : '暂无数据'}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            console.log('Rendering', pageData.length, 'rows to table');
+            pageData.forEach((family, index) => {
+                console.log('Processing family', index, ':', family.name);
+                const row = createFamilyTableRow(family);
+                if (row) {
+                    tbody.appendChild(row);
+                    console.log('Added row for', family.name);
+                } else {
+                    console.error('Failed to create row for', family.name);
+                }
+            });
+            console.log('Table now has', tbody.children.length, 'rows');
+        }
+
+        // Make loadFamilyCards available globally as renderTable
+        window.renderTable = loadFamilyCards;
+
+        // View family details
+        function viewFamilyDetails(familyId) {
+            const family = familyData.find(f => f.id === familyId);
+            if (family) {
+                const drawer = document.getElementById('familyDrawer');
+                const drawerContainer = drawer.querySelector('.drawer-container');
+                drawerContainer.setAttribute('data-family-id', familyId);
+                drawer.classList.add('show');
+                
+                // Update i18n elements in the drawer
+                drawer.querySelectorAll('[data-i18n-key]').forEach(element => {
+                    const key = element.getAttribute('data-i18n-key');
+                    if (key && window.i18n) {
+                        const text = window.i18n.getText(key);
+                        if (text && text !== key) {
+                            element.textContent = text;
+                        }
+                    }
+                });
+                
+                // Reset tabs to first one
+                document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
+                document.querySelector('.drawer-tab').classList.add('active');
+                loadDrawerContent('basicInfo', family);
+            }
+        }
+
+        // Close family drawer
+        function closeFamilyDrawer() {
+            document.getElementById('familyDrawer').classList.remove('show');
+        }
+
+        // Close family drawer when clicking on mask
+        function closeFamilyDrawerOnMask(event) {
+            // Only close if clicking on the overlay itself, not on the drawer content
+            if (event.target === event.currentTarget) {
+                closeFamilyDrawer();
+            }
+        }
+
+        // Confirm family details
+        function confirmFamilyDetails() {
+            // Get the current family ID from the drawer
+            const drawerId = document.querySelector('.drawer-container').getAttribute('data-family-id');
+            
+            console.log('Confirmed family ID:', drawerId);
+            
+            // Close drawer
+            closeFamilyDrawer();
+        }
+
+        // Track dispatch records page
+        let dispatchCurrentPage = 1;
+        
+        // Switch drawer tab
+        function switchDrawerTab(tab, element) {
+            document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+            
+            // Reset dispatch page when switching tabs
+            if (tab === 'dispatchRecords') {
+                dispatchCurrentPage = 1;
+            }
+            
+            // Get the current family from the drawer (stored during viewFamilyDetails)
+            const drawerId = element.closest('.drawer-container').getAttribute('data-family-id');
+            const family = drawerId ? familyData.find(f => f.id == drawerId) : familyData[0];
+            loadDrawerContent(tab, family);
+        }
+        
+        // Change dispatch records page
+        function changeDispatchPage(direction) {
+            dispatchCurrentPage += direction;
+            
+            // Get the current family data
+            const drawerId = document.querySelector('.drawer-container').getAttribute('data-family-id');
+            const family = drawerId ? familyData.find(f => f.id == drawerId) : familyData[0];
+            
+            if (!family) return;
+            
+            // Reload the dispatch records tab with new page
+            loadDrawerContent('dispatchRecords', family);
+        }
+
+        // Load drawer content
+        function loadDrawerContent(tab, family) {
+            const content = document.getElementById('drawerContent');
+            
+            if (!family) {
+                content.innerHTML = '<p>No family data available</p>';
+                return;
+            }
+            
+            switch(tab) {
+                case 'basicInfo':
+                    content.innerHTML = `
+                        <!-- 用户信息 -->
+                        <div class="info-section-container">
+                            <div class="info-section-divider">
+                                <span class="info-section-icon">👤</span>
+                                <span class="info-section-title">${window.i18n ? window.i18n.getText('family.drawer.user') : '用户'}</span>
+                            </div>
+                        <div class="info-grid-3">
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.owner') : '所属用户'}</div>
+                                <div class="info-value">${window.i18n ? window.i18n.getText(family.nameKey) : family.name} <span class="status-active">${window.i18n ? window.i18n.getText('family.drawer.active') : '活跃'}</span></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.avgProfit') : '日均获利'}</div>
+                                <div class="info-value">$${family.avgProfit}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.deviceCode') : '设备编码'}</div>
+                                <div class="info-value">${family.deviceCode}</div>
+                            </div>
+                        </div>
+                        <div class="info-grid-3">
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.meterNumber') : '电表'}</div>
+                                <div class="info-value">${family.meterNumber}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.address') : '地址'}</div>
+                                <div class="info-value">${family.location}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.operatingDays') : '运行天数'}</div>
+                                <div class="info-value">${Math.floor(Math.random() * 300 + 200)}${window.i18n ? window.i18n.getText('family.drawer.day') : '天'}</div>
+                            </div>
+                        </div>
+                        <div class="info-grid-3">
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.totalRevenue') : '累计获利'}</div>
+                                <div class="info-value">$${family.totalProfit}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.avgProfit') : '日均获利'}</div>
+                                <div class="info-value">$${family.avgProfit}</div>
+                            </div>
+                        </div>
+                        </div>
+
+                        <!-- 电池信息 -->
+                        <div class="info-section-container">
+                            <div class="info-section-divider">
+                            <span class="info-section-icon">🔋</span>
+                            <span class="info-section-title">${window.i18n ? window.i18n.getText('family.drawer.battery') : '电池'}</span>
+                        </div>
+                        <div class="info-grid-3">
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.batteryCapacity') : '电池容量'}</div>
+                                <div class="info-value">13.5kWh</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.soc') : 'SOC'}</div>
+                                <div class="info-value">${family.soc}%</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.statusPower') : '状态（实时功率）'}</div>
+                                <div class="info-value status-discharge">${window.i18n ? window.i18n.getText('family.drawer.discharging') : '放电中'} (2.1kW)</div>
+                            </div>
+                        </div>
+                        <div class="device-status-container">
+                            <div class="device-code-header">${family.deviceCode}</div>
+                            <div class="flow-indicators">
+                                <div class="flow-item ${family.deviceStatus === 'discharging' ? 'active' : 'inactive'}">
+                                    <span class="flow-indicator-dot"></span>
+                                    电池→负载
+                                </div>
+                                <div class="flow-item ${family.deviceStatus === 'charging' ? 'active' : 'inactive'}">
+                                    <span class="flow-indicator-dot"></span>
+                                    电池→电网
+                                </div>
+                                ${Math.random() > 0.7 ? '<div class="battery-missing"><span class="flow-indicator-dot"></span>缺少电池</div>' : ''}
+                            </div>
+                        </div>
+                        </div>
+
+                        <!-- 光伏信息 -->
+                        <div class="info-section-container">
+                            <div class="info-section-divider">
+                            <span class="info-section-icon">☀️</span>
+                            <span class="info-section-title">${window.i18n ? window.i18n.getText('family.drawer.solar') : '光伏'}</span>
+                        </div>
+                        <div class="info-grid-3">
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.pvPower') : 'PV发电功率'}</div>
+                                <div class="info-value">3.9kW</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.outputPower') : '输出功率'}</div>
+                                <div class="info-value">1.7kW</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.todayPvLoad') : '今日PV直供负载量'}</div>
+                                <div class="info-value">9.8kWh</div>
+                            </div>
+                        </div>
+                        </div>
+
+                        <!-- 负载信息 -->
+                        <div class="info-section-container">
+                            <div class="info-section-divider">
+                            <span class="info-section-icon">⚡</span>
+                            <span class="info-section-title">${window.i18n ? window.i18n.getText('family.drawer.load') : '负载'}</span>
+                        </div>
+                        <div class="info-grid-3">
+                            <div class="info-item">
+                                <div class="info-label">${window.i18n ? window.i18n.getText('family.drawer.totalLoadConsumption') : '所有负载消耗量'}</div>
+                                <div class="info-value">48.8kWh</div>
+                            </div>
+                        </div>
+                        </div>
+                        
+                        <!-- Operating Data Chart -->
+                        <div class="drawer-chart-container" style="margin-top: 30px;">
+                            <div class="drawer-chart-header">
+                                <div class="drawer-chart-title">${window.i18n ? window.i18n.getText('family.drawer.operatingDataTitle') : '运行数据'}</div>
+                                <div class="drawer-date-picker">${new Date().toISOString().split('T')[0]} ▼</div>
+                            </div>
+                            <div id="operatingChart" class="drawer-chart"></div>
+                        </div>
+                    `;
+                    // Initialize operating chart
+                    setTimeout(() => initOperatingChart(), 100);
+                    break;
+                    
+                case 'revenueInfo':
+                    content.innerHTML = `
+                        <div class="revenue-cards">
+                            <div class="revenue-card">
+                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.todayCharge') : '今日充电量'}</div>
+                                <div class="revenue-card-value">-- kWh</div>
+                            </div>
+                            <div class="revenue-card">
+                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.todayDischarge') : '今日放电量'}</div>
+                                <div class="revenue-card-value">-- kWh</div>
+                            </div>
+                            <div class="revenue-card">
+                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.todayProfit') : '今日获利'}</div>
+                                <div class="revenue-card-value">$${family.todayProfit}</div>
+                            </div>
+                            <div class="revenue-card">
+                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.totalCharge') : '累计充电量'}</div>
+                                <div class="revenue-card-value">-- kWh</div>
+                            </div>
+                            <div class="revenue-card">
+                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.totalDischarge') : '累计放电量'}</div>
+                                <div class="revenue-card-value">-- kWh</div>
+                            </div>
+                            <div class="revenue-card">
+                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.totalRevenue') : '累计获利'}</div>
+                                <div class="revenue-card-value">$${family.totalProfit}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="drawer-chart-container">
+                            <div class="drawer-chart-header">
+                                <div class="drawer-chart-title">${window.i18n ? window.i18n.getText('family.drawer.profitTrend') : '收益趋势'}</div>
+                                <div class="drawer-chart-controls">
+                                    <button class="drawer-chart-control active" onclick="updateProfitChart('day', this)" data-view="day">${window.i18n ? window.i18n.getText('family.drawer.day') : '天'}</button>
+                                    <button class="drawer-chart-control" onclick="updateProfitChart('month', this)" data-view="month">${window.i18n ? window.i18n.getText('family.drawer.month') : '月'}</button>
+                                    <button class="drawer-chart-control" onclick="updateProfitChart('year', this)" data-view="year">${window.i18n ? window.i18n.getText('family.drawer.year') : '年'}</button>
+                                    <input type="date" id="profitDatePicker" class="drawer-chart-date-picker" style="background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-text); padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;" onchange="onProfitDateChange(event)">
+                                </div>
+                            </div>
+                            <div id="profitChart" class="drawer-chart"></div>
+                        </div>
+                    `;
+                    // Set initial date and initialize chart
+                    setTimeout(() => {
+                        const today = new Date();
+                        document.getElementById('profitDatePicker').value = today.toISOString().split('T')[0];
+                        initProfitChart('day');
+                    }, 100);
+                    break;
+                    
+                case 'dispatchRecords':
+                    // Generate mock dispatch records data
+                    const dispatchRecords = generateDispatchRecords();
+                    
+                    // Pagination settings
+                    const recordsPerPage = 10;
+                    const currentPage = dispatchCurrentPage;
+                    const allRecords = dispatchRecords.filter(r => !r.totalCharge);
+                    const totalPages = Math.ceil(allRecords.length / recordsPerPage);
+                    const startIndex = (currentPage - 1) * recordsPerPage;
+                    const endIndex = startIndex + recordsPerPage;
+                    const pageRecords = allRecords.slice(startIndex, endIndex);
+                    
+                    const recordsHtml = pageRecords.map(record => {
+                        const typeClass = record.type === 'charge' ? 'charging' : 'discharging';
+                        const typeText = record.type === 'charge' ? 
+                            (window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.charge') : '充电') :
+                            (window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.discharge') : '放电');
+                        const amountPrefix = record.type === 'charge' ? '-' : '+';
+                        const amountClass = record.type === 'charge' ? 'cost' : 'revenue';
+                        
+                        return `
+                            <tr>
+                                <td style="font-size: 13px; white-space: nowrap;">${record.timeRange}</td>
+                                <td>
+                                    <span class="dispatch-type-badge ${typeClass}">
+                                        ${typeText}
+                                    </span>
+                                </td>
+                                <td style="white-space: nowrap;">${record.energy} kWh</td>
+                                <td class="${amountClass}" style="white-space: nowrap;">${amountPrefix}$${record.amount}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                    
+                    content.innerHTML = `
+                        <style>
+                            .dispatch-records-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-top: 20px;
+                                table-layout: fixed;
+                            }
+                            .dispatch-records-table th {
+                                background: var(--color-bg);
+                                color: var(--color-text-secondary);
+                                font-weight: 600;
+                                text-align: left;
+                                padding: 12px 16px;
+                                border-bottom: 2px solid var(--color-border);
+                                font-size: 13px;
+                                white-space: nowrap;
+                            }
+                            .dispatch-records-table th:first-child {
+                                width: 35%;
+                            }
+                            .dispatch-records-table th:nth-child(2) {
+                                width: 15%;
+                            }
+                            .dispatch-records-table th:nth-child(3) {
+                                width: 25%;
+                            }
+                            .dispatch-records-table th:nth-child(4) {
+                                width: 25%;
+                            }
+                            .dispatch-records-table td {
+                                padding: 12px 16px;
+                                border-bottom: 1px solid var(--color-border-light);
+                                color: var(--color-text);
+                                font-size: 14px;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            }
+                            .dispatch-records-table tbody tr:hover {
+                                background: var(--color-bg-hover);
+                            }
+                            .dispatch-type-badge {
+                                display: inline-flex;
+                                align-items: center;
+                                padding: 4px 12px;
+                                border-radius: 12px;
+                                font-size: 12px;
+                                font-weight: 600;
+                            }
+                            .dispatch-type-badge.charging {
+                                background: rgba(255, 184, 0, 0.1);
+                                color: #ffb800;
+                                border: 1px solid rgba(255, 184, 0, 0.2);
+                            }
+                            .dispatch-type-badge.discharging {
+                                background: rgba(0, 255, 136, 0.1);
+                                color: #00ff88;
+                                border: 1px solid rgba(0, 255, 136, 0.2);
+                            }
+                            .dispatch-records-table .revenue {
+                                color: #00ff88;
+                                font-weight: 600;
+                            }
+                            .dispatch-records-table .cost {
+                                color: #ff6b6b;
+                                font-weight: 600;
+                            }
+                            .dispatch-summary {
+                                display: grid;
+                                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                                gap: 16px;
+                                margin-bottom: 24px;
+                            }
+                            .dispatch-summary-card {
+                                background: var(--color-bg);
+                                border: 1px solid var(--color-border);
+                                border-radius: 8px;
+                                padding: 16px;
+                                text-align: center;
+                            }
+                            .dispatch-summary-value {
+                                font-size: 24px;
+                                font-weight: 700;
+                                margin-bottom: 8px;
+                            }
+                            .dispatch-summary-label {
+                                font-size: 12px;
+                                color: var(--color-text-secondary);
+                            }
+                            .dispatch-summary-value.positive {
+                                color: #00ff88;
+                            }
+                            .dispatch-summary-value.negative {
+                                color: #ff6b6b;
+                            }
+                        </style>
+                        
+                        <div class="dispatch-summary">
+                            <div class="dispatch-summary-card">
+                                <div class="dispatch-summary-value">${dispatchRecords.filter(r => !r.totalCharge).length}</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalCount') : '总调度次数'}</div>
+                            </div>
+                            <div class="dispatch-summary-card">
+                                <div class="dispatch-summary-value" style="color: #ffb800;">${dispatchRecords.totalCharge} kWh</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalCharge') : '充电量'}</div>
+                            </div>
+                            <div class="dispatch-summary-card">
+                                <div class="dispatch-summary-value positive">${dispatchRecords.totalDischarge} kWh</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalDischarge') : '放电量'}</div>
+                            </div>
+                            <div class="dispatch-summary-card">
+                                <div class="dispatch-summary-value positive">$${calculateTotalRevenue(dispatchRecords)}</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalRevenue') : '总收益'}</div>
+                            </div>
+                            <div class="dispatch-summary-card">
+                                <div class="dispatch-summary-value negative">$${calculateTotalCost(dispatchRecords)}</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalCost') : '总成本'}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="overflow-x: auto; width: 100%;">
+                        <table class="dispatch-records-table">
+                            <thead>
+                                <tr>
+                                    <th>${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.time') : '时间'}</th>
+                                    <th>${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.type') : '类型'}</th>
+                                    <th>${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.energy') : '电量'}</th>
+                                    <th>${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.amount') : '金额'}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${recordsHtml}
+                            </tbody>
+                        </table>
+                        </div>
+                        
+                        <div class="dispatch-pagination" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;">
+                            <button class="pagination-btn" onclick="changeDispatchPage(-1)" style="padding: 6px 12px; background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-text); border-radius: 4px; cursor: pointer;" ${currentPage === 1 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                ← ${window.i18n ? window.i18n.getText('common.previous') : '上一页'}
+                            </button>
+                            <span style="color: var(--color-text-secondary); font-size: 14px;">
+                                ${currentPage} / ${totalPages}
+                            </span>
+                            <button class="pagination-btn" onclick="changeDispatchPage(1)" style="padding: 6px 12px; background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-text); border-radius: 4px; cursor: pointer;" ${currentPage === totalPages ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                                ${window.i18n ? window.i18n.getText('common.next') : '下一页'} →
+                            </button>
+                        </div>
+                    `;
+                    break;
+            }
+        }
+
+        // Generate dispatch records data
+        function generateDispatchRecords() {
+            const records = [];
+            const today = new Date();
+            
+            // Track total charge and discharge
+            let totalCharge = 0;
+            let totalDischarge = 0;
+            
+            // Generate records for the last 7 days
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                
+                // Generate 2-4 records per day
+                const recordsPerDay = Math.floor(Math.random() * 3) + 2;
+                
+                for (let j = 0; j < recordsPerDay; j++) {
+                    const startHour = Math.floor(Math.random() * 20); // Start between 0-19
+                    const startMinute = Math.floor(Math.random() * 60);
+                    const duration = Math.floor(Math.random() * 3) + 1; // 1-3 hours duration
+                    const endHour = startHour + duration;
+                    const endMinute = Math.floor(Math.random() * 60);
+                    
+                    const type = Math.random() > 0.3 ? 'discharge' : 'charge';
+                    const energy = type === 'discharge' ? 
+                        (Math.random() * 30 + 10).toFixed(1) : 
+                        (Math.random() * 20 + 5).toFixed(1);
+                    const price = type === 'discharge' ? 
+                        (Math.random() * 0.3 + 0.2) : 
+                        (Math.random() * 0.1 + 0.05);
+                    const amount = (energy * price).toFixed(2);
+                    
+                    // Track totals
+                    if (type === 'charge') {
+                        totalCharge += parseFloat(energy);
+                    } else {
+                        totalDischarge += parseFloat(energy);
+                    }
+                    
+                    const dateStr = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                    const startTime = `${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`;
+                    const endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+                    
+                    records.push({
+                        timeRange: `${dateStr} ${startTime}~${endTime}`,
+                        type: type,
+                        energy: energy,
+                        amount: amount
+                    });
+                }
+            }
+            
+            // Sort by time descending (newest first)
+            records.sort((a, b) => b.timeRange.localeCompare(a.timeRange));
+            
+            // Add totals to the records object
+            records.totalCharge = totalCharge.toFixed(1);
+            records.totalDischarge = totalDischarge.toFixed(1);
+            
+            return records;
+        }
+        
+        // Calculate total revenue from dispatch records
+        function calculateTotalRevenue(records) {
+            const total = records
+                .filter(r => r.type === 'discharge')
+                .reduce((sum, r) => sum + parseFloat(r.amount), 0);
+            return total.toFixed(2);
+        }
+        
+        // Calculate total cost from dispatch records
+        function calculateTotalCost(records) {
+            const total = records
+                .filter(r => r.type === 'charge')
+                .reduce((sum, r) => sum + parseFloat(r.amount), 0);
+            return total.toFixed(2);
+        }
+
+        // Drawer charts removed - only text information displayed
+
+        // Search and filter functions
+        function handleSearch(value) {
+            console.log('Search:', value);
+        }
+
+        function handleDeviceCodeSearch(value) {
+            console.log('Device code search:', value);
+        }
+        
+        function handleMeterSearch(value) {
+            console.log('Meter search:', value);
+        }
+
+        function displayFamilyData(data) {
+            window.filteredData = [...data];
+            loadFamilyCards();
+        }
+
+        function updatePagination(totalCount) {
+            // 简单的分页更新
+            console.log('Total items:', totalCount);
+        }
+
+        function handleDeviceStatusFilter(value) {
+            console.log('Device status filter:', value);
+            if (value === 'missing-battery') {
+                // 筛选出离线（缺少电池）的设备
+                const filteredData = window.familyData.filter(family => family.deviceStatus === 'offline');
+                displayFamilyData(filteredData);
+                updatePagination(filteredData.length);
+            } else if (value === '') {
+                // 显示所有设备
+                displayFamilyData(window.familyData);
+                updatePagination(window.familyData.length);
+            } else {
+                // 按设备状态筛选
+                const filteredData = window.familyData.filter(family => family.deviceStatus === value);
+                displayFamilyData(filteredData);
+                updatePagination(filteredData.length);
+            }
+        }
+
+        function handleDeviceModeFilter(value) {
+            console.log('Device mode filter:', value);
+            if (value === '') {
+                // 显示所有模式
+                displayFamilyData(window.familyData);
+                updatePagination(window.familyData.length);
+            } else {
+                // 按设备模式筛选
+                const filteredData = window.familyData.filter(family => family.deviceMode == value);
+                displayFamilyData(filteredData);
+                updatePagination(filteredData.length);
+            }
+        }
+
+        function handleRegionFilter(value) {
+            console.log('Region filter:', value);
+            // 可以在这里添加地区筛选的逻辑
+        }
+
+        function applyFilters() {
+            // Apply all filters and reload data
+            console.log('Applying filters...');
+            currentPage = 1;
+            loadFamilyCards();
+        }
+
+        function refreshData() {
+            // Refresh data without changing filters
+            console.log('Refreshing data...');
+            loadFamilyCards();
+            // Show refresh notification
+            const timestamp = new Date().toLocaleTimeString();
+            console.log('Data refreshed at:', timestamp);
+        }
+        
+
+        function resetFilters() {
+            document.getElementById('regionFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('meterInput').value = '';
+            // activityFilter element doesn't exist
+            document.getElementById('deviceCodeInput').value = '';
+            document.getElementById('deviceStatusFilter').value = '';
+            currentPage = 1;
+            loadFamilyCards();
+        }
+
+        function exportData() {
+            console.log('Exporting data...');
+            
+            // Prepare CSV data
+            const headers = [
+                '用户名称',
+                '设备编码', 
+                '昨日获利($)',
+                '今日获利($)',
+                '累计获利($)',
+                '设备状态',
+                '运行天数',
+                'SOC(%)'
+            ];
+            
+            const csvData = [];
+            csvData.push(headers);
+            
+            // Add data rows
+            window.filteredData.forEach(family => {
+                const yesterdayProfit = family.avgProfit || Math.floor(family.todayProfit * 0.8);
+                const totalProfit = family.totalProfit || Math.floor(family.todayProfit * 30);
+                const statusText = family.deviceStatus === 'online' ? '在线' : 
+                                 family.deviceStatus === 'offline' ? '离线' : '故障';
+                
+                csvData.push([
+                    family.name,
+                    family.deviceCode,
+                    yesterdayProfit,
+                    family.todayProfit,
+                    totalProfit,
+                    statusText,
+                    family.usageDays,
+                    family.soc
+                ]);
+            });
+            
+            // Convert to CSV string
+            const csvString = csvData.map(row => 
+                row.map(field => `"${field}"`).join(',')
+            ).join('\n');
+            
+            // Create and download file
+            const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            
+            // Generate filename with current date
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            link.setAttribute('download', `家庭获利数据_${dateStr}.csv`);
+            
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            const successMessage = window.i18n ? 
+                (window.i18n.getText('runningData.exportSuccess') || 
+                 window.i18n.getText('exportSuccess') || 
+                 '导出成功') : 
+                '导出成功';
+            alert(successMessage);
+        }
+
+        // Export detail data function
+        function exportDetailData() {
+            // Create and show date selection modal
+            showExportDetailModal();
+        }
+        
+        // Show export detail modal with date selection
+        function showExportDetailModal() {
+            // Remove existing modal if any
+            const existingModal = document.getElementById('exportDetailModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Get today's date in YYYY-MM-DD format
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.id = 'exportDetailModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: var(--color-bg-card, #1a1a1a);
+                border-radius: 12px;
+                padding: 24px;
+                width: 400px;
+                max-width: 90%;
+                border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+                animation: slideUp 0.3s ease;
+            `;
+            
+            modalContent.innerHTML = `
+                <style>
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                    @keyframes slideUp {
+                        from { transform: translateY(20px); opacity: 0; }
+                        to { transform: translateY(0); opacity: 1; }
+                    }
+                    #exportDetailModal .modal-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 20px;
+                    }
+                    #exportDetailModal .modal-title {
+                        font-size: 20px;
+                        font-weight: 600;
+                        color: var(--color-text, #fff);
+                    }
+                    #exportDetailModal .modal-close {
+                        background: transparent;
+                        border: none;
+                        color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+                        font-size: 24px;
+                        cursor: pointer;
+                        padding: 0;
+                        width: 32px;
+                        height: 32px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 4px;
+                        transition: all 0.3s;
+                    }
+                    #exportDetailModal .modal-close:hover {
+                        background: rgba(255, 255, 255, 0.1);
+                        color: #fff;
+                    }
+                    #exportDetailModal .modal-body {
+                        margin-bottom: 24px;
+                    }
+                    #exportDetailModal .date-input-group {
+                        margin-bottom: 16px;
+                    }
+                    #exportDetailModal .date-label {
+                        display: block;
+                        color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
+                        font-size: 14px;
+                        margin-bottom: 8px;
+                        font-weight: 500;
+                    }
+                    #exportDetailModal .date-input {
+                        width: 100%;
+                        padding: 10px 12px;
+                        background: var(--color-bg, #000);
+                        border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+                        border-radius: 8px;
+                        color: var(--color-text, #fff);
+                        font-size: 14px;
+                        transition: all 0.3s;
+                    }
+                    #exportDetailModal .date-input:focus {
+                        outline: none;
+                        border-color: #00ff88;
+                        background: rgba(0, 255, 136, 0.05);
+                    }
+                    #exportDetailModal .modal-hint {
+                        color: var(--color-text-secondary, rgba(255, 255, 255, 0.5));
+                        font-size: 12px;
+                        margin-top: 8px;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                    }
+                    #exportDetailModal .modal-actions {
+                        display: flex;
+                        gap: 12px;
+                        justify-content: flex-end;
+                    }
+                    #exportDetailModal .btn {
+                        padding: 10px 20px;
+                        border-radius: 8px;
+                        font-size: 14px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s;
+                        border: 1px solid transparent;
+                    }
+                    #exportDetailModal .btn-cancel {
+                        background: rgba(255, 255, 255, 0.05);
+                        border-color: rgba(255, 255, 255, 0.1);
+                        color: rgba(255, 255, 255, 0.8);
+                    }
+                    #exportDetailModal .btn-cancel:hover {
+                        background: rgba(255, 255, 255, 0.1);
+                        color: #fff;
+                    }
+                    #exportDetailModal .btn-export {
+                        background: #00ff88;
+                        color: #000;
+                    }
+                    #exportDetailModal .btn-export:hover {
+                        background: #00e67a;
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+                    }
+                    #exportDetailModal .btn-export:disabled {
+                        opacity: 0.5;
+                        cursor: not-allowed;
+                    }
+                </style>
+                <div class="modal-header">
+                    <h3 class="modal-title">${window.i18n ? window.i18n.getText('family.exportDetail.title') : '导出明细'}</h3>
+                    <button class="modal-close" onclick="closeExportDetailModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="date-input-group">
+                        <label class="date-label">${window.i18n ? window.i18n.getText('family.exportDetail.selectDate') : '选择日期'}</label>
+                        <input type="date" 
+                               id="exportDate" 
+                               class="date-input" 
+                               value="${todayStr}"
+                               max="${todayStr}"
+                               required>
+                        <div class="modal-hint">
+                            <span>ℹ️</span>
+                            <span>${window.i18n ? window.i18n.getText('family.exportDetail.hint') : '只能选择单个日期的数据进行导出'}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-cancel" onclick="closeExportDetailModal()">
+                        ${window.i18n ? window.i18n.getText('common.cancel') : '取消'}
+                    </button>
+                    <button class="btn btn-export" onclick="confirmExportDetail()">
+                        ${window.i18n ? window.i18n.getText('family.exportDetail.confirmExport') : '确认导出'}
+                    </button>
+                </div>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Focus on date input
+            setTimeout(() => {
+                document.getElementById('exportDate').focus();
+            }, 100);
+        }
+        
+        // Close export detail modal
+        function closeExportDetailModal() {
+            const modal = document.getElementById('exportDetailModal');
+            if (modal) {
+                modal.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
+        
+        // Confirm and execute export
+        function confirmExportDetail() {
+            const dateInput = document.getElementById('exportDate');
+            const selectedDate = dateInput.value;
+            
+            if (!selectedDate) {
+                alert(window.i18n ? window.i18n.getText('family.exportDetail.selectDateError') : '请选择日期');
+                return;
+            }
+            
+            // Close modal
+            closeExportDetailModal();
+            
+            // Generate detailed data for the selected date
+            console.log('Exporting detailed data for date:', selectedDate);
+            
+            // Prepare detailed CSV data with hourly breakdown
+            const headers = [
+                '日期',
+                '用户名称',
+                '设备编码',
+                '时间段',
+                '放电量(kWh)',
+                '电价(¢/kWh)',
+                '收益($)',
+                '设备状态'
+            ];
+            
+            const csvData = [];
+            csvData.push(headers);
+            
+            // Generate detailed data for each family
+            window.filteredData.forEach(family => {
+                // Generate 24 hours of data (every hour)
+                for (let hour = 0; hour < 24; hour++) {
+                    const timeStr = String(hour).padStart(2, '0') + ':00';
+                    const discharge = (Math.random() * 5).toFixed(2);
+                    const price = (Math.random() * 50 + 70).toFixed(2);
+                    const revenue = (discharge * price / 100).toFixed(2);
+                    const statusText = family.deviceStatus === 'online' ? '在线' : 
+                                     family.deviceStatus === 'offline' ? '离线' : '故障';
+                    
+                    csvData.push([
+                        selectedDate,
+                        family.name,
+                        family.deviceCode,
+                        timeStr,
+                        discharge,
+                        price,
+                        revenue,
+                        statusText
+                    ]);
+                }
+            });
+            
+            // Convert to CSV string
+            const csvString = csvData.map(row => 
+                row.map(field => `"${field}"`).join(',')
+            ).join('\n');
+            
+            // Create and download file
+            const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            
+            // Generate filename with selected date
+            link.setAttribute('download', `获利明细数据_${selectedDate}.csv`);
+            
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            setTimeout(() => {
+                const successMessage = window.i18n ? 
+                    window.i18n.getText('family.exportDetail.exportSuccess') : 
+                    `${selectedDate} 的明细数据导出成功`;
+                alert(successMessage);
+            }, 500);
+        }
+
+        // View running data
+        function viewRunningData(familyId, meterNumber) {
+            // Find the family data to get the name
+            const family = window.familyData.find(f => f.id === familyId);
+            const familyName = family ? family.name : '未知';
+            
+            // Open running data page in new tab with meter number and family name
+            window.open(`running-data.html?meter=${meterNumber}&family=${encodeURIComponent(familyName)}`, '_blank');
+        }
+
+        // Make all functions globally accessible
+        window.viewFamilyDetails = viewFamilyDetails;
+        window.viewRunningData = viewRunningData;
+        window.closeFamilyDrawer = closeFamilyDrawer;
+        window.confirmFamilyDetails = confirmFamilyDetails;
+        window.switchDrawerTab = switchDrawerTab;
+        window.changeDispatchPage = changeDispatchPage;
+        window.handleSearch = handleSearch;
+        window.handleMeterSearch = handleMeterSearch;
+        window.handleDeviceCodeSearch = handleDeviceCodeSearch;
+        window.handleDeviceStatusFilter = handleDeviceStatusFilter;
+        window.handleDeviceModeFilter = handleDeviceModeFilter;
+        window.handleRegionFilter = handleRegionFilter;
+        window.applyFilters = applyFilters;
+        window.resetFilters = resetFilters;
+        window.exportData = exportData;
+        window.exportDetailData = exportDetailData;
+        window.showExportDetailModal = showExportDetailModal;
+        window.closeExportDetailModal = closeExportDetailModal;
+        window.confirmExportDetail = confirmExportDetail;
+        window.refreshData = refreshData;
+        window.loadFamilyCards = loadFamilyCards;
+
+        // Track current view mode
+        let currentProfitView = 'day';
+        
+        // Initialize profit chart
+        function initProfitChart(viewMode = 'day') {
+            const chartDom = document.getElementById('profitChart');
+            if (!chartDom) return;
+            
+            currentProfitView = viewMode;
+            const chart = echarts.init(chartDom);
+            
+            // Generate x-axis data based on view mode
+            let xAxisData = [];
+            let seriesData1 = [];
+            let seriesData2 = [];
+            
+            if (viewMode === 'day') {
+                // Day view: show 24 hours
+                for (let i = 0; i < 24; i++) {
+                    xAxisData.push(`${i}:00`);
+                    seriesData1.push(Math.floor(Math.random() * 50 + 10));
+                    seriesData2.push(Math.floor(Math.random() * 60 + 20));
+                }
+            } else if (viewMode === 'month') {
+                // Month view: show days of month
+                const date = document.getElementById('profitDatePicker')?.value;
+                const selectedDate = date ? new Date(date) : new Date();
+                const year = selectedDate.getFullYear();
+                const month = selectedDate.getMonth();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                for (let i = 1; i <= daysInMonth; i++) {
+                    xAxisData.push(`${i}`);
+                    seriesData1.push(Math.floor(Math.random() * 200 + 50));
+                    seriesData2.push(Math.floor(Math.random() * 250 + 100));
+                }
+            } else if (viewMode === 'year') {
+                // Year view: show 12 months
+                const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+                xAxisData = months;
+                for (let i = 0; i < 12; i++) {
+                    seriesData1.push(Math.floor(Math.random() * 3000 + 1000));
+                    seriesData2.push(Math.floor(Math.random() * 3500 + 1500));
+                }
+            }
+            
+            const option = {
+                legend: {
+                    data: [
+                        window.i18n ? window.i18n.getText('family.drawer.revenue') : '收益',
+                        window.i18n ? window.i18n.getText('family.drawer.discharge') : '放电量'
+                    ],
+                    top: 5,
+                    textStyle: {
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        fontSize: 12
+                    },
+                    itemWidth: 20,
+                    itemHeight: 10,
+                    itemGap: 20
+                },
+                grid: {
+                    top: 40,
+                    right: 20,
+                    bottom: 30,
+                    left: 50
+                },
+                xAxis: {
+                    type: 'category',
+                    data: xAxisData,
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.2)'
+                        }
+                    },
+                    axisLabel: {
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontSize: 11,
+                        rotate: viewMode === 'day' ? 45 : 0,
+                        interval: viewMode === 'day' ? 2 : 'auto'
+                    }
+                },
+                yAxis: [{
+                    type: 'value',
+                    name: '',
+                    position: 'left',
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.2)'
+                        }
+                    },
+                    axisLabel: {
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontSize: 12
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            type: 'dashed'
+                        }
+                    }
+                }, {
+                    type: 'value',
+                    name: '',
+                    position: 'right',
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.2)'
+                        }
+                    },
+                    axisLabel: {
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontSize: 12
+                    },
+                    splitLine: {
+                        show: false
+                    }
+                }],
+                series: [{
+                    name: window.i18n ? window.i18n.getText('family.drawer.revenue') : '收益',
+                    type: 'bar',
+                    data: seriesData1,
+                    itemStyle: {
+                        color: '#5B8FF9'
+                    },
+                    barWidth: viewMode === 'day' ? '30%' : '40%'
+                }, {
+                    name: window.i18n ? window.i18n.getText('family.drawer.discharge') : '放电量',
+                    type: 'line',
+                    yAxisIndex: 1,
+                    data: seriesData2,
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: viewMode === 'day' ? 4 : 8,
+                    itemStyle: {
+                        color: '#5AD8A6'
+                    },
+                    lineStyle: {
+                        width: 3,
+                        color: '#5AD8A6'
+                    }
+                }]
+            };
+            
+            chart.setOption(option);
+            window.addEventListener('resize', () => chart.resize());
+        }
+        
+        // Initialize operating chart
+        function initOperatingChart() {
+            const chartDom = document.getElementById('operatingChart');
+            if (!chartDom) return;
+            
+            const chart = echarts.init(chartDom);
+            
+            // Generate 24 hours for today
+            const hours = [];
+            for (let i = 0; i < 24; i++) {
+                hours.push(i + ':00');
+            }
+            
+            const option = {
+                grid: {
+                    top: 40,
+                    right: 20,
+                    bottom: 40,
+                    left: 60
+                },
+                xAxis: {
+                    type: 'category',
+                    data: hours,
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.2)'
+                        }
+                    },
+                    axisLabel: {
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontSize: 12
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    min: 0,
+                    max: 100,
+                    interval: 20,
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.2)'
+                        }
+                    },
+                    axisLabel: {
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontSize: 12
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            type: 'solid'
+                        }
+                    }
+                },
+                series: [{
+                    name: 'SOC',
+                    type: 'line',
+                    // Generate data for 24 hours
+                    data: [
+                        65, 68, 70, 75, 80, 85, 88, 90, 95, 93, 90, 87,
+                        85, 80, 75, 70, 65, 60, 55, 50, 45, 48, 52, 60
+                    ],
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: 8,
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: 'rgba(90, 216, 166, 0.3)'
+                        }, {
+                            offset: 1,
+                            color: 'rgba(90, 216, 166, 0.05)'
+                        }])
+                    },
+                    itemStyle: {
+                        color: '#5AD8A6'
+                    },
+                    lineStyle: {
+                        width: 3,
+                        color: '#5AD8A6'
+                    },
+                    markPoint: {
+                        symbol: 'rect',
+                        symbolSize: [60, 25],
+                        data: [
+                            {
+                                coord: [6, 88],
+                                value: window.i18n ? window.i18n.getText('family.drawer.charging') : '充电',
+                                itemStyle: {
+                                    color: '#5AD8A6'
+                                },
+                                label: {
+                                    color: '#000',
+                                    fontSize: 12,
+                                    fontWeight: 'bold'
+                                }
+                            },
+                            {
+                                coord: [8, 95],
+                                value: window.i18n ? window.i18n.getText('family.drawer.stopCharging') : '停止充电',
+                                itemStyle: {
+                                    color: '#FFC107'
+                                },
+                                label: {
+                                    color: '#000',
+                                    fontSize: 12,
+                                    fontWeight: 'bold'
+                                }
+                            },
+                            {
+                                coord: [14, 75],
+                                value: window.i18n ? window.i18n.getText('family.drawer.discharging') : '放电',
+                                itemStyle: {
+                                    color: '#1E7FFF'
+                                },
+                                label: {
+                                    color: '#fff',
+                                    fontSize: 12,
+                                    fontWeight: 'bold'
+                                }
+                            },
+                            {
+                                coord: [19, 50],
+                                value: window.i18n ? window.i18n.getText('family.drawer.stopDischarging') : '停止放电',
+                                itemStyle: {
+                                    color: '#FF6B6B'
+                                },
+                                label: {
+                                    color: '#fff',
+                                    fontSize: 12,
+                                    fontWeight: 'bold'
+                                }
+                            }
+                        ]
+                    }
+                }]
+            };
+            
+            chart.setOption(option);
+            window.addEventListener('resize', () => chart.resize());
+        }
+        
+        // Update profit chart time range
+        function updateProfitChart(viewMode, element) {
+            // Update active state
+            document.querySelectorAll('.drawer-chart-control').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            // Update current view mode
+            currentProfitView = viewMode;
+            
+            // Update date picker based on view mode
+            const datePicker = document.querySelector('.drawer-chart-date-picker');
+            if (datePicker) {
+                const today = new Date();
+                if (viewMode === 'day') {
+                    datePicker.type = 'date';
+                    datePicker.value = today.toISOString().split('T')[0];
+                } else if (viewMode === 'month') {
+                    datePicker.type = 'month';
+                    datePicker.value = today.toISOString().slice(0, 7);
+                } else if (viewMode === 'year') {
+                    datePicker.type = 'number';
+                    datePicker.min = '2020';
+                    datePicker.max = '2030';
+                    datePicker.value = today.getFullYear();
+                }
+            }
+            
+            // Reinitialize chart with new view mode
+            initProfitChart(viewMode);
+        }
+        
+        // Handle profit chart date change
+        function onProfitDateChange(event) {
+            const selectedDate = event.target.value;
+            if (selectedDate) {
+                // Refresh chart with selected date
+                initProfitChart(currentProfitView);
+            }
+        }
+    </script>
+    
+    <!-- Profit Details Drawer -->
+    <div class="drawer-overlay" id="profitDrawerOverlay" onclick="closeProfitDrawer()"></div>
+    <div class="profit-drawer" id="profitDrawer">
+        <!-- Fixed Header -->
+        <div class="profit-drawer-header">
+            <div class="profit-drawer-title" id="profitDrawerTitle">刘静——2025/09/10</div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button class="profit-export-btn" onclick="exportProfitDrawerData()" title="导出明细数据">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7,10 12,15 17,10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    导出
+                </button>
+                <button class="profit-drawer-close" onclick="closeProfitDrawer()">✕</button>
+            </div>
+        </div>
+        
+        <!-- Fixed Summary Cards -->
+        <div class="profit-summary-fixed">
+            <div class="profit-summary-item">
+                <div class="profit-summary-label">总放电量</div>
+                <div class="profit-summary-value" id="totalDischarge">63.80 kWh</div>
+            </div>
+            <div class="profit-summary-item">
+                <div class="profit-summary-label">总获利</div>
+                <div class="profit-summary-value" id="totalProfit">$6.02</div>
+            </div>
+        </div>
+        
+        <!-- Table Container -->
+        <div class="profit-table-container">
+            <!-- Fixed Table Header -->
+            <div class="profit-table-header">
+                <div class="header-cell">时间</div>
+                <div class="header-cell">放电量 (kWh)</div>
+                <div class="header-cell">价格 ($/MWh)</div>
+                <div class="header-cell">收益 ($)</div>
+            </div>
+            
+            <!-- Scrollable Content -->
+            <div class="profit-table-content">
+                <div id="profitTableData">
+                    <!-- Table data will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Sample profit details data
+        const sampleProfitData = [
+            { time: '00:00', discharge: 3.43, price: 123.37, revenue: 0.42 },
+            { time: '00:05', discharge: 3.84, price: 105.4, revenue: 0.4 },
+            { time: '00:10', discharge: 2.7, price: 94.36, revenue: 0.25 },
+            { time: '00:15', discharge: 2.16, price: 90.11, revenue: 0.19 },
+            { time: '00:20', discharge: 0.01, price: 78.41, revenue: 0 },
+            { time: '00:25', discharge: 3.11, price: 102.7, revenue: 0.32 },
+            { time: '00:30', discharge: 1.98, price: 75.97, revenue: 0.15 },
+            { time: '00:35', discharge: 0.14, price: 76.93, revenue: 0.01 },
+            { time: '00:40', discharge: 2.23, price: 98.71, revenue: 0.22 },
+            { time: '00:45', discharge: 3.3, price: 85.14, revenue: 0.28 },
+            { time: '00:50', discharge: 4.83, price: 82.75, revenue: 0.4 },
+            { time: '00:55', discharge: 2.18, price: 85.12, revenue: 0.19 },
+            { time: '01:00', discharge: 1.8, price: 79.2, revenue: 0.14 },
+            { time: '01:05', discharge: 4.2, price: 118.83, revenue: 0.5 },
+            { time: '01:10', discharge: 0.36, price: 89.78, revenue: 0.03 },
+            { time: '01:15', discharge: 4.67, price: 87.91, revenue: 0.41 },
+            { time: '01:20', discharge: 4.2, price: 94.11, revenue: 0.4 },
+            { time: '01:25', discharge: 4.19, price: 80.65, revenue: 0.34 },
+            { time: '01:30', discharge: 4.58, price: 106.74, revenue: 0.49 },
+            { time: '01:35', discharge: 2.04, price: 123.05, revenue: 0.25 },
+            { time: '01:40', discharge: 3.59, price: 81.18, revenue: 0.29 },
+            { time: '01:45', discharge: 2.97, price: 113.62, revenue: 0.34 },
+            { time: '01:50', discharge: 1.29, price: 80.86, revenue: 0 }
+        ];
+
+        // Open profit details drawer
+        function openProfitDrawer(userName, date, profitType) {
+            const drawer = document.getElementById('profitDrawer');
+            const overlay = document.getElementById('profitDrawerOverlay');
+            const title = document.getElementById('profitDrawerTitle');
+            
+            // Set title
+            title.textContent = `${userName}——${date}`;
+            
+            // Calculate totals
+            let totalDischarge = 0;
+            let totalProfit = 0;
+            sampleProfitData.forEach(item => {
+                totalDischarge += item.discharge;
+                totalProfit += item.revenue;
+            });
+            
+            // Update summary
+            document.getElementById('totalDischarge').textContent = `${totalDischarge.toFixed(2)} kWh`;
+            document.getElementById('totalProfit').textContent = `$${totalProfit.toFixed(2)}`;
+            
+            // Populate table data
+            const tableData = document.getElementById('profitTableData');
+            tableData.innerHTML = '';
+            sampleProfitData.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'profit-table-row';
+                row.innerHTML = `
+                    <div class="table-cell">${item.time}</div>
+                    <div class="table-cell">${item.discharge}</div>
+                    <div class="table-cell">$${item.price}</div>
+                    <div class="table-cell" style="color: #4ade80;">$${item.revenue}</div>
+                `;
+                tableData.appendChild(row);
+            });
+            
+            // Show drawer
+            overlay.classList.add('show');
+            drawer.classList.add('open');
+        }
+
+        // Export profit drawer data
+        function exportProfitDrawerData() {
+            const drawerTitle = document.getElementById('profitDrawerTitle').textContent;
+            const totalDischarge = document.getElementById('totalDischarge').textContent;
+            const totalProfit = document.getElementById('totalProfit').textContent;
+            
+            // Extract user name and date from title (format: "用户名——YYYY/MM/DD")
+            const titleParts = drawerTitle.split('——');
+            const userName = titleParts[0] || '未知用户';
+            const dateStr = titleParts[1] || new Date().toISOString().split('T')[0];
+            
+            // Prepare CSV data for detailed profit breakdown
+            const headers = [
+                '用户名称',
+                '日期',
+                '时间',
+                '放电量(kWh)',
+                '电价(¢/kWh)',
+                '收益($)'
+            ];
+            
+            const csvData = [];
+            csvData.push(headers);
+            
+            // Generate sample profit detail data (using the sample data structure)
+            const sampleTimes = [];
+            for (let hour = 0; hour < 24; hour++) {
+                for (let minute = 0; minute < 60; minute += 5) {
+                    const timeStr = String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
+                    sampleTimes.push(timeStr);
+                }
+            }
+            
+            // Generate realistic data for each time slot
+            sampleTimes.forEach((time, index) => {
+                const discharge = (Math.random() * 5).toFixed(2);
+                const price = (Math.random() * 50 + 70).toFixed(2);
+                const revenue = (discharge * price / 100).toFixed(2);
+                
+                csvData.push([
+                    userName,
+                    dateStr.replace(/\//g, '-'),
+                    time,
+                    discharge,
+                    price,
+                    revenue
+                ]);
+            });
+            
+            // Convert to CSV string
+            const csvString = csvData.map(row => 
+                row.map(field => `"${field}"`).join(',')
+            ).join('\n');
+            
+            // Create and download file
+            const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            
+            // Generate filename
+            const fileName = `${userName}_获利明细_${dateStr.replace(/\//g, '-')}.csv`;
+            link.setAttribute('download', fileName);
+            
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show success message
+            const successMessage = window.i18n ? 
+                window.i18n.getText('family.exportDetail.exportSuccess') : 
+                `${userName} 的获利明细导出成功`;
+            alert(successMessage);
+        }
+        
+        // Close profit details drawer
+        function closeProfitDrawer() {
+            const drawer = document.getElementById('profitDrawer');
+            const overlay = document.getElementById('profitDrawerOverlay');
+            
+            overlay.classList.remove('show');
+            drawer.classList.remove('open');
+        }
+    </script>
+    
+    <script src="components/global-notifications.js"></script>
+</body>
+</html>

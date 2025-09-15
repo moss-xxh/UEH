@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单模态框测试</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 50px;
+        }
+        button {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .log {
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>简单模态框测试</h1>
+    
+    <button onclick="testCreateModal()">创建模态框</button>
+    <button onclick="testOpenModal()">打开模态框</button>
+    <button onclick="checkTimePeriods()">检查时间段容器</button>
+    <button onclick="clearLog()">清空日志</button>
+    
+    <div id="log" class="log"></div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div style="color: #00ff88;">[${time}]</div> ${message}<br><br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // 直接嵌入模态框创建代码
+        function createModalHTML() {
+            return `
+            <div id="modalContent" class="modal-content" style="display: none; position: fixed; top: 5%; left: calc(50% - 450px); background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 0; width: 900px; max-width: 95%; max-height: 90vh; border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); z-index: 2147483648; flex-direction: column;">
+                <div class="modal-header" style="padding: 24px 32px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.02);">
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #fff;">自动化条件设置</h3>
+                    <button onclick="closeModal()" style="background: none; border: none; color: rgba(255,255,255,0.6); font-size: 24px; cursor: pointer;">×</button>
+                </div>
+                
+                <div class="modal-body" style="padding: 24px 32px; overflow-y: auto; flex: 1;">
+                    <div style="color: #fff; font-size: 14px; margin-bottom: 24px;">设置自动化充放电条件</div>
+                    
+                    <!-- 时间条件设置 -->
+                    <div class="time-condition-container" style="display: flex; flex-direction: column; gap: 32px;">
+                        <!-- 充电时间段管理 -->
+                        <div class="time-periods-section" style="background: rgba(255, 255, 255, 0.02); border-radius: 8px; padding: 24px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                            <h3 style="font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.9); margin: 0 0 16px 0;">充电时间</h3>
+                            <div id="chargeTimePeriods" class="time-periods-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; border: 2px solid #ff0000;"></div>
+                            <button onclick="addTimePeriod('charge')" style="width: 100%; padding: 12px; background: transparent; border: 2px dashed rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.6); border-radius: 6px; cursor: pointer;">+ 添加充电时间段</button>
+                        </div>
+
+                        <!-- 放电时间段管理 -->
+                        <div class="time-periods-section" style="background: rgba(255, 255, 255, 0.02); border-radius: 8px; padding: 24px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                            <h3 style="font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.9); margin: 0 0 16px 0;">放电时间</h3>
+                            <div id="dischargeTimePeriods" class="time-periods-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; border: 2px solid #00ff00;"></div>
+                            <button onclick="addTimePeriod('discharge')" style="width: 100%; padding: 12px; background: transparent; border: 2px dashed rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.6); border-radius: 6px; cursor: pointer;">+ 添加放电时间段</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function testCreateModal() {
+            log('开始创建模态框...');
+            
+            // 检查是否已存在
+            const existing = document.getElementById('modalContent');
+            if (existing) {
+                log('模态框已存在，先删除...');
+                existing.remove();
+            }
+            
+            // 创建新的模态框
+            document.body.insertAdjacentHTML('beforeend', createModalHTML());
+            
+            const modal = document.getElementById('modalContent');
+            if (modal) {
+                log('✅ 模态框创建成功!');
+                log('模态框HTML长度: ' + modal.innerHTML.length + ' 字符');
+            } else {
+                log('❌ 模态框创建失败!');
+            }
+        }
+
+        function testOpenModal() {
+            log('尝试打开模态框...');
+            
+            const modal = document.getElementById('modalContent');
+            if (!modal) {
+                log('⚠️ 模态框不存在，先创建...');
+                testCreateModal();
+                setTimeout(testOpenModal, 100);
+                return;
+            }
+            
+            modal.style.display = 'flex';
+            log('✅ 模态框已打开');
+            
+            // 检查时间段容器
+            setTimeout(checkTimePeriods, 100);
+        }
+
+        function checkTimePeriods() {
+            log('检查时间段容器...');
+            
+            const modal = document.getElementById('modalContent');
+            if (!modal) {
+                log('❌ 模态框不存在');
+                return;
+            }
+            
+            const chargeContainer = document.getElementById('chargeTimePeriods');
+            const dischargeContainer = document.getElementById('dischargeTimePeriods');
+            
+            log('chargeTimePeriods 容器: ' + (chargeContainer ? '✅ 存在' : '❌ 不存在'));
+            log('dischargeTimePeriods 容器: ' + (dischargeContainer ? '✅ 存在' : '❌ 不存在'));
+            
+            if (chargeContainer) {
+                log('充电容器样式: ' + chargeContainer.style.cssText);
+                log('充电容器内容: ' + chargeContainer.innerHTML);
+            }
+            
+            if (dischargeContainer) {
+                log('放电容器样式: ' + dischargeContainer.style.cssText);
+                log('放电容器内容: ' + dischargeContainer.innerHTML);
+            }
+            
+            // 尝试添加测试内容
+            if (chargeContainer) {
+                chargeContainer.innerHTML = '<div style="color: #00ff88; padding: 10px; background: rgba(0,255,136,0.1); border-radius: 4px;">测试充电时间段: 22:00 - 06:00</div>';
+                log('✅ 已添加测试充电时间段');
+            }
+            
+            if (dischargeContainer) {
+                dischargeContainer.innerHTML = '<div style="color: #ffc107; padding: 10px; background: rgba(255,193,7,0.1); border-radius: 4px;">测试放电时间段: 16:00 - 21:00</div>';
+                log('✅ 已添加测试放电时间段');
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modalContent');
+            if (modal) {
+                modal.style.display = 'none';
+                log('模态框已关闭');
+            }
+        }
+
+        function addTimePeriod(type) {
+            log('添加' + (type === 'charge' ? '充电' : '放电') + '时间段');
+            const container = document.getElementById(type + 'TimePeriods');
+            if (container) {
+                const newPeriod = document.createElement('div');
+                newPeriod.style.cssText = 'color: ' + (type === 'charge' ? '#00ff88' : '#ffc107') + '; padding: 10px; background: rgba(' + (type === 'charge' ? '0,255,136' : '255,193,7') + ',0.1); border-radius: 4px; margin: 5px 0;';
+                newPeriod.innerHTML = '新的' + (type === 'charge' ? '充电' : '放电') + '时间段: <input type="time" value="00:00" style="margin: 0 5px;"> - <input type="time" value="00:00" style="margin: 0 5px;"> <button onclick="this.parentElement.remove()">删除</button>';
+                container.appendChild(newPeriod);
+                log('✅ 时间段已添加');
+            } else {
+                log('❌ 找不到容器: ' + type + 'TimePeriods');
+            }
+        }
+
+        // 页面加载时自动运行
+        window.addEventListener('load', () => {
+            log('页面加载完成，准备测试模态框功能');
+            log('点击按钮开始测试...');
+        });
+    </script>
+</body>
+</html>

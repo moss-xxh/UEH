@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Push Strategy Management</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- Tailwind 配置 - 苹果风格 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0071e3',
+                        secondary: '#1d1d1f',
+                        tertiary: '#86868b',
+                        light: '#f5f5f7',
+                        success: '#34c759',
+                        warning: '#ff9500',
+                        danger: '#ff3b30',
+                        border: '#d2d2d7',
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'apple': '0 2px 10px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03)',
+                        'apple-hover': '0 5px 15px rgba(0, 0, 0, 0.08), 0 2px 5px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            }
+        }
+    </script>
+
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .card-apple {
+                @apply bg-white/90 backdrop-blur-sm rounded-xl shadow-apple overflow-hidden transition-all duration-300 hover:shadow-apple-hover;
+            }
+            .btn-apple {
+                @apply bg-primary text-white font-medium py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 hover:bg-primary/90 active:bg-primary/80;
+            }
+            .btn-outline-black {
+                @apply border border-black text-black font-medium py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 hover:bg-black/5 active:bg-black/10;
+            }
+            .input-apple {
+                @apply w-full px-4 py-3 bg-light border border-border rounded-lg transition-all duration-200 focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none;
+            }
+        }
+    </style>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #f5f5f7 100%);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(50px);
+            opacity: 0.15;
+        }
+        
+        body::before {
+            width: 500px;
+            height: 500px;
+            background: #0071e3;
+            top: -250px;
+            right: -250px;
+        }
+        
+        body::after {
+            width: 600px;
+            height: 600px;
+            background: #34c759;
+            bottom: -300px;
+            left: -300px;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
+        
+        .lang-selector {
+            position: relative;
+        }
+        .lang-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            z-index: 10;
+            margin-top: 0.5rem;
+            min-width: 8rem;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .lang-dropdown.show {
+            display: block;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans text-secondary flex">
+    <!-- 侧边栏 -->
+    <aside class="sidebar w-64 bg-white shadow-sm fixed md:relative h-full z-40">
+        <div class="p-6 border-b border-border">
+            <img src="logo_副本.png" alt="Logo" class="h-8 max-w-[150px] object-contain">
+        </div>
+        <nav class="p-4">
+            <ul class="space-y-2">
+                <li>
+                    <a href="home.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-home"></i>
+                        <span data-i18n="nav_home">首页</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="admin.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-shield"></i>
+                        <span data-i18n="auth_management">授权管理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="profit.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-line-chart"></i>
+                        <span data-i18n="nav_profit">利润分析</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="family.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-users"></i>
+                        <span data-i18n="nav_family">家庭管理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="analysis.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-bar-chart"></i>
+                        <span data-i18n="nav_analysis">数据分析</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="organization.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-sitemap"></i>
+                        <span data-i18n="nav_organization">组织管理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" id="push-strategy-link" class="flex items-center gap-3 px-4 py-3 bg-black text-white rounded-lg cursor-default">
+                        <i class="fa fa-bullhorn"></i>
+                        <span data-i18n="nav_push_strategy">推送策略</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="operation-log.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-history"></i>
+                        <span data-i18n="nav_operation_log">操作日志</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="message-center.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-bell"></i>
+                        <span data-i18n="nav_message_center">消息中心</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-cog"></i>
+                        <span data-i18n="nav_settings">设置</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <div class="flex-1 flex flex-col">
+        <!-- 头部导航 -->
+        <header class="bg-white shadow-sm sticky top-0 z-30">
+            <div class="px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <button id="menu-toggle" class="md:hidden text-secondary">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                    <h1 class="text-xl font-semibold" data-i18n="push_strategy_management">推送策略管理</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="lang-selector">
+                        <button id="lang-toggle-btn" class="flex items-center px-3 py-2 rounded-full bg-light hover:bg-gray-200 transition-colors">
+                            <span id="current-lang" class="mr-1">中文</span>
+                            <i class="fa fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="lang-dropdown" class="lang-dropdown">
+                            <button class="lang-option w-full text-left px-4 py-3 hover:bg-light transition-colors" data-lang="zh">中文</button>
+                            <button class="lang-option w-full text-left px-4 py-3 hover:bg-light transition-colors" data-lang="en">English</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容 -->
+        <main class="flex-1 p-6 space-y-6">
+            <!-- 推送统计 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="card-apple p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                            <i class="fa fa-paper-plane text-primary text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-2xl font-bold">1,247</p>
+                            <p class="text-tertiary text-sm" data-i18n="total_push">总推送数</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <span class="text-success">↗ +18%</span>
+                        <span class="text-tertiary ml-2" data-i18n="vs_last_week">较上周</span>
+                    </div>
+                </div>
+
+                <div class="card-apple p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-success/10 rounded-xl flex items-center justify-center">
+                            <i class="fa fa-check-circle text-success text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-2xl font-bold">1,156</p>
+                            <p class="text-tertiary text-sm" data-i18n="successful_push">成功推送</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <span class="text-success">↗ +15%</span>
+                        <span class="text-tertiary ml-2" data-i18n="vs_last_week">较上周</span>
+                    </div>
+                </div>
+
+                <div class="card-apple p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-warning/10 rounded-xl flex items-center justify-center">
+                            <i class="fa fa-clock-o text-warning text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-2xl font-bold">68</p>
+                            <p class="text-tertiary text-sm" data-i18n="pending_push">待推送</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <span class="text-warning">↗ +3</span>
+                        <span class="text-tertiary ml-2" data-i18n="vs_yesterday">较昨天</span>
+                    </div>
+                </div>
+
+                <div class="card-apple p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-danger/10 rounded-xl flex items-center justify-center">
+                            <i class="fa fa-times-circle text-danger text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-2xl font-bold">23</p>
+                            <p class="text-tertiary text-sm" data-i18n="failed_push">推送失败</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <span class="text-danger">↗ +2</span>
+                        <span class="text-tertiary ml-2" data-i18n="vs_yesterday">较昨天</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 创建推送策略 -->
+            <div class="card-apple p-6">
+                <h3 class="text-lg font-semibold mb-4" data-i18n="create_push_strategy">创建推送策略</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- 策略配置 -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-tertiary mb-2" data-i18n="strategy_name">策略名称</label>
+                            <input type="text" class="input-apple" placeholder="输入策略名称">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-tertiary mb-2" data-i18n="push_type">推送类型</label>
+                            <select class="input-apple">
+                                <option data-i18n="system_notification">系统通知</option>
+                                <option data-i18n="energy_alert">能源告警</option>
+                                <option data-i18n="device_status">设备状态</option>
+                                <option data-i18n="marketing_message">营销消息</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-tertiary mb-2" data-i18n="priority">优先级</label>
+                            <select class="input-apple">
+                                <option value="high" data-i18n="high_priority">高优先级</option>
+                                <option value="medium" selected data-i18n="medium_priority">中优先级</option>
+                                <option value="low" data-i18n="low_priority">低优先级</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 目标配置 -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-tertiary mb-2" data-i18n="target_audience">目标受众</label>
+                            <select class="input-apple">
+                                <option data-i18n="all_users">所有用户</option>
+                                <option data-i18n="active_users">活跃用户</option>
+                                <option data-i18n="vip_users">VIP用户</option>
+                                <option data-i18n="specific_region">特定地区</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-tertiary mb-2" data-i18n="push_channel">推送渠道</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="mr-2" checked>
+                                    <span class="text-sm" data-i18n="app_push">应用推送</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="mr-2">
+                                    <span class="text-sm" data-i18n="sms_push">短信推送</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="mr-2">
+                                    <span class="text-sm" data-i18n="email_push">邮件推送</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-tertiary mb-2" data-i18n="trigger_condition">触发条件</label>
+                            <select class="input-apple">
+                                <option data-i18n="immediate_send">立即发送</option>
+                                <option data-i18n="scheduled_send">定时发送</option>
+                                <option data-i18n="event_trigger">事件触发</option>
+                                <option data-i18n="condition_trigger">条件触发</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 内容配置 -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-tertiary mb-2" data-i18n="message_title">消息标题</label>
+                            <input type="text" class="input-apple" placeholder="输入消息标题">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-tertiary mb-2" data-i18n="message_content">消息内容</label>
+                            <textarea class="input-apple" rows="4" placeholder="输入消息内容"></textarea>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn-outline-black flex-1">
+                                <i class="fa fa-eye mr-2"></i>
+                                <span data-i18n="preview">预览</span>
+                            </button>
+                            <button class="btn-apple flex-1" onclick="createPushStrategy()">
+                                <i class="fa fa-plus mr-2"></i>
+                                <span data-i18n="create">创建</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 策略列表 -->
+            <div class="card-apple">
+                <div class="p-4 border-b border-border">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold" data-i18n="strategy_list">策略列表</h3>
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="搜索策略" class="px-4 py-2 border border-border rounded-lg text-sm">
+                            <button class="btn-outline-black">
+                                <i class="fa fa-filter mr-2"></i>
+                                <span data-i18n="filter">筛选</span>
+                            </button>
+                            <button class="btn-outline-black">
+                                <i class="fa fa-download mr-2"></i>
+                                <span data-i18n="export">导出</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="strategy_name">策略名称</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="push_type">推送类型</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="target_audience">目标受众</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="push_count">推送次数</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="success_rate">成功率</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="status">状态</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="create_time">创建时间</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="operations">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="strategy-table-body">
+                            <!-- 动态生成的策略数据 -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 分页 -->
+                <div class="p-4 border-t border-border flex justify-between items-center">
+                    <div class="text-sm text-tertiary">
+                        <span data-i18n="showing">显示</span> 1-10 <span data-i18n="of">共</span> 25 <span data-i18n="records">条记录</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1 rounded-lg border border-border hover:bg-light transition-colors">
+                            <i class="fa fa-chevron-left"></i>
+                        </button>
+                        <span class="px-3 py-1">1 / 3</span>
+                        <button class="px-3 py-1 rounded-lg border border-border hover:bg-light transition-colors">
+                            <i class="fa fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 策略详情模态框 -->
+    <div id="strategy-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <div class="p-5 border-b border-border flex justify-between items-center">
+                <h3 class="text-lg font-semibold" data-i18n="strategy_details">策略详情</h3>
+                <button id="close-strategy-modal" class="text-tertiary hover:text-secondary transition-colors p-1">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-5 overflow-y-auto max-h-[70vh]" id="strategy-modal-content">
+                <!-- 详情内容将通过JavaScript动态添加 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            zh: {
+                push_strategy_management: '推送策略管理',
+                total_push: '总推送数',
+                successful_push: '成功推送',
+                pending_push: '待推送',
+                failed_push: '推送失败',
+                vs_last_week: '较上周',
+                vs_yesterday: '较昨天',
+                create_push_strategy: '创建推送策略',
+                strategy_name: '策略名称',
+                push_type: '推送类型',
+                system_notification: '系统通知',
+                energy_alert: '能源告警',
+                device_status: '设备状态',
+                marketing_message: '营销消息',
+                priority: '优先级',
+                high_priority: '高优先级',
+                medium_priority: '中优先级',
+                low_priority: '低优先级',
+                target_audience: '目标受众',
+                all_users: '所有用户',
+                active_users: '活跃用户',
+                vip_users: 'VIP用户',
+                specific_region: '特定地区',
+                push_channel: '推送渠道',
+                app_push: '应用推送',
+                sms_push: '短信推送',
+                email_push: '邮件推送',
+                trigger_condition: '触发条件',
+                immediate_send: '立即发送',
+                scheduled_send: '定时发送',
+                event_trigger: '事件触发',
+                condition_trigger: '条件触发',
+                message_title: '消息标题',
+                message_content: '消息内容',
+                preview: '预览',
+                create: '创建',
+                strategy_list: '策略列表',
+                filter: '筛选',
+                export: '导出',
+                push_count: '推送次数',
+                success_rate: '成功率',
+                status: '状态',
+                create_time: '创建时间',
+                operations: '操作',
+                showing: '显示',
+                of: '共',
+                records: '条记录',
+                strategy_details: '策略详情',
+                active: '活跃',
+                paused: '暂停',
+                draft: '草稿',
+                view: '查看',
+                edit: '编辑',
+                pause: '暂停',
+                delete: '删除',
+                nav_home: '首页',
+                auth_management: '授权管理',
+                nav_profit: '利润分析',
+                nav_family: '家庭管理',
+                nav_analysis: '数据分析',
+                nav_organization: '组织管理',
+                nav_push_strategy: '推送策略',
+                nav_operation_log: '操作日志',
+                nav_message_center: '消息中心',
+                nav_settings: '设置'
+            },
+            en: {
+                push_strategy_management: 'Push Strategy Management',
+                total_push: 'Total Push',
+                successful_push: 'Successful Push',
+                pending_push: 'Pending Push',
+                failed_push: 'Failed Push',
+                vs_last_week: 'vs last week',
+                vs_yesterday: 'vs yesterday',
+                create_push_strategy: 'Create Push Strategy',
+                strategy_name: 'Strategy Name',
+                push_type: 'Push Type',
+                system_notification: 'System Notification',
+                energy_alert: 'Energy Alert',
+                device_status: 'Device Status',
+                marketing_message: 'Marketing Message',
+                priority: 'Priority',
+                high_priority: 'High Priority',
+                medium_priority: 'Medium Priority',
+                low_priority: 'Low Priority',
+                target_audience: 'Target Audience',
+                all_users: 'All Users',
+                active_users: 'Active Users',
+                vip_users: 'VIP Users',
+                specific_region: 'Specific Region',
+                push_channel: 'Push Channel',
+                app_push: 'App Push',
+                sms_push: 'SMS Push',
+                email_push: 'Email Push',
+                trigger_condition: 'Trigger Condition',
+                immediate_send: 'Immediate Send',
+                scheduled_send: 'Scheduled Send',
+                event_trigger: 'Event Trigger',
+                condition_trigger: 'Condition Trigger',
+                message_title: 'Message Title',
+                message_content: 'Message Content',
+                preview: 'Preview',
+                create: 'Create',
+                strategy_list: 'Strategy List',
+                filter: 'Filter',
+                export: 'Export',
+                push_count: 'Push Count',
+                success_rate: 'Success Rate',
+                status: 'Status',
+                create_time: 'Create Time',
+                operations: 'Operations',
+                showing: 'Showing',
+                of: 'of',
+                records: 'records',
+                strategy_details: 'Strategy Details',
+                active: 'Active',
+                paused: 'Paused',
+                draft: 'Draft',
+                view: 'View',
+                edit: 'Edit',
+                pause: 'Pause',
+                delete: 'Delete',
+                nav_home: 'Home',
+                auth_management: 'Authorization Management',
+                nav_profit: 'Profit Analysis',
+                nav_family: 'Family Management',
+                nav_analysis: 'Data Analysis',
+                nav_organization: 'Organization Management',
+                nav_push_strategy: 'Push Strategy',
+                nav_operation_log: 'Operation Log',
+                nav_message_center: 'Message Center',
+                nav_settings: 'Settings'
+            }
+        };
+
+        let currentLang = localStorage.getItem('language') || 'zh';
+
+        // 模拟策略数据
+        const strategyData = [
+            {
+                id: 1,
+                name: '能源告警推送',
+                type: '能源告警',
+                audience: '所有用户',
+                pushCount: 156,
+                successRate: '92.3%',
+                status: 'active',
+                createTime: '2024-05-15'
+            },
+            {
+                id: 2,
+                name: '系统维护通知',
+                type: '系统通知',
+                audience: '活跃用户',
+                pushCount: 89,
+                successRate: '96.5%',
+                status: 'paused',
+                createTime: '2024-05-12'
+            },
+            {
+                id: 3,
+                name: '营销活动推广',
+                type: '营销消息',
+                audience: 'VIP用户',
+                pushCount: 234,
+                successRate: '88.7%',
+                status: 'active',
+                createTime: '2024-05-08'
+            },
+            {
+                id: 4,
+                name: '设备状态更新',
+                type: '设备状态',
+                audience: '特定地区',
+                pushCount: 45,
+                successRate: '94.2%',
+                status: 'draft',
+                createTime: '2024-05-20'
+            }
+        ];
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+            document.getElementById('current-lang').textContent = lang === 'zh' ? '中文' : 'English';
+            renderStrategyTable();
+        }
+
+        function init() {
+            changeLanguage(currentLang);
+            renderStrategyTable();
+            initEventListeners();
+        }
+
+        function renderStrategyTable() {
+            const tbody = document.getElementById('strategy-table-body');
+            tbody.innerHTML = strategyData.map(strategy => `
+                <tr class="border-b border-border hover:bg-light/50 transition-colors">
+                    <td class="px-4 py-3 text-sm font-medium">${strategy.name}</td>
+                    <td class="px-4 py-3 text-sm">${strategy.type}</td>
+                    <td class="px-4 py-3 text-sm">${strategy.audience}</td>
+                    <td class="px-4 py-3 text-sm">${strategy.pushCount}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <span class="font-medium text-success">${strategy.successRate}</span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(strategy.status)}">
+                            ${translations[currentLang][strategy.status]}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm">${strategy.createTime}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex gap-2">
+                            <button onclick="viewStrategy(${strategy.id})" class="text-xs px-3 py-1 text-primary hover:bg-primary/10 rounded transition-colors">
+                                ${translations[currentLang].view}
+                            </button>
+                            <button onclick="editStrategy(${strategy.id})" class="text-xs px-3 py-1 text-success hover:bg-success/10 rounded transition-colors">
+                                ${translations[currentLang].edit}
+                            </button>
+                            ${strategy.status === 'active' ? 
+                                `<button onclick="pauseStrategy(${strategy.id})" class="text-xs px-3 py-1 text-warning hover:bg-warning/10 rounded transition-colors">
+                                    ${translations[currentLang].pause}
+                                </button>` :
+                                ''
+                            }
+                            <button onclick="deleteStrategy(${strategy.id})" class="text-xs px-3 py-1 text-danger hover:bg-danger/10 rounded transition-colors">
+                                ${translations[currentLang].delete}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'active': return 'bg-success/10 text-success';
+                case 'paused': return 'bg-warning/10 text-warning';
+                case 'draft': return 'bg-tertiary/10 text-tertiary';
+                default: return 'bg-tertiary/10 text-tertiary';
+            }
+        }
+
+        function createPushStrategy() {
+            console.log('创建推送策略');
+        }
+
+        function viewStrategy(id) {
+            const strategy = strategyData.find(s => s.id === id);
+            if (!strategy) return;
+
+            const modal = document.getElementById('strategy-modal');
+            const content = document.getElementById('strategy-modal-content');
+
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <h4 class="font-semibold text-lg">基本信息</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-sm text-tertiary">策略名称</label>
+                                    <p class="font-medium">${strategy.name}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm text-tertiary">推送类型</label>
+                                    <p class="font-medium">${strategy.type}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm text-tertiary">目标受众</label>
+                                    <p class="font-medium">${strategy.audience}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm text-tertiary">创建时间</label>
+                                    <p class="font-medium">${strategy.createTime}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <h4 class="font-semibold text-lg">统计数据</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-sm text-tertiary">推送次数</label>
+                                    <p class="font-medium">${strategy.pushCount}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm text-tertiary">成功率</label>
+                                    <p class="font-medium text-success">${strategy.successRate}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm text-tertiary">状态</label>
+                                    <p class="font-medium">
+                                        <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(strategy.status)}">
+                                            ${translations[currentLang][strategy.status]}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function editStrategy(id) {
+            console.log('编辑策略:', id);
+        }
+
+        function pauseStrategy(id) {
+            console.log('暂停策略:', id);
+        }
+
+        function deleteStrategy(id) {
+            console.log('删除策略:', id);
+        }
+
+        function initEventListeners() {
+            // 语言切换
+            const langToggleBtn = document.getElementById('lang-toggle-btn');
+            const langDropdown = document.getElementById('lang-dropdown');
+            
+            langToggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                langDropdown.classList.toggle('show');
+            });
+            
+            document.querySelectorAll('.lang-option').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const lang = this.getAttribute('data-lang');
+                    changeLanguage(lang);
+                    langDropdown.classList.remove('show');
+                });
+            });
+            
+            document.addEventListener('click', function() {
+                langDropdown.classList.remove('show');
+            });
+
+            // 移动端菜单切换
+            document.getElementById('menu-toggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('show');
+            });
+
+            // 关闭模态框
+            document.getElementById('close-strategy-modal').addEventListener('click', function() {
+                document.getElementById('strategy-modal').classList.add('hidden');
+            });
+
+            document.getElementById('strategy-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

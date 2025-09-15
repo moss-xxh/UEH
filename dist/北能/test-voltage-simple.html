@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电芯电压详情测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .test-button:hover {
+            background: #0051D5;
+        }
+    </style>
+</head>
+<body>
+    <h2>电芯电压详情功能测试</h2>
+    
+    <button class="test-button" onclick="showVoltageDetail()">点击显示电芯电压详情</button>
+    
+    <script>
+        function showVoltageDetail() {
+            console.log('showVoltageDetail 被调用');
+            
+            // 创建遮罩层
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            // 创建弹窗内容
+            overlay.innerHTML = `
+                <div style="
+                    background: white;
+                    width: 90%;
+                    max-width: 400px;
+                    border-radius: 20px;
+                    padding: 20px;
+                    position: relative;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                ">
+                    <button onclick="this.parentElement.parentElement.remove()" style="
+                        position: absolute;
+                        right: 20px;
+                        top: 20px;
+                        border: none;
+                        background: #f0f0f0;
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 15px;
+                        font-size: 20px;
+                        cursor: pointer;
+                    ">×</button>
+                    
+                    <div style="display: flex; align-items: center; margin-bottom: 30px;">
+                        <div style="
+                            width: 56px;
+                            height: 56px;
+                            background: linear-gradient(135deg, #00D4AA 0%, #00E5BB 100%);
+                            border-radius: 14px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin-right: 15px;
+                        ">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="white" stroke="white" stroke-width="0.5"/>
+                            </svg>
+                        </div>
+                        <span style="font-size: 20px; color: #00D4AA; font-weight: 600;">电芯电压</span>
+                    </div>
+                    
+                    <div style="background: #f8f8f8; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: #666;">最高电压编号:</span>
+                            <div>
+                                <span style="color: #666;">最高电压:</span>
+                                <input type="text" placeholder="0" style="width: 80px; margin: 0 5px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                                <span style="color: #999;">mV</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #666;">最低电压编号:</span>
+                            <div>
+                                <span style="color: #666;">最低电压:</span>
+                                <input type="text" placeholder="0" style="width: 80px; margin: 0 5px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                                <span style="color: #999;">mV</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f8f8; padding: 15px; border-radius: 12px;">
+                        <div style="color: #666; margin-bottom: 10px; font-weight: 500;">电芯个数:</div>
+                        <div style="height: 200px; background: white; border-radius: 8px; padding: 15px; overflow-y: auto;">
+                            <div style="color: #999; text-align: center; margin-top: 80px;">暂无数据</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 添加到页面
+            document.body.appendChild(overlay);
+            
+            // 点击遮罩关闭
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    overlay.remove();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

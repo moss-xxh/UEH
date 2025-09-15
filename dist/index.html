@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目集 - Project Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", sans-serif;
+            background: #fff;
+            color: #000;
+            line-height: 1.5;
+        }
+
+        /* 头部 */
+        .header {
+            padding: 60px 20px 40px;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* Tab导航 */
+        .tabs {
+            max-width: 900px;
+            margin: 0 auto 40px;
+            padding: 0 20px;
+            display: flex;
+            gap: 24px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            padding: 8px 0;
+            border: none;
+            background: none;
+            font-size: 15px;
+            color: #999;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .tab:hover {
+            color: #333;
+        }
+
+        .tab.active {
+            color: #000;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #000;
+        }
+
+        /* 内容区 */
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px 80px;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* 卡片网格 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        /* 分类标题 */
+        .category-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin: 32px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e5e5e7;
+        }
+
+        .category-title:first-child {
+            margin-top: 0;
+        }
+
+        .card {
+            border: 1px solid #e5e5e7;
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fff;
+        }
+
+        .card:hover {
+            border-color: #000;
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: #999;
+        }
+
+        /* 响应式 */
+        @media (max-width: 640px) {
+            .title {
+                font-size: 24px;
+            }
+
+            .subtitle {
+                font-size: 14px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部 -->
+    <div class="header">
+        <h1 class="title">项目产品集</h1>
+        <p class="subtitle">Project Product Collection</p>
+    </div>
+
+    <!-- Tab导航 -->
+    <div class="tabs">
+        <button class="tab active" data-tab="ueh">合众能源</button>
+        <button class="tab" data-tab="charging">充电站</button>
+        <button class="tab" data-tab="home">户用</button>
+        <button class="tab" data-tab="storage">储能柜</button>
+        <button class="tab" data-tab="industrial">工控界面</button>
+        <button class="tab" data-tab="beineng">北能</button>
+        <button class="tab" data-tab="website">官网</button>
+    </div>
+
+    <!-- 内容区 -->
+    <div class="content">
+        <!-- 合众能源 -->
+        <div class="tab-panel active" id="ueh">
+            <div class="category-title">虚拟电厂运行</div>
+            <div class="grid">
+                <div class="card" onclick="window.open('http://47.121.136.99:10054/ueh/index.html', '_blank')">
+                    <div class="card-title">UEH 调度端</div>
+                    <div class="card-desc">Web · HTML原型</div>
+                </div>
+                <div class="card" onclick="window.open('https://modao.cc/proto/TcPPJocBsy56qtcTj9eMO3/sharing?view_mode=device&screen=rbpUoeGTMU7ilAmUd&canvasId=rcUodnzCUoeGTMVwzSpr7H', '_blank')">
+                    <div class="card-title">UEH 用户端</div>
+                    <div class="card-desc">App · 墨刀原型</div>
+                </div>
+            </div>
+            
+            <div class="category-title">授权管理</div>
+            <div class="grid">
+                <div class="card" onclick="window.open('https://moss-xxh.github.io/authorization/', '_blank')">
+                    <div class="card-title">用户授权书——web</div>
+                    <div class="card-desc">用户</div>
+                </div>
+                <div class="card" onclick="window.open(' https://moss-xxh.github.io/authorization-moblie/', '_blank')">
+                    <div class="card-title">用户授权书——APP</div>
+                    <div class="card-desc">用户</div>
+                </div>
+                <div class="card" onclick="window.open('https://moss-xxh.github.io/UEH-System/', '_blank')">
+                    <div class="card-title">后台</div>
+                    <div class="card-desc">Web · 运维</div>
+                </div>
+                <div class="card" onclick="window.open('https://ovk0ykbrwq.feishu.cn/wiki/Qr7PwwaRJipCkmkgQNqcMXafnqb', '_blank')">
+                    <div class="card-title">业务流程图</div>
+                    <div class="card-desc">流程图 · 系统架构</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 充电站 -->
+        <div class="tab-panel" id="charging">
+            <div class="grid">
+                <div class="card" onclick="window.open('http://47.121.136.99:10054/ueh/index.html', '_blank')">
+                    <div class="card-title">充电站 Web</div>
+                    <div class="card-desc">开发中 · HTML原型</div>
+                </div>
+                <div class="card" onclick="window.open('https://modao.cc/proto/TcPPJocBsy56qtcTj9eMO3/sharing?view_mode=device&screen=rbpUoeGTMU7ilAmUd&canvasId=rcUodnzCUoeGTMVwzSpr7H', '_blank')">
+                    <div class="card-title">充电站 App</div>
+                    <div class="card-desc">开发中 · 墨刀原型</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 户用 -->
+        <div class="tab-panel" id="home">
+            <div class="grid">
+                <div class="card" onclick="window.open('http://47.121.136.99:10054/ueh/index.html', '_blank')">
+                    <div class="card-title">户用 Web</div>
+                    <div class="card-desc">HTML原型</div>
+                </div>
+                <div class="card" onclick="window.open('https://modao.cc/proto/TcPPJocBsy56qtcTj9eMO3/sharing?view_mode=device&screen=rbpUoeGTMU7ilAmUd&canvasId=rcUodnzCUoeGTMVwzSpr7H', '_blank')">
+                    <div class="card-title">户用 App</div>
+                    <div class="card-desc">墨刀原型</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 储能柜 -->
+        <div class="tab-panel" id="storage">
+            <div class="grid">
+                <div class="card" onclick="window.open('http://47.121.136.99:10054/储能柜/login.html', '_blank')">
+                    <div class="card-title">储能柜管理系统</div>
+                    <div class="card-desc">Web · HTML原型</div>
+                </div>
+                <div class="card" onclick="window.open('http://47.121.136.99:10054/储能柜/touchscreen/touchscreen-display.html', '_blank')">
+                    <div class="card-title">储能柜触摸屏</div>
+                    <div class="card-desc">触屏 · HTML原型</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 工控界面 -->
+        <div class="tab-panel" id="industrial">
+            <div class="grid">
+                <div class="card" onclick="window.open('https://www.figma.com/design/NYMOdEtnWohzvxQ30Liuac/Untitled?node-id=0-1&t=BJ2ruAwBoqTO3kzC-1', '_blank')">
+                    <div class="card-title">工控桌面端</div>
+                    <div class="card-desc">Figma设计稿</div>
+                </div>
+                <div class="card" onclick="window.open('https://www.figma.com/design/NYMOdEtnWohzvxQ30Liuac/Untitled?node-id=0-1&t=BJ2ruAwBoqTO3kzC-1', '_blank')">
+                    <div class="card-title">工控移动端</div>
+                    <div class="card-desc">Figma设计稿</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 北能 -->
+        <div class="tab-panel" id="beineng">
+            <div class="grid">
+                <div class="card" onclick="window.open('https://moss-xxh.github.io/North-Energy/', '_blank')">
+                    <div class="card-title">北能管理端</div>
+                    <div class="card-desc">墨刀原型</div>
+                </div>
+                <div class="card" onclick="window.open('https://moss-xxh.github.io/North-Energy/', '_blank')">
+                    <div class="card-title">北能移动端</div>
+                    <div class="card-desc">HTML原型</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 官网 -->
+        <div class="tab-panel" id="website">
+            <div class="grid">
+                <div class="card" onclick="window.open('http://47.121.136.99:10054/官网/登录页面.html', '_blank')">
+                    <div class="card-title">官网后台</div>
+                    <div class="card-desc">Web · 管理系统</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab切换
+        const tabs = document.querySelectorAll('.tab');
+        const panels = document.querySelectorAll('.tab-panel');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetId = tab.dataset.tab;
+                
+                tabs.forEach(t => t.classList.remove('active'));
+                panels.forEach(p => p.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(targetId).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

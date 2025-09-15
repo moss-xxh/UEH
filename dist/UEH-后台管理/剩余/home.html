@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Overview</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Tailwind 配置 - 苹果风格 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0071e3',
+                        secondary: '#1d1d1f',
+                        tertiary: '#86868b',
+                        light: '#f5f5f7',
+                        success: '#34c759',
+                        warning: '#ff9500',
+                        danger: '#ff3b30',
+                        border: '#d2d2d7',
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'apple': '0 2px 10px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03)',
+                        'apple-hover': '0 5px 15px rgba(0, 0, 0, 0.08), 0 2px 5px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            }
+        }
+    </script>
+
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .card-apple {
+                @apply bg-white/90 backdrop-blur-sm rounded-xl shadow-apple overflow-hidden transition-all duration-300 hover:shadow-apple-hover;
+            }
+            .btn-apple {
+                @apply bg-primary text-white font-medium py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 hover:bg-primary/90 active:bg-primary/80;
+            }
+            .btn-outline-black {
+                @apply border border-black text-black font-medium py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 hover:bg-black/5 active:bg-black/10;
+            }
+        }
+    </style>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #f5f5f7 100%);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(50px);
+            opacity: 0.15;
+        }
+        
+        body::before {
+            width: 500px;
+            height: 500px;
+            background: #0071e3;
+            top: -250px;
+            right: -250px;
+        }
+        
+        body::after {
+            width: 600px;
+            height: 600px;
+            background: #34c759;
+            bottom: -300px;
+            left: -300px;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
+        
+        .lang-selector {
+            position: relative;
+        }
+        .lang-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            z-index: 10;
+            margin-top: 0.5rem;
+            min-width: 8rem;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .lang-dropdown.show {
+            display: block;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans text-secondary flex">
+    <!-- 侧边栏 -->
+    <aside class="sidebar w-64 bg-white shadow-sm fixed md:relative h-full z-40">
+        <div class="p-6 border-b border-border">
+            <img src="logo_副本.png" alt="Logo" class="h-8 max-w-[150px] object-contain">
+        </div>
+        <nav class="p-4">
+            <ul class="space-y-2">
+                <li>
+                    <a href="#" id="home-link" class="flex items-center gap-3 px-4 py-3 bg-black text-white rounded-lg cursor-default">
+                        <i class="fa fa-home"></i>
+                        <span data-i18n="nav_home">首页</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="admin.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-shield"></i>
+                        <span data-i18n="auth_management">授权管理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="profit.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-line-chart"></i>
+                        <span data-i18n="nav_profit">利润分析</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="family.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-users"></i>
+                        <span data-i18n="nav_family">家庭管理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="analysis.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-bar-chart"></i>
+                        <span data-i18n="nav_analysis">数据分析</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="organization.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-sitemap"></i>
+                        <span data-i18n="nav_organization">组织管理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="push-strategy.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-bullhorn"></i>
+                        <span data-i18n="nav_push_strategy">推送策略</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="operation-log.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-history"></i>
+                        <span data-i18n="nav_operation_log">操作日志</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="message-center.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-bell"></i>
+                        <span data-i18n="nav_message_center">消息中心</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-cog"></i>
+                        <span data-i18n="nav_settings">设置</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <div class="flex-1 flex flex-col">
+        <!-- 头部导航 -->
+        <header class="bg-white shadow-sm sticky top-0 z-30">
+            <div class="px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <button id="menu-toggle" class="md:hidden text-secondary">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                    <h1 class="text-xl font-semibold" data-i18n="dashboard_overview">仪表板概览</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <!-- 语言选择器 -->
+                    <div class="lang-selector">
+                        <button id="lang-toggle-btn" class="flex items-center px-3 py-2 rounded-full bg-light hover:bg-gray-200 transition-colors">
+                            <span id="current-lang" class="mr-1">中文</span>
+                            <i class="fa fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="lang-dropdown" class="lang-dropdown">
+                            <button class="lang-option w-full text-left px-4 py-3 hover:bg-light transition-colors" data-lang="zh">中文</button>
+                            <button class="lang-option w-full text-left px-4 py-3 hover:bg-light transition-colors" data-lang="en">English</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容 -->
+        <main class="flex-1 p-6 space-y-6">
+            <!-- 核心指标卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- 总用户数 -->
+                <div class="card-apple p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                            <i class="fa fa-users text-primary text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-2xl font-bold">1,247</p>
+                            <p class="text-tertiary text-sm" data-i18n="total_users">总用户数</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <span class="text-success">↗ +12%</span>
+                        <span class="text-tertiary ml-2" data-i18n="vs_last_month">较上月</span>
+                    </div>
+                </div>
+
+                <!-- 活跃用户 -->
+                <div class="card-apple p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-success/10 rounded-xl flex items-center justify-center">
+                            <i class="fa fa-user-check text-success text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-2xl font-bold">923</p>
+                            <p class="text-tertiary text-sm" data-i18n="active_users">活跃用户</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <span class="text-success">↗ +8%</span>
+                        <span class="text-tertiary ml-2" data-i18n="vs_last_month">较上月</span>
+                    </div>
+                </div>
+
+                <!-- 总收入 -->
+                <div class="card-apple p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-warning/10 rounded-xl flex items-center justify-center">
+                            <i class="fa fa-dollar text-warning text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-2xl font-bold">$85,420</p>
+                            <p class="text-tertiary text-sm" data-i18n="total_revenue">总收入</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <span class="text-success">↗ +15%</span>
+                        <span class="text-tertiary ml-2" data-i18n="vs_last_month">较上月</span>
+                    </div>
+                </div>
+
+                <!-- 设备在线率 -->
+                <div class="card-apple p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-danger/10 rounded-xl flex items-center justify-center">
+                            <i class="fa fa-signal text-danger text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-2xl font-bold">96.5%</p>
+                            <p class="text-tertiary text-sm" data-i18n="device_online">设备在线率</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <span class="text-success">↗ +2%</span>
+                        <span class="text-tertiary ml-2" data-i18n="vs_last_month">较上月</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 图表区域 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- 用户增长趋势 -->
+                <div class="card-apple p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold" data-i18n="user_growth">用户增长趋势</h3>
+                        <select class="text-sm border border-border rounded-lg px-3 py-1">
+                            <option data-i18n="last_7_days">最近7天</option>
+                            <option data-i18n="last_30_days">最近30天</option>
+                            <option data-i18n="last_3_months">最近3个月</option>
+                        </select>
+                    </div>
+                    <canvas id="userGrowthChart" width="400" height="200"></canvas>
+                </div>
+
+                <!-- 收入分析 -->
+                <div class="card-apple p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold" data-i18n="revenue_analysis">收入分析</h3>
+                        <select class="text-sm border border-border rounded-lg px-3 py-1">
+                            <option data-i18n="this_month">本月</option>
+                            <option data-i18n="last_month">上月</option>
+                            <option data-i18n="last_quarter">上季度</option>
+                        </select>
+                    </div>
+                    <canvas id="revenueChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- 快速操作和最新活动 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- 快速操作 -->
+                <div class="card-apple p-6">
+                    <h3 class="text-lg font-semibold mb-4" data-i18n="quick_actions">快速操作</h3>
+                    <div class="space-y-3">
+                        <button class="w-full btn-outline-black text-left">
+                            <i class="fa fa-plus mr-3"></i>
+                            <span data-i18n="add_user">添加新用户</span>
+                        </button>
+                        <button class="w-full btn-outline-black text-left">
+                            <i class="fa fa-cog mr-3"></i>
+                            <span data-i18n="system_config">系统配置</span>
+                        </button>
+                        <button class="w-full btn-outline-black text-left">
+                            <i class="fa fa-download mr-3"></i>
+                            <span data-i18n="export_report">导出报告</span>
+                        </button>
+                        <button class="w-full btn-outline-black text-left">
+                            <i class="fa fa-bell mr-3"></i>
+                            <span data-i18n="send_notification">发送通知</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 系统状态 -->
+                <div class="card-apple p-6">
+                    <h3 class="text-lg font-semibold mb-4" data-i18n="system_status">系统状态</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm" data-i18n="cpu_usage">CPU使用率</span>
+                            <div class="flex items-center gap-2">
+                                <div class="w-16 h-2 bg-light rounded-full overflow-hidden">
+                                    <div class="h-full bg-success rounded-full" style="width: 65%"></div>
+                                </div>
+                                <span class="text-xs text-tertiary">65%</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm" data-i18n="memory_usage">内存使用率</span>
+                            <div class="flex items-center gap-2">
+                                <div class="w-16 h-2 bg-light rounded-full overflow-hidden">
+                                    <div class="h-full bg-warning rounded-full" style="width: 78%"></div>
+                                </div>
+                                <span class="text-xs text-tertiary">78%</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm" data-i18n="disk_usage">磁盘使用率</span>
+                            <div class="flex items-center gap-2">
+                                <div class="w-16 h-2 bg-light rounded-full overflow-hidden">
+                                    <div class="h-full bg-primary rounded-full" style="width: 45%"></div>
+                                </div>
+                                <span class="text-xs text-tertiary">45%</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm" data-i18n="network_status">网络状态</span>
+                            <span class="text-xs text-success">正常</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最新活动 -->
+                <div class="card-apple p-6">
+                    <h3 class="text-lg font-semibold mb-4" data-i18n="recent_activity">最新活动</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="w-2 h-2 bg-success rounded-full mt-2"></div>
+                            <div class="flex-1">
+                                <p class="text-sm">新用户注册</p>
+                                <p class="text-xs text-tertiary">2分钟前</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-2 h-2 bg-warning rounded-full mt-2"></div>
+                            <div class="flex-1">
+                                <p class="text-sm">设备离线告警</p>
+                                <p class="text-xs text-tertiary">15分钟前</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                            <div class="flex-1">
+                                <p class="text-sm">系统更新完成</p>
+                                <p class="text-xs text-tertiary">1小时前</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-2 h-2 bg-danger rounded-full mt-2"></div>
+                            <div class="flex-1">
+                                <p class="text-sm">安全扫描异常</p>
+                                <p class="text-xs text-tertiary">3小时前</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 语言翻译数据
+        const translations = {
+            zh: {
+                dashboard_overview: '仪表板概览',
+                total_users: '总用户数',
+                active_users: '活跃用户',
+                total_revenue: '总收入',
+                device_online: '设备在线率',
+                vs_last_month: '较上月',
+                user_growth: '用户增长趋势',
+                revenue_analysis: '收入分析',
+                last_7_days: '最近7天',
+                last_30_days: '最近30天',
+                last_3_months: '最近3个月',
+                this_month: '本月',
+                last_month: '上月',
+                last_quarter: '上季度',
+                quick_actions: '快速操作',
+                system_status: '系统状态',
+                recent_activity: '最新活动',
+                add_user: '添加新用户',
+                system_config: '系统配置',
+                export_report: '导出报告',
+                send_notification: '发送通知',
+                cpu_usage: 'CPU使用率',
+                memory_usage: '内存使用率',
+                disk_usage: '磁盘使用率',
+                network_status: '网络状态',
+                nav_home: '首页',
+                auth_management: '授权管理',
+                nav_profit: '利润分析',
+                nav_family: '家庭管理',
+                nav_analysis: '数据分析',
+                nav_organization: '组织管理',
+                nav_push_strategy: '推送策略',
+                nav_operation_log: '操作日志',
+                nav_message_center: '消息中心',
+                nav_settings: '设置'
+            },
+            en: {
+                dashboard_overview: 'Dashboard Overview',
+                total_users: 'Total Users',
+                active_users: 'Active Users',
+                total_revenue: 'Total Revenue',
+                device_online: 'Device Online Rate',
+                vs_last_month: 'vs last month',
+                user_growth: 'User Growth Trend',
+                revenue_analysis: 'Revenue Analysis',
+                last_7_days: 'Last 7 Days',
+                last_30_days: 'Last 30 Days',
+                last_3_months: 'Last 3 Months',
+                this_month: 'This Month',
+                last_month: 'Last Month',
+                last_quarter: 'Last Quarter',
+                quick_actions: 'Quick Actions',
+                system_status: 'System Status',
+                recent_activity: 'Recent Activity',
+                add_user: 'Add New User',
+                system_config: 'System Configuration',
+                export_report: 'Export Report',
+                send_notification: 'Send Notification',
+                cpu_usage: 'CPU Usage',
+                memory_usage: 'Memory Usage',
+                disk_usage: 'Disk Usage',
+                network_status: 'Network Status',
+                nav_home: 'Home',
+                auth_management: 'Authorization Management',
+                nav_profit: 'Profit Analysis',
+                nav_family: 'Family Management',
+                nav_analysis: 'Data Analysis',
+                nav_organization: 'Organization Management',
+                nav_push_strategy: 'Push Strategy',
+                nav_operation_log: 'Operation Log',
+                nav_message_center: 'Message Center',
+                nav_settings: 'Settings'
+            }
+        };
+
+        // 当前语言
+        let currentLang = localStorage.getItem('language') || 'zh';
+
+        // 语言切换功能
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+            document.getElementById('current-lang').textContent = lang === 'zh' ? '中文' : 'English';
+        }
+
+        // 初始化
+        function init() {
+            changeLanguage(currentLang);
+            initCharts();
+            initEventListeners();
+        }
+
+        // 初始化图表
+        function initCharts() {
+            // 用户增长趋势图
+            const userCtx = document.getElementById('userGrowthChart').getContext('2d');
+            new Chart(userCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                    datasets: [{
+                        label: currentLang === 'zh' ? '用户数量' : 'User Count',
+                        data: [850, 920, 980, 1050, 1150, 1247],
+                        borderColor: '#0071e3',
+                        backgroundColor: 'rgba(0, 113, 227, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 收入分析图
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        currentLang === 'zh' ? 'VPP收益' : 'VPP Revenue',
+                        currentLang === 'zh' ? '设备租赁' : 'Device Rental',
+                        currentLang === 'zh' ? '服务费' : 'Service Fee',
+                        currentLang === 'zh' ? '其他' : 'Others'
+                    ],
+                    datasets: [{
+                        data: [45, 25, 20, 10],
+                        backgroundColor: ['#0071e3', '#34c759', '#ff9500', '#ff3b30'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 初始化事件监听
+        function initEventListeners() {
+            // 语言切换
+            const langToggleBtn = document.getElementById('lang-toggle-btn');
+            const langDropdown = document.getElementById('lang-dropdown');
+            
+            langToggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                langDropdown.classList.toggle('show');
+            });
+            
+            document.querySelectorAll('.lang-option').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const lang = this.getAttribute('data-lang');
+                    changeLanguage(lang);
+                    langDropdown.classList.remove('show');
+                });
+            });
+            
+            document.addEventListener('click', function() {
+                langDropdown.classList.remove('show');
+            });
+
+            // 移动端菜单切换
+            document.getElementById('menu-toggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('show');
+            });
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

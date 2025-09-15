@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authorization Management</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- Tailwind 配置 - 苹果风格 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0071e3',
+                        secondary: '#1d1d1f',
+                        tertiary: '#86868b',
+                        light: '#f5f5f7',
+                        success: '#34c759',
+                        warning: '#ff9500',
+                        danger: '#ff3b30',
+                        border: '#d2d2d7',
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'apple': '0 2px 10px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03)',
+                        'apple-hover': '0 5px 15px rgba(0, 0, 0, 0.08), 0 2px 5px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            }
+        }
+    </script>
+
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .input-focus {
+                @apply focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none transition-all duration-200;
+            }
+            .btn-apple {
+                @apply bg-primary text-white font-medium py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 hover:bg-primary/90 active:bg-primary/80;
+            }
+            .btn-outline {
+                @apply border border-primary text-primary font-medium py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 hover:bg-primary/5 active:bg-primary/10;
+            }
+            .btn-outline-black {
+                @apply border border-black text-black font-medium py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 hover:bg-black/5 active:bg-black/10;
+            }
+            .btn-black {
+                @apply bg-black text-white font-medium py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 hover:bg-black/90 active:bg-black/80;
+            }
+            .input-apple {
+                @apply w-full px-4 py-3 bg-light border border-border rounded-lg transition-all duration-200;
+                &:focus {
+                    @apply ring-1 ring-black border-black text-black outline-none;
+                }
+            }
+            .input-with-icon {
+                @apply pl-12;
+            }
+            .label-apple {
+                @apply block text-sm font-medium text-secondary mb-2;
+            }
+            .card-apple {
+                @apply bg-white/90 backdrop-blur-sm rounded-xl shadow-apple overflow-hidden transition-all duration-300 hover:shadow-apple-hover;
+            }
+        }
+    </style>
+
+    <style>
+        /* 全局样式 */
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #f5f5f7 100%);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 背景装饰 */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(50px);
+            opacity: 0.15;
+        }
+        
+        body::before {
+            width: 500px;
+            height: 500px;
+            background: #0071e3;
+            top: -250px;
+            right: -250px;
+        }
+        
+        body::after {
+            width: 600px;
+            height: 600px;
+            background: #34c759;
+            bottom: -300px;
+            left: -300px;
+        }
+        
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* 按钮按下效果 */
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        /* 语言选择器样式 */
+        .lang-selector {
+            position: relative;
+        }
+        .lang-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            z-index: 10;
+            margin-top: 0.5rem;
+            min-width: 8rem;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .lang-dropdown.show {
+            display: block;
+        }
+        
+        /* 状态消息动画 */
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .status-message {
+            animation: fadeSlideIn 0.3s ease-out;
+        }
+        
+        /* 滚动条样式 - 苹果风格 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* 表格样式 */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* 侧边栏样式 */
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans text-secondary flex">
+    <!-- 侧边栏 -->
+    <aside class="sidebar w-64 bg-white shadow-sm fixed md:relative h-full z-40">
+        <div class="p-6 border-b border-border">
+            <img src="logo_副本.png" alt="Logo" class="h-8 max-w-[150px] object-contain">
+        </div>
+        <nav class="p-4">
+            <ul class="space-y-2">
+                <li>
+                    <a href="../index.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-home"></i>
+                        <span data-i18n="nav_home">首页</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" id="auth-management-link" class="flex items-center gap-3 px-4 py-3 bg-black text-white rounded-lg cursor-default">
+                        <i class="fa fa-shield"></i>
+                        <span data-i18n="auth_management">授权管理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../002.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-line-chart"></i>
+                        <span data-i18n="nav_profit">利润分析</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../family-new.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-users"></i>
+                        <span data-i18n="nav_family">家庭管理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../001.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-bar-chart"></i>
+                        <span data-i18n="nav_analysis">数据分析</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../organization-new.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-sitemap"></i>
+                        <span data-i18n="nav_organization">组织管理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../push-strategy-page.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-bullhorn"></i>
+                        <span data-i18n="nav_push_strategy">推送策略</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../operation-log-page.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-history"></i>
+                        <span data-i18n="nav_operation_log">操作日志</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../message-center.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-bell"></i>
+                        <span data-i18n="nav_message_center">消息中心</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="../settings.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-cog"></i>
+                        <span data-i18n="nav_settings">设置</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="help.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-question-circle"></i>
+                        <span data-i18n="nav_help">帮助中心</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <div class="flex-1 flex flex-col">
+        <!-- 头部导航 -->
+        <header class="bg-white shadow-sm sticky top-0 z-30">
+            <div class="px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <button id="menu-toggle" class="md:hidden text-secondary">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                    <h1 class="text-xl font-semibold" data-i18n="auth_management">授权管理</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <!-- 语言选择器 -->
+                    <div class="lang-selector">
+                        <button id="lang-toggle-btn" class="flex items-center px-3 py-2 rounded-full bg-light hover:bg-gray-200 transition-colors">
+                            <span id="current-lang" class="mr-1">中文</span>
+                            <i class="fa fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="lang-dropdown" class="lang-dropdown">
+                            <button class="lang-option w-full text-left px-4 py-3 hover:bg-light transition-colors" data-lang="zh">
+                                中文
+                            </button>
+                            <button class="lang-option w-full text-left px-4 py-3 hover:bg-light transition-colors" data-lang="en">
+                                English
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容 -->
+        <main class="flex-1 p-6">
+            <!-- 统计卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- 总用户统计 -->
+                <div class="card-apple p-6">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                                    <i class="fa fa-users text-primary"></i>
+                                </div>
+                                <p class="text-tertiary text-sm font-medium" data-i18n="total_users">总用户</p>
+                            </div>
+                            <p class="text-3xl font-bold" id="total-users">50</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-success/5 rounded-lg p-3 border border-success/20">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-success font-medium" data-i18n="authorized_label">已授权</span>
+                                    <span class="text-lg font-bold text-success" id="total-authorized">36</span>
+                                </div>
+                            </div>
+                            <div class="bg-warning/5 rounded-lg p-3 border border-warning/20">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-warning font-medium" data-i18n="unauthorized_label">未授权</span>
+                                    <span class="text-lg font-bold text-warning" id="total-unauthorized">14</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 今日新增 -->
+                <div class="card-apple p-6">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-info/10 rounded-xl flex items-center justify-center">
+                                    <i class="fa fa-calendar-plus-o text-info"></i>
+                                </div>
+                                <p class="text-tertiary text-sm font-medium" data-i18n="today_new">今日新增</p>
+                            </div>
+                            <p class="text-3xl font-bold" id="today-total">4</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-success/5 rounded-lg p-3 border border-success/20">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-success font-medium" data-i18n="authorized_label">已授权</span>
+                                    <span class="text-lg font-bold text-success" id="today-authorized">3</span>
+                                </div>
+                            </div>
+                            <div class="bg-warning/5 rounded-lg p-3 border border-warning/20">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-warning font-medium" data-i18n="unauthorized_label">未授权</span>
+                                    <span class="text-lg font-bold text-warning" id="today-unauthorized">1</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 搜索和筛选 -->
+            <div class="card-apple p-6 mb-6">
+                <h3 class="text-lg font-semibold mb-4" data-i18n="search_title">查询条件</h3>
+                <div class="space-y-4">
+                    <!-- 第一行：品牌、时间、账号 -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- 品牌选择 -->
+                        <div class="flex items-center gap-3">
+                            <label class="text-sm text-tertiary whitespace-nowrap min-w-[70px]" data-i18n="brand_label">品牌</label>
+                            <select id="brand-filter" class="input-apple flex-1">
+                                <option value="" data-i18n="all_brands">所有品牌</option>
+                                <option value="ipotisedge">ipotisedge</option>
+                                <option value="foxess">FOX ESS</option>
+                                <option value="weiheng">weiheng</option>
+                            </select>
+                        </div>
+                        <!-- 时间选择 -->
+                        <div class="flex items-center gap-3">
+                            <label class="text-sm text-tertiary whitespace-nowrap min-w-[70px]" data-i18n="time_label">时间</label>
+                            <div class="relative flex-1">
+                                <input type="date" id="date-filter" class="input-apple input-with-icon w-full" placeholder="YYYY-MM-DD">
+                                <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-tertiary">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 账号输入 -->
+                        <div class="flex items-center gap-3">
+                            <label class="text-sm text-tertiary whitespace-nowrap min-w-[70px]" data-i18n="account_label">账号</label>
+                            <div class="relative flex-1">
+                                <input type="text" id="account-input" placeholder="输入账号" class="input-apple input-with-icon w-full">
+                                <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-tertiary">
+                                    <i class="fa fa-user"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 第二行：设备SN、电表号 -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- 设备SN -->
+                        <div class="flex items-center gap-3">
+                            <label class="text-sm text-tertiary whitespace-nowrap min-w-[70px]" data-i18n="sn_label">设备SN</label>
+                            <div class="relative flex-1">
+                                <input type="text" id="sn-input" placeholder="输入设备SN" class="input-apple input-with-icon w-full">
+                                <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-tertiary">
+                                    <i class="fa fa-barcode"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 电表号 -->
+                        <div class="flex items-center gap-3">
+                            <label class="text-sm text-tertiary whitespace-nowrap min-w-[70px]" data-i18n="meter_label">电表号</label>
+                            <div class="relative flex-1">
+                                <input type="text" id="meter-input" placeholder="输入电表号" class="input-apple input-with-icon w-full">
+                                <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-tertiary">
+                                    <i class="fa fa-tachometer"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 查询和重置按钮 -->
+                        <div class="flex items-center justify-end gap-3">
+                            <button id="reset-btn" class="btn-outline-black px-6">
+                                <i class="fa fa-refresh mr-2"></i>
+                                <span data-i18n="reset_btn">重置</span>
+                            </button>
+                            <button id="search-btn" class="btn-black px-6">
+                                <i class="fa fa-search mr-2"></i>
+                                <span data-i18n="search_btn">查询</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 数据表格 -->
+            <div class="card-apple">
+                <div class="p-4 border-b border-border">
+                    <div class="flex justify-between items-center">
+                        <!-- Tabs 替换授权列表位置 -->
+                        <div class="flex gap-1">
+                            <button id="tab-authorized" class="tab-btn px-3 py-1.5 text-sm rounded-md bg-black text-white font-medium transition-all" onclick="switchTab('authorized')">
+                                <span data-i18n="authorized_tab">已授权</span>
+                                <span class="ml-1 text-xs opacity-80" id="authorized-count">(0)</span>
+                            </button>
+                            <button id="tab-unauthorized" class="tab-btn px-3 py-1.5 text-sm rounded-md text-tertiary hover:bg-light transition-all" onclick="switchTab('unauthorized')">
+                                <span data-i18n="unauthorized_tab">未授权</span>
+                                <span class="ml-1 text-xs opacity-60" id="unauthorized-count">(0)</span>
+                            </button>
+                            <button id="tab-rejected" class="tab-btn px-3 py-1.5 text-sm rounded-md text-tertiary hover:bg-light transition-all" onclick="switchTab('rejected')">
+                                <span data-i18n="rejected_tab">已驳回</span>
+                                <span class="ml-1 text-xs opacity-60" id="rejected-count">(0)</span>
+                            </button>
+                            <button id="tab-exited" class="tab-btn px-3 py-1.5 text-sm rounded-md text-tertiary hover:bg-light transition-all" onclick="switchTab('exited')">
+                                <span data-i18n="exited_tab">已退出</span>
+                                <span class="ml-1 text-xs opacity-60" id="exited-count">(0)</span>
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="table-export-btn" class="btn-outline-black px-4 py-2">
+                                <i class="fa fa-download mr-2"></i>
+                                <span data-i18n="export">导出</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="w-full">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary">
+                                    <input type="checkbox" id="select-all" class="rounded">
+                                </th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="th_account">账号</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="th_sn">设备SN</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="th_brand">品牌</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="th_address">地址</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="th_meter">电表号</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="th_submit_time">提交时间</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" id="status-header" data-i18n="th_auth_status">授权状态</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="th_remarks">备注</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="th_operations">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body">
+                            <!-- 数据将通过JavaScript动态添加 -->
+                        </tbody>
+                    </table>
+                    <div id="empty-state" class="p-12 text-center hidden">
+                        <i class="fa fa-inbox text-6xl text-tertiary/30 mb-4"></i>
+                        <p class="text-tertiary" data-i18n="no_data">暂无数据</p>
+                    </div>
+                </div>
+                <!-- 分页 -->
+                <div class="p-4 border-t border-border flex justify-between items-center">
+                    <div class="text-sm text-tertiary">
+                        <span data-i18n="showing">显示</span> <span id="showing-range">0-0</span> <span data-i18n="of">共</span> <span id="total-records">0</span> <span data-i18n="records">条记录</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="prev-page" class="px-3 py-1 rounded-lg border border-border hover:bg-light transition-colors disabled:opacity-50">
+                            <i class="fa fa-chevron-left"></i>
+                        </button>
+                        <span class="px-3 py-1" id="page-info">1 / 1</span>
+                        <button id="next-page" class="px-3 py-1 rounded-lg border border-border hover:bg-light transition-colors disabled:opacity-50">
+                            <i class="fa fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 详情模态框 -->
+    <div id="detail-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            <div class="p-5 border-b border-border flex justify-between items-center">
+                <h3 class="text-lg font-semibold" data-i18n="detail_title">授权详情</h3>
+                <button id="close-detail-btn" class="text-tertiary hover:text-secondary transition-colors p-1">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-5 overflow-y-auto max-h-[70vh]" id="detail-content">
+                <!-- 详情内容将通过JavaScript动态添加 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 驳回模态框 -->
+    <div id="reject-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl w-full max-w-md overflow-hidden shadow-apple">
+            <div class="p-5 border-b border-border">
+                <h3 class="text-lg font-semibold flex items-center">
+                    <i class="fa fa-times-circle text-danger mr-2"></i>
+                    <span data-i18n="reject_title">驳回申请</span>
+                </h3>
+            </div>
+            <div class="p-5">
+                <p class="text-gray-600 mb-3 text-sm" data-i18n="reject_message">请输入驳回原因（选填）：</p>
+                <textarea id="reject-reason" rows="4" class="input-apple w-full resize-none" placeholder="请输入驳回原因..."></textarea>
+                <input type="hidden" id="reject-device-id">
+            </div>
+            <div class="p-5 border-t border-border flex justify-end gap-3">
+                <button onclick="closeRejectModal()" class="btn-outline-black px-4 py-2">
+                    <span data-i18n="cancel">取消</span>
+                </button>
+                <button onclick="confirmReject()" class="px-4 py-2 bg-danger text-white rounded-full hover:bg-danger/90 transition-colors">
+                    <i class="fa fa-times mr-2"></i>
+                    <span data-i18n="confirm_reject">确认驳回</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 退出VPP计划模态框 -->
+    <div id="exit-vpp-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden">
+            <div class="p-5 border-b border-border">
+                <h3 class="text-lg font-semibold flex items-center">
+                    <i class="fa fa-exclamation-triangle text-warning mr-2"></i>
+                    <span data-i18n="exit_vpp_title">退出VPP计划</span>
+                </h3>
+            </div>
+            <div class="p-5">
+                <p class="text-gray-700 mb-3" data-i18n="exit_vpp_message">您确定要退出VPP计划吗？</p>
+                <p class="text-sm text-danger" data-i18n="exit_vpp_warning">此操作不可恢复。</p>
+                <input type="hidden" id="exit-vpp-device-id">
+            </div>
+            <div class="p-5 border-t border-border flex justify-end gap-3">
+                <button onclick="closeExitVPPModal()" class="px-4 py-2 rounded-lg border border-border hover:bg-light transition-colors">
+                    <span data-i18n="cancel">取消</span>
+                </button>
+                <button onclick="confirmExitVPP()" class="px-4 py-2 rounded-lg bg-danger text-white hover:bg-danger/90 transition-colors">
+                    <i class="fa fa-sign-out mr-2"></i>
+                    <span data-i18n="confirm_exit">确认退出</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 恢复VPP计划模态框 -->
+    <div id="restore-vpp-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden">
+            <div class="p-5 border-b border-border">
+                <h3 class="text-lg font-semibold flex items-center">
+                    <i class="fa fa-undo text-success mr-2"></i>
+                    <span data-i18n="restore_vpp_title">恢复VPP计划</span>
+                </h3>
+            </div>
+            <div class="p-5">
+                <p class="text-gray-700 mb-3" data-i18n="restore_vpp_message">您确定要将此用户恢复到VPP计划吗？</p>
+                <p class="text-sm text-success" data-i18n="restore_vpp_warning">恢复后用户将重新加入VPP计划。</p>
+                <input type="hidden" id="restore-vpp-device-id">
+            </div>
+            <div class="p-5 border-t border-border flex justify-end gap-3">
+                <button onclick="closeRestoreModal()" class="px-4 py-2 rounded-lg border border-border hover:bg-light transition-colors">
+                    <span data-i18n="cancel">取消</span>
+                </button>
+                <button onclick="confirmRestore()" class="px-4 py-2 bg-success text-white rounded-lg hover:bg-success/90 transition-colors">
+                    <span data-i18n="confirm_restore">确认恢复</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 语言翻译数据
+        const translations = {
+            en: {
+                total_users: 'Total Users',
+                total_authorized: 'Authorized',
+                today_new: 'Today\'s New',
+                authorized_label: 'Authorized',
+                unauthorized_label: 'Unauthorized',
+                percentage: 'Percentage',
+                search_title: 'Search Criteria',
+                auth_status_label: 'Auth Status',
+                all_status: 'All',
+                authorized: 'Authorized',
+                unauthorized: 'Unauthorized',
+                brand_label: 'Brand',
+                time_label: 'Time',
+                account_label: 'Account',
+                sn_label: 'Device SN',
+                search_btn: 'Search',
+                reset_btn: 'Reset',
+                all_brands: 'All Brands',
+                all_time: 'All Time',
+                today: 'Today',
+                this_week: 'This Week',
+                this_month: 'This Month',
+                auth_list: 'Authorization List',
+                authorized_tab: 'Authorized',
+                unauthorized_tab: 'Unauthorized',
+                exited_tab: 'Exited',
+                th_brand: 'Brand',
+                th_account: 'Account',
+                th_sn: 'Device SN',
+                th_address: 'Address',
+                th_meter: 'NMI',
+                meter_label: 'NMI',
+                th_submit_time: 'Submit Time',
+                th_auth_status: 'Auth Status',
+                th_remarks: 'Remarks',
+                th_operations: 'Operations',
+                exit_vpp: 'Exit VPP',
+                confirm_exit: 'Confirm Exit',
+                cancel: 'Cancel',
+                exit_vpp_title: 'Exit VPP Plan',
+                exit_vpp_message: 'Are you sure you want to exit the VPP plan?',
+                exit_vpp_warning: 'This action cannot be undone.',
+                account_not_exist: 'Account does not exist',
+                device_not_exist: 'Device does not exist',
+                both_not_exist: 'Account and device do not exist',
+                no_data: 'No Data',
+                showing: 'Showing',
+                of: 'of',
+                records: 'records',
+                detail_title: 'Authorization Detail',
+                view: 'View',
+                active: 'Active',
+                inactive: 'Inactive',
+                search_placeholder: 'Search account, device SN or address...',
+                export: 'Export',
+                refresh: 'Refresh',
+                auth_management: 'Authorization Management',
+                exit_users: 'Exited Users',
+                rejected_tab: 'Rejected',
+                reject_title: 'Reject Application',
+                reject_message: 'Please enter rejection reason (optional):',
+                confirm_reject: 'Confirm Reject',
+                detect: 'Check',
+                reject: 'Reject',
+                detect_success: 'Detection successful, authorized',
+                reject_success: 'Successfully rejected',
+                rejection_reason: 'Rejection Reason',
+                rejected_time: 'Rejected Time',
+                restore_vpp: 'Restore to VPP',
+                exit_time: 'Exit Time',
+                no_exited_users: 'No exited users',
+                restore_success: 'Successfully restored to VPP',
+                restore: 'Restore',
+                restore_vpp_title: 'Restore to VPP Plan',
+                restore_vpp_message: 'Are you sure you want to restore this user to VPP plan?',
+                restore_vpp_warning: 'The user will rejoin the VPP plan after restoration.',
+                confirm_restore: 'Confirm Restore',
+            },
+            zh: {
+                total_users: '总用户',
+                total_authorized: '已授权',
+                today_new: '今日新增',
+                authorized_label: '已授权',
+                unauthorized_label: '未授权',
+                percentage: '占比',
+                search_title: '查询条件',
+                auth_status_label: '授权状态',
+                all_status: '全部',
+                authorized: '已授权',
+                unauthorized: '未授权',
+                brand_label: '品牌',
+                time_label: '时间',
+                account_label: '账号',
+                sn_label: '设备SN',
+                search_btn: '查询',
+                reset_btn: '重置',
+                all_brands: '所有品牌',
+                all_time: '所有时间',
+                today: '今天',
+                this_week: '本周',
+                this_month: '本月',
+                auth_list: '授权列表',
+                authorized_tab: '已授权',
+                unauthorized_tab: '未授权',
+                exited_tab: '已退出',
+                th_brand: '品牌',
+                th_account: '账号',
+                th_sn: '设备SN',
+                th_address: '地址',
+                th_meter: '电表号',
+                meter_label: '电表号',
+                th_submit_time: '提交时间',
+                th_status: '状态',
+                th_remarks: '备注',
+                th_operations: '操作',
+                exit_vpp: '退出VPP',
+                confirm_exit: '确认退出',
+                cancel: '取消',
+                exit_vpp_title: '退出VPP计划',
+                exit_vpp_message: '您确定要退出VPP计划吗？',
+                exit_vpp_warning: '此操作不可恢复。',
+                account_not_exist: '账号不存在',
+                device_not_exist: '设备不存在',
+                both_not_exist: '账号设备不存在',
+                no_data: '暂无数据',
+                showing: '显示',
+                of: '共',
+                records: '条记录',
+                detail_title: '授权详情',
+                view: '查看',
+                active: '活跃',
+                inactive: '未激活',
+                search_placeholder: '搜索账号、设备SN或地址...',
+                export: '导出',
+                refresh: '刷新',
+                auth_management: '授权管理',
+                exit_users: '退出用户',
+                rejected_tab: '已驳回',
+                reject_title: '驳回申请',
+                reject_message: '请输入驳回原因（选填）：',
+                confirm_reject: '确认驳回',
+                detect: '检测',
+                reject: '驳回',
+                detect_success: '检测成功，已授权',
+                reject_success: '已成功驳回',
+                rejection_reason: '驳回原因',
+                rejected_time: '驳回时间',
+                restore_vpp: '恢复到VPP',
+                exit_time: '退出时间',
+                no_exited_users: '暂无退出用户',
+                restore_success: '成功恢复到VPP计划',
+                restore: '恢复',
+                restore_vpp_title: '恢复到VPP计划',
+                restore_vpp_message: '您确定要将此用户恢复到VPP计划吗？',
+                restore_vpp_warning: '恢复后用户将重新加入VPP计划。',
+                confirm_restore: '确认恢复',
+            }
+        };
+
+        // 当前语言 - 从localStorage读取，默认为英文
+        let currentLang = localStorage.getItem('language') || 'en';
+
+        // 模拟数据
+        let mockData = [];
+
+        // 生成模拟数据
+        function generateMockData() {
+            const brands = ['ipotisedge', 'FOX ESS', 'weiheng'];
+            const cities = currentLang === 'zh' 
+                ? ['悉尼, 新南威尔士州', '墨尔本, 维多利亚州', '布里斯班, 昆士兰州', '珀斯, 西澳大利亚州'] 
+                : ['Sydney, NSW', 'Melbourne, VIC', 'Brisbane, QLD', 'Perth, WA'];
+            
+            mockData = [];
+            const today = new Date();
+            
+            // 生成数据：37条已授权，2条未授权
+            for (let i = 1; i <= 39; i++) {
+                const date = new Date();
+                // 今天的数据
+                if (i <= 4) {
+                    date.setHours(date.getHours() - Math.floor(Math.random() * 24));
+                } else {
+                    date.setDate(date.getDate() - Math.floor(Math.random() * 29 + 1));
+                }
+                
+                let status = 'active';
+                let remarkType = ''; // 备注类型
+                
+                if (i === 38) {
+                    // 第38条：未授权，检测后会成功
+                    status = 'inactive';
+                    remarkType = ''; // 没有问题，检测后会变成已授权
+                } else if (i === 39) {
+                    // 第39条：未授权，检测后会失败
+                    status = 'inactive';
+                    remarkType = 'account_not_exist'; // 账号不存在，检测后仍然失败
+                } else {
+                    // 其他都是已授权
+                    status = 'active';
+                }
+                
+                mockData.push({
+                    id: i,
+                    brand: brands[Math.floor(Math.random() * brands.length)],
+                    account: `user${1000 + i}`,
+                    sn: `SN2024${Math.floor(Math.random() * 10000)}`,
+                    address: cities[Math.floor(Math.random() * cities.length)],
+                    meter: Math.floor(Math.random() * 100000000).toString(),
+                    submitTime: date.toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US'),
+                    status: status,
+                    remarkType: remarkType,
+                    isExited: false
+                });
+            }
+        }
+
+        // 分页变量
+        let currentPage = 1;
+        const pageSize = 10;
+        let filteredData = [];
+        let currentTab = 'authorized'; // 当前选中的tab
+
+        // 初始化
+        function init() {
+            // 应用保存的语言设置
+            changeLanguage(currentLang);
+            generateMockData();
+            generateExitedUsers();
+            updateStats();
+            updateTableHeader();
+            renderTable();
+            updateTabCounts();
+            initEventListeners();
+        }
+        
+        // 生成退出用户测试数据
+        function generateExitedUsers() {
+            // 如果localStorage中没有退出用户，添加2条测试数据
+            if (exitedUsers.length === 0) {
+                const cities = currentLang === 'zh' 
+                    ? ['悉尼, 新南威尔士州', '墨尔本, 维多利亚州'] 
+                    : ['Sydney, NSW', 'Melbourne, VIC'];
+                
+                exitedUsers = [
+                    {
+                        id: 1001,
+                        brand: 'ipotisedge',
+                        account: 'exited_user1',
+                        sn: 'SN2024001',
+                        address: cities[0],
+                        meter: '12345678',
+                        submitTime: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US'),
+                        status: 'active',
+                        remarkType: '',
+                        isExited: true,
+                        exitTime: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US')
+                    },
+                    {
+                        id: 1002,
+                        brand: 'FOX ESS',
+                        account: 'exited_user2',
+                        sn: 'SN2024002',
+                        address: cities[1],
+                        meter: '87654321',
+                        submitTime: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US'),
+                        status: 'active',
+                        remarkType: '',
+                        isExited: true,
+                        exitTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US')
+                    }
+                ];
+                localStorage.setItem('exitedVPPUsers', JSON.stringify(exitedUsers));
+            }
+        }
+
+        // 更新统计数据
+        function updateStats() {
+            // 总用户数（不包括已退出和已驳回的）
+            const totalUsers = mockData.filter(item => !item.isExited && !item.isRejected).length;
+            document.getElementById('total-users').textContent = totalUsers;
+            
+            // 已授权和未授权统计（不包括已退出和已驳回的）
+            const authorizedCount = mockData.filter(item => item.status === 'active' && !item.isExited && !item.isRejected).length;
+            const unauthorizedCount = mockData.filter(item => item.status === 'inactive' && !item.isExited && !item.isRejected).length;
+            
+            document.getElementById('total-authorized').textContent = authorizedCount;
+            document.getElementById('total-unauthorized').textContent = unauthorizedCount;
+            
+            // 今日数据统计
+            const today = new Date().toDateString();
+            const todayData = mockData.filter(item => {
+                return new Date(item.submitTime).toDateString() === today && !item.isExited && !item.isRejected;
+            });
+            
+            const todayAuthorized = todayData.filter(item => item.status === 'active').length;
+            const todayUnauthorized = todayData.filter(item => item.status === 'inactive').length;
+            
+            document.getElementById('today-total').textContent = todayData.length;
+            document.getElementById('today-authorized').textContent = todayAuthorized;
+            document.getElementById('today-unauthorized').textContent = todayUnauthorized;
+        }
+
+        // 渲染表格
+        function renderTable() {
+            const tbody = document.getElementById('data-table-body');
+            const emptyState = document.getElementById('empty-state');
+            
+            // 应用筛选
+            filteredData = filterData();
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                updatePagination();
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            
+            // 分页
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, filteredData.length);
+            const pageData = filteredData.slice(startIndex, endIndex);
+            
+            tbody.innerHTML = pageData.map(item => `
+                <tr class="border-b border-border hover:bg-light/50 transition-colors cursor-pointer" onclick="viewDetail(${item.id})">
+                    <td class="px-4 py-3" onclick="event.stopPropagation()">
+                        <input type="checkbox" class="rounded" data-id="${item.id}">
+                    </td>
+                    <td class="px-4 py-3 text-sm font-medium">${item.account}</td>
+                    <td class="px-4 py-3 text-sm">${item.sn}</td>
+                    <td class="px-4 py-3 text-sm">${item.brand}</td>
+                    <td class="px-4 py-3 text-sm">${item.address}</td>
+                    <td class="px-4 py-3 text-sm">${item.meter}</td>
+                    <td class="px-4 py-3 text-sm">${item.submitTime}</td>
+                    <td class="px-4 py-3">
+                        ${currentTab === 'exited' ? 
+                            `<span class="text-sm">${item.exitTime || '-'}</span>` :
+                            currentTab === 'rejected' ?
+                            `<span class="text-sm">${item.rejectedTime || '-'}</span>` :
+                            `<span class="px-2 py-1 text-xs rounded-full ${
+                                item.status === 'active' 
+                                    ? 'bg-success/10 text-success' 
+                                    : 'bg-warning/10 text-warning'
+                            }">
+                                ${item.status === 'active' ? translations[currentLang].authorized : translations[currentLang].unauthorized}
+                            </span>`
+                        }
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                        ${currentTab === 'unauthorized' && !item.hasDetected ?
+                            '-' :
+                            item.status === 'inactive' && item.remarkType && item.hasDetected ? 
+                            `<span class="text-danger">${translations[currentLang][item.remarkType]}</span>` : 
+                            item.rejectionReason ? 
+                            `<span class="text-gray-600">${item.rejectionReason}</span>` :
+                            '-'}
+                    </td>
+                    <td class="px-4 py-3" onclick="event.stopPropagation()">
+                        ${currentTab === 'exited' ? 
+                            `<button onclick="showRestoreModal(${item.id})" class="px-3 py-1 text-xs bg-success text-white rounded-lg hover:bg-success/90 transition-colors">
+                                <i class="fa fa-undo mr-1"></i>
+                                ${translations[currentLang].restore || '恢复'}
+                            </button>` :
+                            currentTab === 'unauthorized' ?
+                            `<div class="flex gap-2">
+                                <button onclick="performDetection(${item.id})" class="px-3 py-1.5 text-xs bg-black text-white rounded-lg hover:bg-black/90 transition-all duration-200">
+                                    <i class="fa fa-check mr-1"></i>
+                                    ${translations[currentLang].detect || '检测'}
+                                </button>
+                                <button onclick="showRejectModal(${item.id})" class="px-3 py-1.5 text-xs text-danger border border-danger rounded-lg hover:bg-danger hover:text-white transition-all duration-200">
+                                    <i class="fa fa-times mr-1"></i>
+                                    ${translations[currentLang].reject || '驳回'}
+                                </button>
+                            </div>` :
+                            currentTab === 'rejected' ?
+                            `-` :
+                            `<button onclick="showExitVPPModal(${item.id})" class="px-3 py-1 text-xs bg-danger text-white rounded-lg hover:bg-danger/90 transition-colors">
+                                <i class="fa fa-sign-out mr-1"></i>
+                                ${translations[currentLang].exit_vpp}
+                            </button>`
+                        }
+                    </td>
+                </tr>
+            `).join('');
+            
+            updatePagination();
+        }
+
+        // 筛选数据
+        function filterData() {
+            // 根据Tab筛选数据
+            let data;
+            
+            if (currentTab === 'authorized') {
+                data = [...mockData.filter(item => item.status === 'active' && !item.isExited && !item.isRejected)];
+            } else if (currentTab === 'unauthorized') {
+                data = [...mockData.filter(item => item.status === 'inactive' && !item.isExited && !item.isRejected)];
+            } else if (currentTab === 'rejected') {
+                data = [...rejectedUsers];
+            } else if (currentTab === 'exited') {
+                data = [...exitedUsers];
+            } else {
+                data = [...mockData.filter(item => !item.isExited)];
+            }
+            
+            
+            // 账号筛选
+            const accountTerm = document.getElementById('account-input').value.toLowerCase();
+            if (accountTerm) {
+                data = data.filter(item => 
+                    item.account.toLowerCase().includes(accountTerm)
+                );
+            }
+            
+            // 设备SN筛选
+            const snTerm = document.getElementById('sn-input').value.toLowerCase();
+            if (snTerm) {
+                data = data.filter(item => 
+                    item.sn.toLowerCase().includes(snTerm)
+                );
+            }
+            
+            // 品牌筛选
+            const brandFilter = document.getElementById('brand-filter').value;
+            if (brandFilter) {
+                data = data.filter(item => item.brand === brandFilter);
+            }
+            
+            // 电表号筛选
+            const meterTerm = document.getElementById('meter-input').value.toLowerCase();
+            if (meterTerm) {
+                data = data.filter(item => 
+                    item.meter.toLowerCase().includes(meterTerm)
+                );
+            }
+            
+            // 时间筛选
+            const dateFilter = document.getElementById('date-filter').value;
+            if (dateFilter) {
+                const selectedDate = new Date(dateFilter);
+                data = data.filter(item => {
+                    const itemDate = new Date(item.submitTime);
+                    return itemDate.toDateString() === selectedDate.toDateString();
+                });
+            }
+            
+            return data;
+        }
+
+        // 更新分页信息
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredData.length / pageSize);
+            const startIndex = (currentPage - 1) * pageSize + 1;
+            const endIndex = Math.min(currentPage * pageSize, filteredData.length);
+            
+            document.getElementById('showing-range').textContent = 
+                filteredData.length > 0 ? `${startIndex}-${endIndex}` : '0-0';
+            document.getElementById('total-records').textContent = filteredData.length;
+            document.getElementById('page-info').textContent = `${currentPage} / ${totalPages || 1}`;
+            
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage >= totalPages;
+        }
+
+        // 查看详情
+        window.viewDetail = function(id) {
+            const item = mockData.find(d => d.id === id);
+            if (!item) return;
+            
+            const modal = document.getElementById('detail-modal');
+            const content = document.getElementById('detail-content');
+            
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center pb-3 border-b border-border">
+                        <span class="text-tertiary">${translations[currentLang].th_brand}:</span>
+                        <span class="font-medium">${item.brand}</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-3 border-b border-border">
+                        <span class="text-tertiary">${translations[currentLang].th_account}:</span>
+                        <span class="font-medium">${item.account}</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-3 border-b border-border">
+                        <span class="text-tertiary">${translations[currentLang].th_sn}:</span>
+                        <span class="font-medium">${item.sn}</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-3 border-b border-border">
+                        <span class="text-tertiary">${translations[currentLang].th_address}:</span>
+                        <span class="font-medium">${item.address}</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-3 border-b border-border">
+                        <span class="text-tertiary">${translations[currentLang].th_meter}:</span>
+                        <span class="font-medium">${item.meter}</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-3 border-b border-border">
+                        <span class="text-tertiary">${translations[currentLang].th_submit_time}:</span>
+                        <span class="font-medium">${item.submitTime}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-tertiary">${translations[currentLang].th_status}:</span>
+                        <span class="px-2 py-1 text-xs rounded-full ${
+                            item.status === 'active' 
+                                ? 'bg-success/10 text-success' 
+                                : 'bg-warning/10 text-warning'
+                        }">
+                            ${translations[currentLang][item.status]}
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+        
+        // 显示退出VPP模态框
+        window.showExitVPPModal = function(id) {
+            document.getElementById('exit-vpp-device-id').value = id;
+            document.getElementById('exit-vpp-modal').classList.remove('hidden');
+        }
+        
+        // 关闭退出VPP模态框
+        window.closeExitVPPModal = function() {
+            document.getElementById('exit-vpp-modal').classList.add('hidden');
+            document.getElementById('exit-vpp-device-id').value = '';
+        }
+        
+        // 显示恢复模态框
+        window.showRestoreModal = function(id) {
+            document.getElementById('restore-vpp-device-id').value = id;
+            document.getElementById('restore-vpp-modal').classList.remove('hidden');
+        }
+        
+        // 关闭恢复模态框
+        window.closeRestoreModal = function() {
+            document.getElementById('restore-vpp-modal').classList.add('hidden');
+            document.getElementById('restore-vpp-device-id').value = '';
+        }
+        
+        // 确认恢复
+        window.confirmRestore = function() {
+            const deviceId = document.getElementById('restore-vpp-device-id').value;
+            if (!deviceId) return;
+            
+            restoreToVPP(parseInt(deviceId));
+            closeRestoreModal();
+        }
+        
+        // 存储退出的用户
+        let exitedUsers = JSON.parse(localStorage.getItem('exitedVPPUsers') || '[]');
+        // 存储驳回的用户
+        let rejectedUsers = JSON.parse(localStorage.getItem('rejectedUsers') || '[]');
+        
+        // 确认退出VPP
+        window.confirmExitVPP = function() {
+            const deviceId = document.getElementById('exit-vpp-device-id').value;
+            if (!deviceId) return;
+            
+            // 查找要退出的设备
+            const deviceIndex = mockData.findIndex(d => d.id == deviceId);
+            if (deviceIndex !== -1) {
+                const exitedDevice = mockData[deviceIndex];
+                exitedDevice.exitTime = new Date().toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US');
+                
+                // 添加到退出用户列表
+                exitedUsers.push(exitedDevice);
+                localStorage.setItem('exitedVPPUsers', JSON.stringify(exitedUsers));
+                
+                // 不删除数据，只标记为已退出
+                mockData[deviceIndex].isExited = true;
+                
+                // 显示成功消息（不使用alert）
+                showSuccessToast(currentLang === 'zh' ? '已成功退出VPP计划' : 'Successfully exited VPP plan');
+            }
+            
+            // 关闭模态框
+            closeExitVPPModal();
+            
+            // 更新统计和刷新表格
+            updateStats();
+            renderTable();
+            if (typeof updateTabCounts === 'function') {
+                updateTabCounts();
+            }
+        }
+        
+        // 显示成功提示
+        function showSuccessToast(message, type = 'success') {
+            // 创建toast元素
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : type === 'black' ? 'bg-black' : 'bg-primary';
+            const iconClass = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-times-circle' : type === 'black' ? 'fa-info-circle' : 'fa-info-circle';
+            
+            toast.className = `fixed top-20 right-6 ${bgClass} text-white px-5 py-3 rounded-lg shadow-apple z-50 flex items-center gap-2`;
+            toast.innerHTML = `
+                <i class="fa ${iconClass}"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            
+            // 3秒后自动消失
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.3s';
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+
+        // 语言切换
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang); // 保存到localStorage
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+            
+            // 更新placeholder
+            document.getElementById('account-input').placeholder = lang === 'zh' ? '输入账号' : 'Enter account';
+            document.getElementById('sn-input').placeholder = lang === 'zh' ? '输入设备SN' : 'Enter device SN';
+            document.getElementById('meter-input').placeholder = lang === 'zh' ? '输入电表号' : 'Enter NMI';
+            document.getElementById('current-lang').textContent = lang === 'zh' ? '中文' : 'English';
+            
+            // 更新日期输入的标签格式
+            const dateInput = document.getElementById('date-filter');
+            if (dateInput) {
+                // 为日期输入添加格式提示
+                if (lang === 'zh') {
+                    dateInput.setAttribute('title', '选择日期');
+                    dateInput.setAttribute('placeholder', 'YYYY-MM-DD');
+                } else {
+                    dateInput.setAttribute('title', 'Select date');
+                    dateInput.setAttribute('placeholder', 'YYYY-MM-DD');
+                }
+            }
+            
+            // 重新生成数据和渲染
+            generateMockData();
+            updateStats();
+            renderTable();
+        }
+
+        // 初始化事件监听
+        function initEventListeners() {
+            // 语言切换
+            const langToggleBtn = document.getElementById('lang-toggle-btn');
+            const langDropdown = document.getElementById('lang-dropdown');
+            
+            langToggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                langDropdown.classList.toggle('show');
+            });
+            
+            document.querySelectorAll('.lang-option').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const lang = this.getAttribute('data-lang');
+                    changeLanguage(lang);
+                    langDropdown.classList.remove('show');
+                });
+            });
+            
+            document.addEventListener('click', function() {
+                langDropdown.classList.remove('show');
+            });
+            
+            // 查询按钮
+            document.getElementById('search-btn').addEventListener('click', function() {
+                currentPage = 1;
+                renderTable();
+            });
+            
+            // 重置按钮
+            document.getElementById('reset-btn').addEventListener('click', function() {
+                document.getElementById('account-input').value = '';
+                document.getElementById('sn-input').value = '';
+                document.getElementById('meter-input').value = '';
+                document.getElementById('brand-filter').value = '';
+                document.getElementById('date-filter').value = '';
+                currentPage = 1;
+                renderTable();
+            });
+            
+            // 实时筛选（可选）
+            
+            document.getElementById('account-input').addEventListener('input', function() {
+                currentPage = 1;
+                renderTable();
+            });
+            
+            document.getElementById('sn-input').addEventListener('input', function() {
+                currentPage = 1;
+                renderTable();
+            });
+            
+            document.getElementById('meter-input').addEventListener('input', function() {
+                currentPage = 1;
+                renderTable();
+            });
+            
+            document.getElementById('brand-filter').addEventListener('change', function() {
+                currentPage = 1;
+                renderTable();
+            });
+            
+            document.getElementById('date-filter').addEventListener('change', function() {
+                currentPage = 1;
+                renderTable();
+            });
+            
+            // 分页
+            document.getElementById('prev-page').addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                }
+            });
+            
+            document.getElementById('next-page').addEventListener('click', function() {
+                const totalPages = Math.ceil(filteredData.length / pageSize);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                }
+            });
+            
+            // 全选
+            document.getElementById('select-all').addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox"]');
+                checkboxes.forEach(cb => cb.checked = this.checked);
+            });
+            
+            // 批量检测按钮 - 已移除
+            // document.getElementById('batch-detect-btn').addEventListener('click', performBatchDetection);
+            
+            // 表格导出按钮
+            document.getElementById('table-export-btn').addEventListener('click', function() {
+                alert(currentLang === 'zh' ? '导出功能开发中...' : 'Export feature in development...');
+            });
+            
+            // 关闭详情模态框
+            document.getElementById('close-detail-btn').addEventListener('click', function() {
+                document.getElementById('detail-modal').classList.add('hidden');
+            });
+            
+            document.getElementById('detail-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+            
+            // 退出VPP模态框点击外部关闭
+            document.getElementById('exit-vpp-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeExitVPPModal();
+                }
+            });
+            
+            // 恢复VPP模态框点击外部关闭
+            document.getElementById('restore-vpp-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeRestoreModal();
+                }
+            });
+            
+            // 移动端菜单切换
+            document.getElementById('menu-toggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('show');
+            });
+        }
+
+        // 切换Tab
+        function switchTab(tab) {
+            currentTab = tab;
+            currentPage = 1;
+            
+            // 批量检测按钮显示 - 已移除
+            // const batchDetectBtn = document.getElementById('batch-detect-btn');
+            // if (batchDetectBtn) {
+            //     if (tab === 'unauthorized' || tab === 'authorized') {
+            //         batchDetectBtn.classList.remove('hidden');
+            //     } else {
+            //         batchDetectBtn.classList.add('hidden');
+            //     }
+            // }
+            
+            // 更新Tab样式
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-black', 'text-white', 'font-medium');
+                btn.classList.add('text-tertiary');
+                // 更新计数透明度
+                const countSpan = btn.querySelector('[id$="-count"]');
+                if (countSpan) {
+                    countSpan.classList.remove('opacity-80');
+                    countSpan.classList.add('opacity-60');
+                }
+            });
+            
+            const activeTab = document.getElementById(`tab-${tab}`);
+            if (activeTab) {
+                activeTab.classList.remove('text-tertiary');
+                activeTab.classList.add('bg-black', 'text-white', 'font-medium');
+                // 更新激活Tab计数透明度
+                const countSpan = activeTab.querySelector('[id$="-count"]');
+                if (countSpan) {
+                    countSpan.classList.remove('opacity-60');
+                    countSpan.classList.add('opacity-80');
+                }
+            }
+            
+            // 更新表头
+            updateTableHeader();
+            
+            // 重新渲染表格
+            renderTable();
+        }
+        
+        // 更新表头
+        function updateTableHeader() {
+            const statusHeader = document.getElementById('status-header');
+            if (statusHeader) {
+                if (currentTab === 'exited') {
+                    statusHeader.textContent = translations[currentLang].exit_time || '退出时间';
+                } else if (currentTab === 'rejected') {
+                    statusHeader.textContent = translations[currentLang].rejected_time || '驳回时间';
+                } else {
+                    statusHeader.textContent = translations[currentLang].th_auth_status || '授权状态';
+                }
+            }
+        }
+        
+        // 更新Tab计数
+        function updateTabCounts() {
+            const authorizedCount = mockData.filter(item => item.status === 'active' && !item.isExited && !item.isRejected).length;
+            const unauthorizedCount = mockData.filter(item => item.status === 'inactive' && !item.isExited && !item.isRejected).length;
+            const rejectedCount = rejectedUsers.length;
+            const exitedCount = exitedUsers.length;
+            
+            if (document.getElementById('authorized-count')) {
+                document.getElementById('authorized-count').textContent = `(${authorizedCount})`;
+            }
+            if (document.getElementById('unauthorized-count')) {
+                document.getElementById('unauthorized-count').textContent = `(${unauthorizedCount})`;
+            }
+            if (document.getElementById('rejected-count')) {
+                document.getElementById('rejected-count').textContent = `(${rejectedCount})`;
+            }
+            if (document.getElementById('exited-count')) {
+                document.getElementById('exited-count').textContent = `(${exitedCount})`;
+            }
+        }
+        
+        // 恢复到VPP
+        function restoreToVPP(userId) {
+            // 从退出用户列表中找到用户
+            const userIndex = exitedUsers.findIndex(u => u.id === userId);
+            if (userIndex !== -1) {
+                const user = exitedUsers[userIndex];
+                
+                // 从退出列表移除
+                exitedUsers.splice(userIndex, 1);
+                localStorage.setItem('exitedVPPUsers', JSON.stringify(exitedUsers));
+                
+                // 在mockData中找到并更新状态
+                const mockIndex = mockData.findIndex(d => d.id === userId);
+                if (mockIndex !== -1) {
+                    mockData[mockIndex].isExited = false;
+                    delete mockData[mockIndex].exitTime;
+                }
+                
+                showSuccessToast(currentLang === 'zh' ? '成功恢复到VPP计划' : 'Successfully restored to VPP plan');
+                renderTable();
+                updateTabCounts();
+                updateStats();
+            }
+        }
+        
+        // 显示驳回模态框
+        window.showRejectModal = function(id) {
+            document.getElementById('reject-device-id').value = id;
+            document.getElementById('reject-reason').value = '';
+            document.getElementById('reject-modal').classList.remove('hidden');
+        }
+        
+        // 关闭驳回模态框
+        window.closeRejectModal = function() {
+            document.getElementById('reject-modal').classList.add('hidden');
+            document.getElementById('reject-device-id').value = '';
+            document.getElementById('reject-reason').value = '';
+        }
+        
+        // 确认驳回
+        window.confirmReject = function() {
+            const deviceId = parseInt(document.getElementById('reject-device-id').value);
+            const reason = document.getElementById('reject-reason').value || '未提供原因';
+            
+            if (!deviceId) return;
+            
+            // 查找要驳回的设备
+            const deviceIndex = mockData.findIndex(d => d.id === deviceId);
+            if (deviceIndex !== -1) {
+                const rejectedDevice = {...mockData[deviceIndex]};
+                rejectedDevice.rejectedTime = new Date().toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US');
+                rejectedDevice.rejectionReason = reason;
+                rejectedDevice.isRejected = true;
+                
+                // 添加到驳回用户列表
+                rejectedUsers.push(rejectedDevice);
+                localStorage.setItem('rejectedUsers', JSON.stringify(rejectedUsers));
+                
+                // 标记为已驳回
+                mockData[deviceIndex].isRejected = true;
+                
+                showSuccessToast(translations[currentLang].reject_success || '已成功驳回', 'error');
+            }
+            
+            closeRejectModal();
+            updateStats();
+            renderTable();
+            updateTabCounts();
+        }
+        
+        // 执行检测
+        window.performDetection = function(id, isFromBatch = false) {
+            // 如果不是批量检测，显示单个检测提示
+            if (!isFromBatch) {
+                showSuccessToast(currentLang === 'zh' ? '正在检测中...' : 'Detecting...', 'black');
+            }
+            
+            setTimeout(() => {
+                // 查找设备
+                const deviceIndex = mockData.findIndex(d => d.id === id);
+                if (deviceIndex !== -1) {
+                    // 标记为已检测，保持未授权状态但显示原因
+                    mockData[deviceIndex].hasDetected = true;
+                    
+                    // 根据remarkType判断是否可以授权
+                    if (!mockData[deviceIndex].remarkType) {
+                        // 如果没有问题，更新为已授权
+                        mockData[deviceIndex].status = 'active';
+                        if (!isFromBatch) {
+                            showSuccessToast(translations[currentLang].detect_success || '检测成功，已授权');
+                        }
+                    } else {
+                        // 如果有问题，保持未授权状态，但显示原因
+                        if (!isFromBatch) {
+                            showSuccessToast(
+                                currentLang === 'zh' ? 
+                                `检测完成：${translations[currentLang][mockData[deviceIndex].remarkType]}` : 
+                                `Detection completed: ${translations[currentLang][mockData[deviceIndex].remarkType]}`,
+                                'error'
+                            );
+                        }
+                    }
+                    
+                    if (!isFromBatch) {
+                        updateStats();
+                        renderTable();
+                        updateTabCounts();
+                    }
+                }
+            }, isFromBatch ? 500 : 1500); // 批量检测时更快
+        }
+        
+        // 批量检测 - 已移除
+        // window.performBatchDetection = function() {
+        //     // 根据当前tab选择不同的项目
+        //     let itemsToDetect;
+        //     if (currentTab === 'unauthorized') {
+        //         itemsToDetect = mockData.filter(item => item.status === 'inactive' && !item.isExited && !item.isRejected);
+        //     } else if (currentTab === 'authorized') {
+        //         itemsToDetect = mockData.filter(item => item.status === 'active' && !item.isExited && !item.isRejected);
+        //     } else {
+        //         return;
+        //     }
+        //     
+        //     const unauthorizedItems = itemsToDetect;
+        //     
+        //     if (unauthorizedItems.length === 0) {
+        //         showSuccessToast(currentLang === 'zh' ? '没有需要检测的项目' : 'No items to detect', 'black');
+        //         return;
+        //     }
+        //     
+        //     showSuccessToast(currentLang === 'zh' ? `正在批量检测 ${unauthorizedItems.length} 个项目...` : `Detecting ${unauthorizedItems.length} items...`, 'black');
+        //     
+        //     let processed = 0;
+        //     let authorizedCount = 0;
+        //     let failedCount = 0;
+        //     
+        //     unauthorizedItems.forEach((item, index) => {
+        //         setTimeout(() => {
+        //             const deviceIndex = mockData.findIndex(d => d.id === item.id);
+        //             if (deviceIndex !== -1) {
+        //                 mockData[deviceIndex].hasDetected = true;
+        //                 
+        //                 if (!mockData[deviceIndex].remarkType) {
+        //                     mockData[deviceIndex].status = 'active';
+        //                     authorizedCount++;
+        //                 } else {
+        //                     failedCount++;
+        //                 }
+        //             }
+        //             
+        //             processed++;
+        //             
+        //             if (processed === unauthorizedItems.length) {
+        //                 // 全部完成
+        //                 setTimeout(() => {
+        //                     if (currentTab === 'authorized') {
+        //                         // 已授权tab的检测结果
+        //                         showSuccessToast(
+        //                             currentLang === 'zh' ? 
+        //                             `检测完成，${unauthorizedItems.length} 个项目状态正常` : 
+        //                             `Detection completed, ${unauthorizedItems.length} items status normal`,
+        //                             'success'
+        //                         );
+        //                     } else if (failedCount > 0) {
+        //                         showSuccessToast(
+        //                             currentLang === 'zh' ? 
+        //                             `批量检测完成：${authorizedCount} 个已授权，${failedCount} 个检测失败` : 
+        //                             `Batch detection completed: ${authorizedCount} authorized, ${failedCount} failed`,
+        //                             'black'
+        //                         );
+        //                     } else {
+        //                         showSuccessToast(
+        //                             currentLang === 'zh' ? 
+        //                             `批量检测完成，${authorizedCount} 个项目已授权` : 
+        //                             `Batch detection completed, ${authorizedCount} items authorized`,
+        //                             'success'
+        //                         );
+        //                     }
+        //                     updateStats();
+        //                     renderTable();
+        //                     updateTabCounts();
+        //                 }, 600);
+        //             }
+        //         }, index * 200); // 每个间隔200ms
+        //     });
+        // }
+        
+        // 导出函数到全局
+        window.switchTab = switchTab;
+        window.restoreToVPP = restoreToVPP;
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

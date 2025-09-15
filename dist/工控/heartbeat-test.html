@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心跳包测试 - 工控系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 蒙版背景 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background-color: #f3f4f6;
+        }
+
+        .back-btn svg {
+            width: 20px;
+            height: 20px;
+            color: #6b7280;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #0f172a;
+            flex: 1;
+            text-align: center;
+            margin: 0;
+        }
+
+        /* 简约仪表盘样式 */
+        .dashboard {
+            position: relative;
+            width: 240px;
+            height: 240px;
+            margin: 0 auto 40px;
+        }
+
+        .gauge {
+            width: 240px;
+            height: 240px;
+        }
+
+        .gauge-bg {
+            fill: none;
+            stroke: #f1f5f9;
+            stroke-width: 8;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dasharray 1s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .gauge-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .success-rate {
+            font-size: 36px;
+            font-weight: 300;
+            color: #0f172a;
+            margin-bottom: 6px;
+            letter-spacing: -1px;
+        }
+
+        .success-label {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        /* 统计信息 */
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px 12px;
+            background: #fafbfc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .sent-number {
+            color: #3b82f6;
+        }
+
+        .received-number {
+            color: #10b981;
+        }
+
+        .lost-number {
+            color: #ef4444;
+        }
+
+        /* 详细信息 */
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #fafbfc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .detail-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        /* 控制按钮 */
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 100px;
+        }
+
+        .btn-start {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: #059669;
+        }
+
+        .btn-stop {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-stop:hover {
+            background: #dc2626;
+        }
+
+        .btn-reset {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-reset:hover {
+            background: #e2e8f0;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .dashboard {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .gauge {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .success-rate {
+                font-size: 28px;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .details {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="modal-overlay">
+        <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <h1 class="title">心跳包测试</h1>
+        </div>
+        
+        <!-- 仪表盘 -->
+        <div class="dashboard">
+            <svg class="gauge" viewBox="0 0 240 240">
+                <circle class="gauge-bg" cx="120" cy="120" r="100" stroke-dasharray="628" stroke-dashoffset="0"></circle>
+                <circle class="gauge-fill" id="gauge-fill" cx="120" cy="120" r="100" stroke-dasharray="628" stroke-dashoffset="628" stroke="#10b981"></circle>
+            </svg>
+            <div class="gauge-center">
+                <div class="success-rate" id="success-rate">100%</div>
+                <div class="success-label">成功率</div>
+            </div>
+        </div>
+        
+        <!-- 统计信息 -->
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number sent-number" id="sent-count">0</div>
+                <div class="stat-label">发送</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number received-number" id="received-count">0</div>
+                <div class="stat-label">接收</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number lost-number" id="lost-count">0</div>
+                <div class="stat-label">丢失</div>
+            </div>
+        </div>
+        
+        <!-- 详细信息 -->
+        <div class="details">
+            <div class="detail-item">
+                <span class="detail-label">测试时长</span>
+                <span class="detail-value" id="duration">00:00</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">平均延迟</span>
+                <span class="detail-value" id="avg-latency">0ms</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">最大延迟</span>
+                <span class="detail-value" id="max-latency">0ms</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">丢包率</span>
+                <span class="detail-value" id="packet-loss">0%</span>
+            </div>
+        </div>
+        
+        <!-- 控制按钮 -->
+        <div class="controls">
+            <button class="btn btn-start" id="start-btn" onclick="startTest()">开始测试</button>
+            <button class="btn btn-stop" id="stop-btn" onclick="stopTest()" disabled>停止测试</button>
+            <button class="btn btn-reset" id="reset-btn" onclick="resetTest()">重置</button>
+        </div>
+        </div>
+    </div>
+
+    <script>
+        let testInterval = null;
+        let startTime = null;
+        let durationInterval = null;
+        let sentPackets = 0;
+        let receivedPackets = 0;
+        let lostPackets = 0;
+        let latencies = [];
+        let isRunning = false;
+
+        // DOM 元素
+        const sentCountEl = document.getElementById('sent-count');
+        const receivedCountEl = document.getElementById('received-count');
+        const lostCountEl = document.getElementById('lost-count');
+        const successRateEl = document.getElementById('success-rate');
+        const durationEl = document.getElementById('duration');
+        const avgLatencyEl = document.getElementById('avg-latency');
+        const maxLatencyEl = document.getElementById('max-latency');
+        const packetLossEl = document.getElementById('packet-loss');
+        const gaugeFillEl = document.getElementById('gauge-fill');
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const resetBtn = document.getElementById('reset-btn');
+
+        function startTest() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            startTime = Date.now();
+            
+            // 更新按钮状态
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            resetBtn.disabled = true;
+            
+            // 开始发送心跳包（每秒一次）
+            testInterval = setInterval(sendHeartbeat, 1000);
+            
+            // 开始更新测试时长
+            durationInterval = setInterval(updateDuration, 1000);
+        }
+
+        function stopTest() {
+            if (!isRunning) return;
+            
+            isRunning = false;
+            
+            // 清除定时器
+            if (testInterval) {
+                clearInterval(testInterval);
+                testInterval = null;
+            }
+            
+            if (durationInterval) {
+                clearInterval(durationInterval);
+                durationInterval = null;
+            }
+            
+            // 更新按钮状态
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            resetBtn.disabled = false;
+        }
+
+        function resetTest() {
+            stopTest();
+            
+            // 重置所有数据
+            sentPackets = 0;
+            receivedPackets = 0;
+            lostPackets = 0;
+            latencies = [];
+            startTime = null;
+            
+            // 重置显示
+            updateDisplay();
+            
+            // 重置按钮状态
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            resetBtn.disabled = false;
+        }
+
+        function sendHeartbeat() {
+            sentPackets++;
+            
+            // 模拟网络延迟和丢包
+            const sendTime = Date.now();
+            const shouldLose = Math.random() < 0.05; // 5%概率丢包
+            
+            if (shouldLose) {
+                // 模拟丢包
+                lostPackets++;
+                setTimeout(updateDisplay, Math.random() * 100);
+            } else {
+                // 模拟网络延迟（10-200ms）
+                const latency = Math.random() * 190 + 10;
+                
+                setTimeout(() => {
+                    receivedPackets++;
+                    latencies.push(latency);
+                    updateDisplay();
+                }, latency);
+            }
+        }
+
+        function updateDisplay() {
+            // 更新计数器
+            sentCountEl.textContent = sentPackets;
+            receivedCountEl.textContent = receivedPackets;
+            lostCountEl.textContent = lostPackets;
+            
+            // 计算成功率
+            const successRate = sentPackets > 0 ? (receivedPackets / sentPackets * 100) : 100;
+            const lossRate = sentPackets > 0 ? (lostPackets / sentPackets * 100) : 0;
+            
+            successRateEl.textContent = successRate.toFixed(1) + '%';
+            packetLossEl.textContent = lossRate.toFixed(1) + '%';
+            
+            // 更新仪表盘
+            updateGauge(successRate);
+            
+            // 计算延迟统计
+            if (latencies.length > 0) {
+                const avgLatency = latencies.reduce((a, b) => a + b, 0) / latencies.length;
+                const maxLatency = Math.max(...latencies);
+                
+                avgLatencyEl.textContent = Math.round(avgLatency) + 'ms';
+                maxLatencyEl.textContent = Math.round(maxLatency) + 'ms';
+            } else {
+                avgLatencyEl.textContent = '0ms';
+                maxLatencyEl.textContent = '0ms';
+            }
+        }
+
+        function updateGauge(percentage) {
+            const circumference = 628;
+            const offset = circumference - (percentage / 100) * circumference;
+            
+            gaugeFillEl.style.strokeDashoffset = offset;
+            
+            // 根据成功率改变颜色
+            if (percentage >= 95) {
+                gaugeFillEl.style.stroke = '#10b981'; // 绿色
+            } else if (percentage >= 80) {
+                gaugeFillEl.style.stroke = '#f59e0b'; // 黄色
+            } else {
+                gaugeFillEl.style.stroke = '#ef4444'; // 红色
+            }
+        }
+
+        function updateDuration() {
+            if (!startTime) return;
+            
+            const elapsed = Date.now() - startTime;
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            
+            durationEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // 初始化显示
+        updateDisplay();
+    </script>
+</body>
+</html>

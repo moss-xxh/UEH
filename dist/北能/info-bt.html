@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设备详情 - 基础信息</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', sans-serif;
+            background: #f2f2f7;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            max-width: 430px;
+            margin: 0 auto;
+            background: #f2f2f7;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .status-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 8px 20px 0;
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            z-index: 1001;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 44px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 44px 20px 12px;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #007aff;
+            font-size: 17px;
+            font-weight: 400;
+            cursor: pointer;
+            padding: 8px;
+            margin: -8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .header-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1d1d1f;
+            text-align: center;
+            letter-spacing: -0.41px;
+        }
+        
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 140px 20px 100px 20px;
+            background: #f2f2f7;
+        }
+        
+        .info-status-section {
+            margin-bottom: 16px;
+        }
+        
+        .info-status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .status-item {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+            transition: all 0.15s ease;
+        }
+        
+        .status-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 122, 255, 0.1);
+        }
+        
+        .status-content {
+            flex: 1;
+        }
+        
+        .status-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d1d1f;
+            line-height: 1.2;
+            letter-spacing: -0.41px;
+            margin-bottom: 4px;
+        }
+        
+        .status-label {
+            font-size: 13px;
+            color: #8e8e93;
+            font-weight: 400;
+        }
+        
+        .detail-section {
+            background: #ffffff;
+            border-radius: 24px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transition: all 0.15s ease;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+            background: rgba(0, 0, 0, 0.02);
+        }
+        
+        .section-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 122, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #007aff;
+            margin-right: 16px;
+        }
+        
+        .section-title {
+            font-size: 17px;
+            font-weight: 500;
+            color: #1d1d1f;
+            letter-spacing: -0.41px;
+        }
+        
+        .section-action {
+            font-size: 15px;
+            color: #8e8e93;
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+        
+        .section-action:hover {
+            color: #007aff;
+        }
+        
+        .detail-list {
+            padding: 0;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+            transition: background-color 0.15s ease;
+        }
+        
+        .detail-row:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-row-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            padding: 16px 24px;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .detail-row-grid:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 13px;
+            color: #8e8e93;
+            margin-bottom: 4px;
+            font-weight: 400;
+        }
+        
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+            letter-spacing: -0.3px;
+        }
+        
+        .alert-empty-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            color: #8e8e93;
+        }
+        
+        .bottom-menu {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            height: 84px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            padding: 8px 0 24px;
+            z-index: 1000;
+        }
+        
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            text-decoration: none;
+            color: #8e8e93;
+            padding: 6px 4px;
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.15s ease;
+        }
+        
+        .menu-item:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+        
+        .menu-item.active {
+            color: #007aff;
+        }
+        
+        .menu-item.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32px;
+            height: 2px;
+            background: #007aff;
+            border-radius: 1px;
+        }
+        
+        .menu-item svg {
+            width: 20px;
+            height: 20px;
+            margin-bottom: 2px;
+        }
+        
+        .menu-label {
+            font-size: 9px;
+            font-weight: 500;
+            text-align: center;
+            letter-spacing: -0.1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            <div class="status-left">
+                <button style="background: none; border: none; color: #007aff; font-size: 14px; font-weight: 400; cursor: pointer; padding: 4px; margin: -4px; display: flex; align-items: center; gap: 2px; margin-top: 20px;" onclick="window.location.href='solar-energy-app-new.html'">
+                    <svg width="7" height="12" viewBox="0 0 7 12" fill="currentColor">
+                        <path d="M6.5 0.5L1.5 5.5C1.22386 5.77614 1.22386 6.22386 1.5 6.5L6.5 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                    </svg>
+                    返回
+                </button>
+                <span style="margin-left: 8px;">9:41</span>
+            </div>
+            <div class="status-right">
+                <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
+                    <path d="M2 1.5C2 0.671573 2.67157 0 3.5 0H12.5C13.3284 0 14 0.671573 14 1.5V8.5C14 9.32843 13.3284 10 12.5 10H3.5C2.67157 10 2 9.32843 2 8.5V1.5Z" fill="#1d1d1f"/>
+                    <path d="M0.75 3C0.335786 3 0 3.33579 0 3.75V6.25C0 6.66421 0.335786 7 0.75 7H1.5V3H0.75Z" fill="#1d1d1f"/>
+                    <rect x="3" y="2" width="8" height="6" rx="1" fill="#30d158"/>
+                </svg>
+                <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
+                    <path d="M2 2V10H16V2C16 0.895431 15.1046 0 14 0H4C2.89543 0 2 0.895431 2 2Z" fill="#1d1d1f"/>
+                    <path d="M0 3C0 2.44772 0.447715 2 1 2C1.55228 2 2 2.44772 2 3V9C2 9.55228 1.55228 10 1 10C0.447715 10 0 9.55228 0 9V3Z" fill="#1d1d1f"/>
+                    <path d="M16 3V9C16 9.55228 16.4477 10 17 10C17.5523 10 18 9.55228 18 9V3C18 2.44772 17.5523 2 17 2C16.4477 2 16 2.44772 16 3Z" fill="#1d1d1f"/>
+                    <rect x="3" y="2" width="10" height="8" rx="0.5" fill="#30d158"/>
+                </svg>
+                <span>100%</span>
+            </div>
+        </div>
+        
+        <!-- 顶部导航 -->
+        <div class="header">
+            <button class="back-button" onclick="history.back()">
+                <svg width="9" height="16" viewBox="0 0 9 16" fill="currentColor">
+                    <path d="M8.5 0.5L1.5 7.5C1.22386 7.77614 1.22386 8.22386 1.5 8.5L8.5 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+                </svg>
+                返回
+            </button>
+            <div class="header-title">基础信息</div>
+        </div>
+        
+        <!-- 主要内容 -->
+        <div class="main-content">
+            <!-- 基础状态 -->
+            <div class="detail-section" style="margin-bottom: 16px;">
+                <div style="padding: 24px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px 32px;">
+                        <div style="text-align: center;">
+                            <div class="status-value" style="color: #30D158; font-size: 24px; margin-bottom: 6px;">49%</div>
+                            <div class="status-label" style="font-size: 15px;">电量</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div class="status-value" style="color: #5AC8FA; font-size: 24px; margin-bottom: 6px;">100%</div>
+                            <div class="status-label" style="font-size: 15px;">SOH</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div class="status-value" style="font-size: 20px; margin-bottom: 4px;">52.69V</div>
+                            <div class="status-label">电压</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div class="status-value" style="font-size: 20px; margin-bottom: 4px;">0A</div>
+                            <div class="status-label">当前设备</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 电芯电压 -->
+            <a href="voltage-detail.html" style="text-decoration: none; color: inherit; display: block;">
+                <div class="detail-section" style="margin-bottom: 16px; cursor: pointer; transition: all 0.2s ease;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 16px;">
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 6px; height: 18px; background: linear-gradient(135deg, #FF9500, #FF6B35); border-radius: 3px; margin-right: 12px;"></div>
+                            <div style="font-size: 17px; font-weight: 600; color: #1d1d1f;">电芯电压</div>
+                        </div>
+                        <div style="display: flex; align-items: center; color: #8e8e93;">
+                            <span style="font-size: 15px;">详情</span>
+                            <svg width="8" height="14" fill="#8e8e93" viewBox="0 0 8 14" style="margin-left: 4px;">
+                                <path d="M1 1L7 7L1 13" stroke="#8e8e93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div style="padding: 0 24px 24px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px 32px;">
+                            <div style="text-align: center;">
+                                <div class="status-value" style="font-size: 20px; margin-bottom: 4px;">5</div>
+                                <div class="status-label">最高电压编号</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div class="status-value" style="font-size: 20px; margin-bottom: 4px;">3295mV</div>
+                                <div class="status-label">最高电压</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div class="status-value" style="font-size: 20px; margin-bottom: 4px;">3</div>
+                                <div class="status-label">最低电压编号</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div class="status-value" style="font-size: 20px; margin-bottom: 4px;">3291mV</div>
+                                <div class="status-label">最低电压</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- 温度 -->
+            <a href="temperature-detail.html" style="text-decoration: none; color: inherit; display: block;">
+                <div class="detail-section" style="margin-bottom: 16px; cursor: pointer; transition: all 0.2s ease;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 16px;">
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 6px; height: 18px; background: linear-gradient(135deg, #FF3B30, #FF6B59); border-radius: 3px; margin-right: 12px;"></div>
+                            <div style="font-size: 17px; font-weight: 600; color: #1d1d1f;">温度</div>
+                        </div>
+                        <div style="display: flex; align-items: center; color: #8e8e93;">
+                            <span style="font-size: 15px;">详情</span>
+                            <svg width="8" height="14" fill="#8e8e93" viewBox="0 0 8 14" style="margin-left: 4px;">
+                                <path d="M1 1L7 7L1 13" stroke="#8e8e93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div style="padding: 0 24px 24px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px 32px;">
+                            <div style="text-align: center;">
+                                <div class="status-value" style="font-size: 20px; margin-bottom: 4px;">2</div>
+                                <div class="status-label">最高温度编号</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div class="status-value" style="font-size: 20px; margin-bottom: 4px;">24.9°C</div>
+                                <div class="status-label">最高温度</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div class="status-value" style="font-size: 20px; margin-bottom: 4px;">4</div>
+                                <div class="status-label">最低温度编号</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div class="status-value" style="font-size: 20px; margin-bottom: 4px;">24.9°C</div>
+                                <div class="status-label">最低温度</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div class="status-value" style="font-size: 20px; margin-bottom: 4px;">26.7°C</div>
+                                <div class="status-label">MOS温度</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div class="status-value" style="font-size: 20px; margin-bottom: 4px;">26.9°C</div>
+                                <div class="status-label">环境温度</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- 告警信息 -->
+            <div class="detail-section">
+                <div style="display: flex; align-items: center; padding: 20px 24px 16px;">
+                    <div style="width: 6px; height: 18px; background: linear-gradient(135deg, #30D158, #34C759); border-radius: 3px; margin-right: 12px;"></div>
+                    <div style="font-size: 17px; font-weight: 600; color: #1d1d1f;">告警信息</div>
+                </div>
+                <div style="padding: 0;">
+                    <!-- 当前告警 -->
+                    <div style="display: flex; align-items: center; padding: 16px 24px; border-bottom: 0.5px solid rgba(0, 0, 0, 0.05); cursor: pointer; transition: background-color 0.15s ease;" onclick="showCurrentAlerts()" onmouseover="this.style.background='rgba(0, 0, 0, 0.02)'" onmouseout="this.style.background='transparent'">
+                        <div style="flex: 1;">
+                            <span style="font-size: 17px; font-weight: 500; color: #1d1d1f;">当前告警</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 6L15 12L9 18" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    
+                    <!-- 历史告警 -->
+                    <div style="display: flex; align-items: center; padding: 16px 24px; cursor: pointer; transition: background-color 0.15s ease;" onclick="showHistoryAlerts()" onmouseover="this.style.background='rgba(0, 0, 0, 0.02)'" onmouseout="this.style.background='transparent'">
+                        <div style="flex: 1;">
+                            <span style="font-size: 17px; font-weight: 500; color: #1d1d1f;">历史告警</span>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 6L15 12L9 18" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部菜单 -->
+        <div class="bottom-menu">
+            <a href="home-bt.html" class="menu-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                <span class="menu-label">首页</span>
+            </a>
+            <a href="info-bt.html" class="menu-item active">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                <span class="menu-label">基础信息</span>
+            </a>
+            <a href="alerts-bt.html" class="menu-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                </svg>
+                <span class="menu-label">并机汇总</span>
+            </a>
+            <a href="settings-bt.html" class="menu-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                </svg>
+                <span class="menu-label">设置</span>
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // 显示当前告警
+        function showCurrentAlerts() {
+            window.location.href = 'current-alerts.html';
+        }
+        
+        // 显示历史告警
+        function showHistoryAlerts() {
+            window.location.href = 'history-alerts.html';
+        }
+        
+        // 页面初始化
+        console.log('基础信息页面加载完成');
+    </script>
+</body>
+</html>

@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设备控制中心 - 储能柜管理系统</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .device-control-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .modal-tab.active {
+            color: #3b82f6 !important;
+            border-bottom-color: #3b82f6 !important;
+        }
+
+
+        .devices-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            margin-top: 10px;
+        }
+
+        .device-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .device-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .device-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .device-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .device-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-online {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-offline {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-fault {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .device-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .metric-item {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .device-controls {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .control-btn.primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .control-btn.primary:hover {
+            background: #2563eb;
+        }
+
+        .control-btn.secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .control-btn.secondary:hover {
+            background: #e5e7eb;
+        }
+
+
+
+        .control-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 15px;
+        }
+
+        .control-tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .control-tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .control-tab:not(.active) {
+            color: #6b7280;
+        }
+
+        .control-tab:not(.active):hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .control-section h4 {
+            margin: 0 0 15px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .control-item label {
+            font-size: 13px;
+            color: #6b7280;
+            flex: 1;
+        }
+
+        .control-input {
+            width: 120px;
+            padding: 6px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .control-select {
+            width: 140px;
+            padding: 6px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-btn.primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            background: #2563eb;
+        }
+
+        .action-btn.danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .action-btn.danger:hover {
+            background: #dc2626;
+        }
+
+        .action-btn.secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .action-btn.secondary:hover {
+            background: #4b5563;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .devices-overview {
+                grid-template-columns: 1fr;
+            }
+            
+            .device-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-trigger" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <img src="logo.png" alt="AlwaysControl Technology" />
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <button class="theme-btn" onclick="toggleTheme()" title="切换主题">
+                <i class="fas fa-moon" id="headerThemeIcon"></i>
+            </button>
+            <button class="lang-btn" onclick="toggleLanguage()" title="切换语言">
+                <i class="fas fa-globe"></i>
+            </button>
+            <a href="alarm-management.html" class="notification-badge" style="text-decoration: none;">
+                <i class="fas fa-bell" style="font-size: 18px; color: var(--text-secondary);"></i>
+            </a>
+            <div class="user-menu" onclick="logout()">
+                <div class="avatar">A</div>
+                <span class="user-name" id="userName">管理员</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 侧边栏 -->
+    <nav class="sidebar" id="sidebar">
+        <div class="menu">
+            <a href="dashboard.html" class="menu-item" data-menu="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span id="menuDashboard">仪表盘</span>
+            </a>
+            <a href="devices.html" class="menu-item" data-menu="devices">
+                <i class="fas fa-database"></i>
+                <span id="menuDevices">设备管理</span>
+            </a>
+            <!-- 隐藏电站详情菜单
+            <a href="cabinet-detail.html" class="menu-item" data-menu="cabinet-detail">
+                <i class="fas fa-server"></i>
+                <span id="menuCabinetDetail">电站详情</span>
+            </a>
+            -->
+            <a href="device-control.html" class="menu-item active" data-menu="device-control">
+                <i class="fas fa-cogs"></i>
+                <span id="menuControl">设备控制</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="menuAlarms">告警管理</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-chart-bar"></i>
+                <span id="menuReports">报告中心</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-users"></i>
+                <span id="menuSystem">系统管理</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <main class="main-content">
+        <div class="device-control-container">
+
+            <!-- 设备概览 -->
+            <div class="devices-overview" id="devicesOverview">
+                <!-- 设备卡片将通过JavaScript动态生成 -->
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 移动端遮罩 -->
+    <div id="mobileOverlay" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 998;" onclick="closeMobileSidebar()"></div>
+
+    <!-- 设备控制弹窗 -->
+    <div id="controlModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); width: 90%; max-width: 800px; max-height: 90vh; overflow: hidden;">
+            <!-- 弹窗头部 -->
+            <div style="padding: 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+                <h3 id="modalTitle" style="font-size: 18px; font-weight: 600; color: #1f2937; margin: 0;">储能柜 001 - 设备控制</h3>
+                <button onclick="closeControlModal()" style="background: none; border: none; cursor: pointer; padding: 8px; color: #6b7280;">
+                    <i class="fas fa-times" style="font-size: 20px;"></i>
+                </button>
+            </div>
+            
+            <!-- 弹窗内容 -->
+            <div style="padding: 20px; overflow-y: auto; max-height: calc(90vh - 140px);">
+                <!-- 选项卡 -->
+                <div style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb;">
+                    <button class="modal-tab active" onclick="switchModalTab('basic')" id="basicModalTab" style="padding: 10px 20px; border: none; background: none; color: #6b7280; font-size: 14px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;">基础控制</button>
+                    <button class="modal-tab" onclick="switchModalTab('advanced')" id="advancedModalTab" style="padding: 10px 20px; border: none; background: none; color: #6b7280; font-size: 14px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;">高级设置</button>
+                    <button class="modal-tab" onclick="switchModalTab('protection')" id="protectionModalTab" style="padding: 10px 20px; border: none; background: none; color: #6b7280; font-size: 14px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;">保护参数</button>
+                    <button class="modal-tab" onclick="switchModalTab('monitoring')" id="monitoringModalTab" style="padding: 10px 20px; border: none; background: none; color: #6b7280; font-size: 14px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;">监控配置</button>
+                </div>
+                
+                <!-- 选项卡内容 -->
+                <div id="modalTabContent">
+                    <!-- 内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+            
+            <!-- 弹窗底部 -->
+            <div style="padding: 20px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 12px;">
+                <button onclick="closeControlModal()" style="padding: 10px 20px; border: 1px solid #d1d5db; background: white; color: #4b5563; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer;">取消</button>
+                <button onclick="applySettings()" style="padding: 10px 20px; border: none; background: #3b82f6; color: white; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer;">应用设置</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="common.js"></script>
+    <script>
+        // 检查登录状态
+        checkAuth();
+        
+        // 设置当前页面菜单项
+        setActiveMenuItem('device-control');
+
+        // 模拟储能柜数据
+        let cabinetDevices = [];
+
+        // 当前选中的设备
+        let selectedDevice = null;
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            generateCabinetData();
+            renderDevicesOverview();
+        });
+
+        // 生成储能柜数据
+        function generateCabinetData() {
+            for (let i = 0; i < 8; i++) {
+                const statuses = ['online', 'offline', 'fault'];
+                const workStates = ['充电中', '放电中', '待机'];
+                
+                let status = 'online';
+                if (i === 7) status = 'fault'; // 第8个设为故障
+                else if (i >= 5) status = 'offline'; // 第6、7个设为离线
+
+                cabinetDevices.push({
+                    id: i + 1,
+                    name: `储能柜 ${String(i + 1).padStart(3, '0')}`,
+                    status: status,
+                    workState: workStates[Math.floor(Math.random() * 3)],
+                    soc: Math.floor(Math.random() * 20 + 75), // 75-95%
+                    power: (Math.random() * 200 + 100).toFixed(1), // 100-300 kW
+                    temperature: (Math.random() * 15 + 25).toFixed(1), // 25-40°C
+                    voltage: (Math.random() * 50 + 700).toFixed(1), // 700-750V
+                    current: (Math.random() * 100 + 150).toFixed(1), // 150-250A
+                    soh: Math.floor(Math.random() * 5 + 93), // 93-98%
+                    utilization: Math.floor(Math.random() * 30 + 60) // 60-90%
+                });
+            }
+        }
+
+        // 渲染设备概览
+        function renderDevicesOverview() {
+            const container = document.getElementById('devicesOverview');
+            container.innerHTML = '';
+
+            cabinetDevices.forEach(device => {
+                const statusClass = device.status === 'online' ? 'status-online' : 
+                                  device.status === 'offline' ? 'status-offline' : 'status-fault';
+                const statusText = device.status === 'online' ? '在线' : 
+                                 device.status === 'offline' ? '离线' : '故障';
+                const statusColor = device.status === 'online' ? '#10b981' : 
+                                  device.status === 'offline' ? '#f59e0b' : '#ef4444';
+
+                const card = document.createElement('div');
+                card.className = 'device-card';
+                card.innerHTML = `
+                    <div class="device-card-header">
+                        <div class="device-name">${device.name}</div>
+                        <div class="device-status ${statusClass}">${statusText}</div>
+                    </div>
+                    
+                    <div class="device-metrics">
+                        <div class="metric-item">
+                            <div class="metric-value" style="color: ${statusColor};">${device.soc}%</div>
+                            <div class="metric-label">SOC</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" style="color: #3b82f6;">${device.power} kW</div>
+                            <div class="metric-label">功率</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" style="color: #f59e0b;">${device.temperature}°C</div>
+                            <div class="metric-label">温度</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-size: 12px; color: #6b7280; margin-bottom: 2px;">工作状态</div>
+                        <div style="font-size: 14px; font-weight: 600; color: #374151;">${device.workState}</div>
+                    </div>
+                    
+                    <div class="device-controls">
+                        <button class="control-btn secondary" onclick="viewDeviceDetails(${device.id})">查看详情</button>
+                        <button class="control-btn primary" onclick="goToDeviceControl(${device.id})">设备控制</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 查看设备详情
+        function viewDeviceDetails(deviceId) {
+            // 跳转到cabinet-detail.html页面，并传递设备ID
+            window.location.href = `cabinet-detail.html?deviceId=${deviceId}`;
+        }
+
+        // 显示设备控制弹窗
+        function goToDeviceControl(deviceId) {
+            const device = cabinetDevices.find(d => d.id === deviceId);
+            if (device) {
+                selectedDevice = device;
+                showControlModal(device);
+            }
+        }
+
+        // 显示控制弹窗
+        function showControlModal(device) {
+            document.getElementById('modalTitle').textContent = `${device.name} - 设备控制`;
+            document.getElementById('controlModal').style.display = 'block';
+            switchModalTab('basic');
+        }
+
+        // 关闭控制弹窗
+        function closeControlModal() {
+            document.getElementById('controlModal').style.display = 'none';
+            selectedDevice = null;
+        }
+
+        // 切换弹窗选项卡
+        function switchModalTab(tabName) {
+            // 更新选项卡状态
+            document.querySelectorAll('.modal-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName + 'ModalTab').classList.add('active');
+
+            // 生成对应内容
+            const content = document.getElementById('modalTabContent');
+            
+            switch(tabName) {
+                case 'basic':
+                    content.innerHTML = generateModalBasicContent();
+                    break;
+                case 'advanced':
+                    content.innerHTML = generateModalAdvancedContent();
+                    break;
+                case 'protection':
+                    content.innerHTML = generateModalProtectionContent();
+                    break;
+                case 'monitoring':
+                    content.innerHTML = generateModalMonitoringContent();
+                    break;
+            }
+        }
+
+        // 生成基础控制内容
+        function generateModalBasicContent() {
+            return `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 15px;">
+                            <i class="fas fa-battery-three-quarters" style="margin-right: 8px; color: #3b82f6;"></i>充放电控制
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">运行模式</label>
+                                <select style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                    <option value="auto">自动控制</option>
+                                    <option value="charge">强制充电</option>
+                                    <option value="discharge">强制放电</option>
+                                    <option value="standby">待机模式</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">功率设定 (kW)</label>
+                                <input type="number" value="${selectedDevice ? selectedDevice.power : '0'}" min="0" max="500" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">SOC下限 (%)</label>
+                                <input type="number" value="20" min="5" max="50" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">SOC上限 (%)</label>
+                                <input type="number" value="90" min="50" max="95" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 15px;">
+                            <i class="fas fa-clock" style="margin-right: 8px; color: #10b981;"></i>时间控制
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">充电时段</label>
+                                <input type="text" value="00:00 - 08:00" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">放电时段</label>
+                                <input type="text" value="18:00 - 22:00" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">响应优先级</label>
+                                <select style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                    <option value="high">高优先级</option>
+                                    <option value="medium">中优先级</option>
+                                    <option value="low">低优先级</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成高级设置内容
+        function generateModalAdvancedContent() {
+            return `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 15px;">
+                            <i class="fas fa-cog" style="margin-right: 8px; color: #8b5cf6;"></i>BMS参数设置
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">均衡开启电压差 (mV)</label>
+                                <input type="number" value="50" min="10" max="200" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">均衡电流 (A)</label>
+                                <input type="number" value="5" min="1" max="20" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 15px;">
+                            <i class="fas fa-bolt" style="margin-right: 8px; color: #f59e0b;"></i>PCS参数设置
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">并网电压 (V)</label>
+                                <input type="number" value="380" min="300" max="500" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">功率因数</label>
+                                <input type="number" value="0.99" min="0.8" max="1" step="0.01" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成保护参数内容
+        function generateModalProtectionContent() {
+            return `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 15px;">
+                            <i class="fas fa-shield-alt" style="margin-right: 8px; color: #ef4444;"></i>电池保护参数
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">过充保护电压 (V)</label>
+                                <input type="number" value="3.65" min="3.5" max="4.2" step="0.01" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">过放保护电压 (V)</label>
+                                <input type="number" value="2.5" min="2.0" max="3.0" step="0.01" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">高温保护 (°C)</label>
+                                <input type="number" value="45" min="35" max="60" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">低温保护 (°C)</label>
+                                <input type="number" value="0" min="-20" max="10" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 15px;">
+                            <i class="fas fa-exclamation-triangle" style="margin-right: 8px; color: #f59e0b;"></i>告警阈值设置
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">温差告警 (°C)</label>
+                                <input type="number" value="5" min="2" max="10" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">压差告警 (mV)</label>
+                                <input type="number" value="100" min="50" max="300" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">SOC差异告警 (%)</label>
+                                <input type="number" value="5" min="2" max="10" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成监控配置内容
+        function generateModalMonitoringContent() {
+            return `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 15px;">
+                            <i class="fas fa-chart-line" style="margin-right: 8px; color: #10b981;"></i>数据采集设置
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">采集频率</label>
+                                <select style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                    <option value="1">1秒</option>
+                                    <option value="5">5秒</option>
+                                    <option value="10">10秒</option>
+                                    <option value="30">30秒</option>
+                                    <option value="60">60秒</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; font-weight: 500; color: #4b5563; margin-bottom: 6px;">数据保存周期</label>
+                                <select style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                    <option value="7">7天</option>
+                                    <option value="30">30天</option>
+                                    <option value="90">90天</option>
+                                    <option value="180">180天</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 15px;">
+                            <i class="fas fa-bell" style="margin-right: 8px; color: #3b82f6;"></i>告警通知设置
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" checked style="width: 16px; height: 16px;">
+                                    <span style="font-size: 14px; color: #4b5563;">启用邮件通知</span>
+                                </label>
+                            </div>
+                            <div>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" checked style="width: 16px; height: 16px;">
+                                    <span style="font-size: 14px; color: #4b5563;">启用短信通知</span>
+                                </label>
+                            </div>
+                            <div>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" style="width: 16px; height: 16px;">
+                                    <span style="font-size: 14px; color: #4b5563;">启用微信通知</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 应用设置
+        function applySettings() {
+            showNotification('设置已成功应用', 'success');
+            closeControlModal();
+        }
+
+        // 以下函数已不再需要，因为设备控制详情改为独立页面
+        /*
+        function switchTab(tabName) {
+            // 更新选项卡状态
+            document.querySelectorAll('.control-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Tab').classList.add('active');
+
+            // 生成对应内容
+            const content = document.getElementById('controlTabContent');
+            
+            switch(tabName) {
+                case 'basic':
+                    content.innerHTML = generateBasicControlContent();
+                    break;
+                case 'advanced':
+                    content.innerHTML = generateAdvancedControlContent();
+                    break;
+                case 'protection':
+                    content.innerHTML = generateProtectionControlContent();
+                    break;
+                case 'monitoring':
+                    content.innerHTML = generateMonitoringControlContent();
+                    break;
+            }
+        }
+
+        // 生成基础控制内容
+        function generateBasicControlContent() {
+            return `
+                <div class="control-section">
+                    <h4><i class="fas fa-battery-three-quarters" style="margin-right: 8px; color: #3b82f6;"></i>充放电控制</h4>
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <label>运行模式</label>
+                            <select class="control-select">
+                                <option value="auto">自动控制</option>
+                                <option value="charge">强制充电</option>
+                                <option value="discharge">强制放电</option>
+                                <option value="standby">待机模式</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label>功率设定 (kW)</label>
+                            <input type="number" class="control-input" value="${selectedDevice.power}" min="0" max="500">
+                        </div>
+                        <div class="control-item">
+                            <label>SOC下限 (%)</label>
+                            <input type="number" class="control-input" value="20" min="5" max="50">
+                        </div>
+                        <div class="control-item">
+                            <label>SOC上限 (%)</label>
+                            <input type="number" class="control-input" value="90" min="50" max="95">
+                        </div>
+                        <div class="control-item">
+                            <label>最大充电功率 (kW)</label>
+                            <input type="number" class="control-input" value="300" min="50" max="500">
+                        </div>
+                        <div class="control-item">
+                            <label>最大放电功率 (kW)</label>
+                            <input type="number" class="control-input" value="300" min="50" max="500">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h4><i class="fas fa-microchip" style="margin-right: 8px; color: #10b981;"></i>BMS电池管理</h4>
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <label>均衡控制</label>
+                            <select class="control-select">
+                                <option value="auto">自动均衡</option>
+                                <option value="manual">手动均衡</option>
+                                <option value="off">关闭均衡</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label>充电许可</label>
+                            <select class="control-select">
+                                <option value="enabled">允许</option>
+                                <option value="disabled">禁止</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label>放电许可</label>
+                            <select class="control-select">
+                                <option value="enabled">允许</option>
+                                <option value="disabled">禁止</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label>热管理控制</label>
+                            <select class="control-select">
+                                <option value="auto">自动控制</option>
+                                <option value="manual">手动控制</option>
+                                <option value="off">关闭</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h4><i class="fas fa-thermometer-half" style="margin-right: 8px; color: #f59e0b;"></i>温控系统</h4>
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <label>目标温度 (°C)</label>
+                            <input type="number" class="control-input" value="25" min="15" max="35">
+                        </div>
+                        <div class="control-item">
+                            <label>温度死区 (°C)</label>
+                            <input type="number" class="control-input" value="2" min="1" max="5">
+                        </div>
+                        <div class="control-item">
+                            <label>风扇转速控制</label>
+                            <select class="control-select">
+                                <option value="auto">自动调速</option>
+                                <option value="low">低速运行</option>
+                                <option value="medium">中速运行</option>
+                                <option value="high">高速运行</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label>制冷启动阈值 (°C)</label>
+                            <input type="number" class="control-input" value="30" min="25" max="40">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn secondary" onclick="resetBasicSettings()">重置</button>
+                    <button class="action-btn primary" onclick="applyBasicSettings()">应用设置</button>
+                    <button class="action-btn danger" onclick="emergencyStop()">紧急停机</button>
+                </div>
+            `;
+        }
+
+        // 生成高级控制内容
+        function generateAdvancedControlContent() {
+            return `
+                <div class="control-section">
+                    <h4><i class="fas fa-bolt" style="margin-right: 8px; color: #3b82f6;"></i>PCS储能变流器</h4>
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <label>运行模式</label>
+                            <select class="control-select">
+                                <option value="grid_following">跟网型控制</option>
+                                <option value="grid_forming">构网型控制</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label>功率因数</label>
+                            <input type="number" class="control-input" value="0.95" min="0.8" max="1.0" step="0.01">
+                        </div>
+                        <div class="control-item">
+                            <label>电压调节范围 (%)</label>
+                            <input type="number" class="control-input" value="5" min="1" max="10">
+                        </div>
+                        <div class="control-item">
+                            <label>频率调节参数 (Hz)</label>
+                            <input type="number" class="control-input" value="50.0" min="49.5" max="50.5" step="0.1">
+                        </div>
+                        <div class="control-item">
+                            <label>启停控制</label>
+                            <select class="control-select">
+                                <option value="auto">自动启停</option>
+                                <option value="manual">手动控制</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h4><i class="fas fa-brain" style="margin-right: 8px; color: #10b981;"></i>EMS能量管理系统</h4>
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <label>充放电策略</label>
+                            <select class="control-select">
+                                <option value="peak_shaving">峰谷套利</option>
+                                <option value="demand_response">需量管理</option>
+                                <option value="frequency_regulation">一次调频</option>
+                                <option value="agc">AGC控制</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label>调度周期 (分钟)</label>
+                            <input type="number" class="control-input" value="15" min="5" max="60">
+                        </div>
+                        <div class="control-item">
+                            <label>安全裕度 (%)</label>
+                            <input type="number" class="control-input" value="5" min="0" max="20">
+                        </div>
+                        <div class="control-item">
+                            <label>经济优化权重</label>
+                            <input type="number" class="control-input" value="0.7" min="0" max="1" step="0.1">
+                        </div>
+                        <div class="control-item">
+                            <label>负载预测算法</label>
+                            <select class="control-select">
+                                <option value="lstm">LSTM神经网络</option>
+                                <option value="arima">ARIMA模型</option>
+                                <option value="linear">线性回归</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h4><i class="fas fa-network-wired" style="margin-right: 8px; color: #8b5cf6;"></i>通信与监控</h4>
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <label>通信协议</label>
+                            <select class="control-select">
+                                <option value="modbus">Modbus TCP</option>
+                                <option value="can">CAN总线</option>
+                                <option value="ethernet">以太网</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label>数据更新周期 (秒)</label>
+                            <input type="number" class="control-input" value="5" min="1" max="60">
+                        </div>
+                        <div class="control-item">
+                            <label>通信超时时间 (秒)</label>
+                            <input type="number" class="control-input" value="30" min="10" max="120">
+                        </div>
+                        <div class="control-item">
+                            <label>采样精度等级</label>
+                            <select class="control-select">
+                                <option value="high">高精度</option>
+                                <option value="medium">中等精度</option>
+                                <option value="low">低精度</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn secondary" onclick="resetAdvancedSettings()">重置</button>
+                    <button class="action-btn primary" onclick="applyAdvancedSettings()">应用高级设置</button>
+                </div>
+            `;
+        }
+
+        // 生成保护参数内容
+        function generateProtectionControlContent() {
+            return `
+                <div class="control-section">
+                    <h4><i class="fas fa-shield-alt" style="margin-right: 8px; color: #ef4444;"></i>电池保护参数</h4>
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <label>单体过压保护 (V)</label>
+                            <input type="number" class="control-input" value="3.75" min="3.6" max="4.0" step="0.01">
+                        </div>
+                        <div class="control-item">
+                            <label>单体欠压保护 (V)</label>
+                            <input type="number" class="control-input" value="2.3" min="2.0" max="2.8" step="0.01">
+                        </div>
+                        <div class="control-item">
+                            <label>充电过流保护 (A)</label>
+                            <input type="number" class="control-input" value="200" min="50" max="500">
+                        </div>
+                        <div class="control-item">
+                            <label>放电过流保护 (A)</label>
+                            <input type="number" class="control-input" value="200" min="50" max="500">
+                        </div>
+                        <div class="control-item">
+                            <label>绝缘阻抗下限 (MΩ)</label>
+                            <input type="number" class="control-input" value="100" min="50" max="500">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h4><i class="fas fa-temperature-high" style="margin-right: 8px; color: #f59e0b;"></i>温度保护参数</h4>
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <label>充电过温保护 (°C)</label>
+                            <input type="number" class="control-input" value="55" min="45" max="65">
+                        </div>
+                        <div class="control-item">
+                            <label>放电过温保护 (°C)</label>
+                            <input type="number" class="control-input" value="60" min="50" max="70">
+                        </div>
+                        <div class="control-item">
+                            <label>充电低温保护 (°C)</label>
+                            <input type="number" class="control-input" value="0" min="-10" max="10">
+                        </div>
+                        <div class="control-item">
+                            <label>放电低温保护 (°C)</label>
+                            <input type="number" class="control-input" value="-20" min="-30" max="-10">
+                        </div>
+                        <div class="control-item">
+                            <label>温度梯度保护 (°C/min)</label>
+                            <input type="number" class="control-input" value="5" min="1" max="10">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h4><i class="fas fa-fire-extinguisher" style="margin-right: 8px; color: #dc2626;"></i>消防保护参数</h4>
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <label>温度预警阈值 (°C)</label>
+                            <input type="number" class="control-input" value="70" min="60" max="80">
+                        </div>
+                        <div class="control-item">
+                            <label>温度告警阈值 (°C)</label>
+                            <input type="number" class="control-input" value="80" min="70" max="90">
+                        </div>
+                        <div class="control-item">
+                            <label>烟雾预警阈值 (V)</label>
+                            <input type="number" class="control-input" value="4.0" min="3.0" max="5.0" step="0.1">
+                        </div>
+                        <div class="control-item">
+                            <label>烟雾告警阈值 (V)</label>
+                            <input type="number" class="control-input" value="5.0" min="4.0" max="6.0" step="0.1">
+                        </div>
+                        <div class="control-item">
+                            <label>CO预警浓度 (ppm)</label>
+                            <input type="number" class="control-input" value="190" min="100" max="300">
+                        </div>
+                        <div class="control-item">
+                            <label>温升告警速率 (°C/s)</label>
+                            <input type="number" class="control-input" value="1.0" min="0.5" max="2.0" step="0.1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h4><i class="fas fa-exclamation-triangle" style="margin-right: 8px; color: #f59e0b;"></i>系统保护参数</h4>
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <label>过压保护 (V)</label>
+                            <input type="number" class="control-input" value="800" min="750" max="900">
+                        </div>
+                        <div class="control-item">
+                            <label>欠压保护 (V)</label>
+                            <input type="number" class="control-input" value="600" min="500" max="650">
+                        </div>
+                        <div class="control-item">
+                            <label>漏电保护 (mA)</label>
+                            <input type="number" class="control-input" value="30" min="10" max="100">
+                        </div>
+                        <div class="control-item">
+                            <label>接地故障保护</label>
+                            <select class="control-select">
+                                <option value="enabled">启用</option>
+                                <option value="disabled">禁用</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn secondary" onclick="resetProtectionSettings()">恢复默认</button>
+                    <button class="action-btn primary" onclick="applyProtectionSettings()">应用保护设置</button>
+                </div>
+            `;
+        }
+
+        // 生成监控配置内容
+        function generateMonitoringControlContent() {
+            return `
+                <div class="control-section">
+                    <h4><i class="fas fa-chart-line" style="margin-right: 8px; color: #3b82f6;"></i>数据采集配置</h4>
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <label>高频数据采样 (秒)</label>
+                            <input type="number" class="control-input" value="1" min="1" max="10">
+                        </div>
+                        <div class="control-item">
+                            <label>中频数据采样 (秒)</label>
+                            <input type="number" class="control-input" value="10" min="5" max="30">
+                        </div>
+                        <div class="control-item">
+                            <label>低频数据采样 (分钟)</label>
+                            <input type="number" class="control-input" value="1" min="1" max="10">
+                        </div>
+                        <div class="control-item">
+                            <label>数据存储周期 (天)</label>
+                            <input type="number" class="control-input" value="30" min="7" max="365">
+                        </div>
+                        <div class="control-item">
+                            <label>数据压缩算法</label>
+                            <select class="control-select">
+                                <option value="lz4">LZ4快速压缩</option>
+                                <option value="gzip">GZIP标准压缩</option>
+                                <option value="none">无压缩</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h4><i class="fas fa-bell" style="margin-right: 8px; color: #f59e0b;"></i>告警配置</h4>
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <label>告警级别</label>
+                            <select class="control-select">
+                                <option value="all">全部告警</option>
+                                <option value="critical">仅严重告警</option>
+                                <option value="warning">警告及以上</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label>告警延迟确认 (秒)</label>
+                            <input type="number" class="control-input" value="10" min="1" max="60">
+                        </div>
+                        <div class="control-item">
+                            <label>自动复位时间 (分钟)</label>
+                            <input type="number" class="control-input" value="30" min="5" max="120">
+                        </div>
+                        <div class="control-item">
+                            <label>邮件通知</label>
+                            <select class="control-select">
+                                <option value="enabled">启用</option>
+                                <option value="disabled">禁用</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label>短信通知</label>
+                            <select class="control-select">
+                                <option value="enabled">启用</option>
+                                <option value="critical_only">仅严重告警</option>
+                                <option value="disabled">禁用</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h4><i class="fas fa-database" style="margin-right: 8px; color: #10b981;"></i>数据管理</h4>
+                    <div class="control-grid">
+                        <div class="control-item">
+                            <label>数据备份策略</label>
+                            <select class="control-select">
+                                <option value="daily">每日备份</option>
+                                <option value="weekly">每周备份</option>
+                                <option value="monthly">每月备份</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label>备份保留期 (月)</label>
+                            <input type="number" class="control-input" value="12" min="1" max="60">
+                        </div>
+                        <div class="control-item">
+                            <label>数据导出格式</label>
+                            <select class="control-select">
+                                <option value="csv">CSV格式</option>
+                                <option value="excel">Excel格式</option>
+                                <option value="json">JSON格式</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label>实时数据推送</label>
+                            <select class="control-select">
+                                <option value="websocket">WebSocket</option>
+                                <option value="mqtt">MQTT</option>
+                                <option value="disabled">禁用</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn secondary" onclick="exportConfig()">导出配置</button>
+                    <button class="action-btn secondary" onclick="importConfig()">导入配置</button>
+                    <button class="action-btn primary" onclick="applyMonitoringSettings()">应用监控设置</button>
+                </div>
+            `;
+        }
+
+        // 应用基础设置
+        function applyBasicSettings() {
+            showNotification('基础控制设置已应用', 'success');
+        }
+
+        // 重置基础设置
+        function resetBasicSettings() {
+            if (confirm('确认要重置所有基础设置吗？')) {
+                switchTab('basic');
+                showNotification('基础设置已重置为默认值', 'info');
+            }
+        }
+
+        // 应用高级设置
+        function applyAdvancedSettings() {
+            showNotification('高级控制设置已应用', 'success');
+        }
+
+        // 重置高级设置
+        function resetAdvancedSettings() {
+            if (confirm('确认要重置所有高级设置吗？')) {
+                switchTab('advanced');
+                showNotification('高级设置已重置为默认值', 'info');
+            }
+        }
+
+        // 应用保护设置
+        function applyProtectionSettings() {
+            showNotification('保护参数设置已应用', 'success');
+        }
+
+        // 重置保护设置
+        function resetProtectionSettings() {
+            if (confirm('确认要恢复保护参数默认值吗？')) {
+                switchTab('protection');
+                showNotification('保护参数已恢复为默认值', 'warning');
+            }
+        }
+
+        // 应用监控设置
+        function applyMonitoringSettings() {
+            showNotification('监控配置已应用', 'success');
+        }
+
+        // 导出配置
+        function exportConfig() {
+            showNotification('配置文件导出中...', 'info');
+            setTimeout(() => {
+                showNotification('配置文件已导出到下载目录', 'success');
+            }, 1000);
+        }
+
+        // 导入配置
+        function importConfig() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json,.cfg';
+            input.onchange = function(e) {
+                if (e.target.files.length > 0) {
+                    showNotification('配置文件导入中...', 'info');
+                    setTimeout(() => {
+                        showNotification('配置文件导入成功', 'success');
+                    }, 1000);
+                }
+            };
+            input.click();
+        }
+
+        */
+        
+        // 紧急停机 - 这个函数保留用于紧急操作
+        function emergencyStop() {
+            if (confirm('⚠️ 确认执行紧急停机操作？\\n此操作将立即停止所有充放电活动！')) {
+                showNotification('🚨 紧急停机指令已发送', 'error');
+                
+                // 模拟设备状态更新
+                setTimeout(() => {
+                    if (selectedDevice) {
+                        selectedDevice.workState = '待机';
+                        selectedDevice.power = '0.0';
+                        renderDevicesOverview();
+                        showNotification('设备已安全停机', 'success');
+                    }
+                }, 2000);
+            }
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 10000;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s;
+                max-width: 350px;
+            `;
+            
+            // 设置不同类型的背景色
+            const colors = {
+                success: '#10b981',
+                error: '#ef4444',
+                warning: '#f59e0b',
+                info: '#3b82f6'
+            };
+            notification.style.background = colors[type] || colors.info;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // 显示动画
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // 自动移除
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

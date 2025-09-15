@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profit Analysis</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Tailwind 配置 - 苹果风格 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0071e3',
+                        secondary: '#1d1d1f',
+                        tertiary: '#86868b',
+                        light: '#f5f5f7',
+                        success: '#34c759',
+                        warning: '#ff9500',
+                        danger: '#ff3b30',
+                        border: '#d2d2d7',
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'apple': '0 2px 10px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03)',
+                        'apple-hover': '0 5px 15px rgba(0, 0, 0, 0.08), 0 2px 5px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            }
+        }
+    </script>
+
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .card-apple {
+                @apply bg-white/90 backdrop-blur-sm rounded-xl shadow-apple overflow-hidden transition-all duration-300 hover:shadow-apple-hover;
+            }
+            .btn-apple {
+                @apply bg-primary text-white font-medium py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 hover:bg-primary/90 active:bg-primary/80;
+            }
+            .btn-outline-black {
+                @apply border border-black text-black font-medium py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 hover:bg-black/5 active:bg-black/10;
+            }
+            .input-apple {
+                @apply w-full px-4 py-3 bg-light border border-border rounded-lg transition-all duration-200 focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none;
+            }
+        }
+    </style>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #f5f5f7 100%);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(50px);
+            opacity: 0.15;
+        }
+        
+        body::before {
+            width: 500px;
+            height: 500px;
+            background: #0071e3;
+            top: -250px;
+            right: -250px;
+        }
+        
+        body::after {
+            width: 600px;
+            height: 600px;
+            background: #34c759;
+            bottom: -300px;
+            left: -300px;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
+        
+        .lang-selector {
+            position: relative;
+        }
+        .lang-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            z-index: 10;
+            margin-top: 0.5rem;
+            min-width: 8rem;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .lang-dropdown.show {
+            display: block;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans text-secondary flex">
+    <!-- 侧边栏 -->
+    <aside class="sidebar w-64 bg-white shadow-sm fixed md:relative h-full z-40">
+        <div class="p-6 border-b border-border">
+            <img src="logo_副本.png" alt="Logo" class="h-8 max-w-[150px] object-contain">
+        </div>
+        <nav class="p-4">
+            <ul class="space-y-2">
+                <li>
+                    <a href="home.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-home"></i>
+                        <span data-i18n="nav_home">首页</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="admin.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-shield"></i>
+                        <span data-i18n="auth_management">授权管理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" id="profit-link" class="flex items-center gap-3 px-4 py-3 bg-black text-white rounded-lg cursor-default">
+                        <i class="fa fa-line-chart"></i>
+                        <span data-i18n="nav_profit">利润分析</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="family.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-users"></i>
+                        <span data-i18n="nav_family">家庭管理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="analysis.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-bar-chart"></i>
+                        <span data-i18n="nav_analysis">数据分析</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="organization.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-sitemap"></i>
+                        <span data-i18n="nav_organization">组织管理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="push-strategy.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-bullhorn"></i>
+                        <span data-i18n="nav_push_strategy">推送策略</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="operation-log.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-history"></i>
+                        <span data-i18n="nav_operation_log">操作日志</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="message-center.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-bell"></i>
+                        <span data-i18n="nav_message_center">消息中心</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fa fa-cog"></i>
+                        <span data-i18n="nav_settings">设置</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <div class="flex-1 flex flex-col">
+        <!-- 头部导航 -->
+        <header class="bg-white shadow-sm sticky top-0 z-30">
+            <div class="px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <button id="menu-toggle" class="md:hidden text-secondary">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                    <h1 class="text-xl font-semibold" data-i18n="profit_analysis">利润分析</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="lang-selector">
+                        <button id="lang-toggle-btn" class="flex items-center px-3 py-2 rounded-full bg-light hover:bg-gray-200 transition-colors">
+                            <span id="current-lang" class="mr-1">中文</span>
+                            <i class="fa fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="lang-dropdown" class="lang-dropdown">
+                            <button class="lang-option w-full text-left px-4 py-3 hover:bg-light transition-colors" data-lang="zh">中文</button>
+                            <button class="lang-option w-full text-left px-4 py-3 hover:bg-light transition-colors" data-lang="en">English</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容 -->
+        <main class="flex-1 p-6 space-y-6">
+            <!-- 筛选条件 -->
+            <div class="card-apple p-6">
+                <h3 class="text-lg font-semibold mb-4" data-i18n="filter_conditions">筛选条件</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm text-tertiary mb-2" data-i18n="time_range">时间范围</label>
+                        <select class="input-apple" id="time-range">
+                            <option value="today" data-i18n="today">今天</option>
+                            <option value="week" data-i18n="this_week">本周</option>
+                            <option value="month" selected data-i18n="this_month">本月</option>
+                            <option value="quarter" data-i18n="this_quarter">本季度</option>
+                            <option value="year" data-i18n="this_year">今年</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-tertiary mb-2" data-i18n="profit_type">收益类型</label>
+                        <select class="input-apple" id="profit-type">
+                            <option value="all" data-i18n="all_types">所有类型</option>
+                            <option value="vpp" data-i18n="vpp_revenue">VPP收益</option>
+                            <option value="device" data-i18n="device_rental">设备租赁</option>
+                            <option value="service" data-i18n="service_fee">服务费用</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-tertiary mb-2" data-i18n="region">地区</label>
+                        <select class="input-apple" id="region">
+                            <option value="all" data-i18n="all_regions">所有地区</option>
+                            <option value="nsw">新南威尔士州</option>
+                            <option value="vic">维多利亚州</option>
+                            <option value="qld">昆士兰州</option>
+                            <option value="wa">西澳大利亚州</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button class="btn-apple w-full" onclick="updateAnalysis()">
+                            <i class="fa fa-search mr-2"></i>
+                            <span data-i18n="analyze">分析</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 核心指标 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="card-apple p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-success/10 rounded-xl flex items-center justify-center">
+                            <i class="fa fa-dollar text-success text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-2xl font-bold" id="total-revenue">$125,840</p>
+                            <p class="text-tertiary text-sm" data-i18n="total_revenue">总收入</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <span class="text-success">↗ +18%</span>
+                        <span class="text-tertiary ml-2" data-i18n="vs_last_period">较上期</span>
+                    </div>
+                </div>
+
+                <div class="card-apple p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-warning/10 rounded-xl flex items-center justify-center">
+                            <i class="fa fa-money text-warning text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-2xl font-bold" id="net-profit">$89,560</p>
+                            <p class="text-tertiary text-sm" data-i18n="net_profit">净利润</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <span class="text-success">↗ +22%</span>
+                        <span class="text-tertiary ml-2" data-i18n="vs_last_period">较上期</span>
+                    </div>
+                </div>
+
+                <div class="card-apple p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                            <i class="fa fa-percent text-primary text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-2xl font-bold" id="profit-margin">71.2%</p>
+                            <p class="text-tertiary text-sm" data-i18n="profit_margin">利润率</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <span class="text-success">↗ +3%</span>
+                        <span class="text-tertiary ml-2" data-i18n="vs_last_period">较上期</span>
+                    </div>
+                </div>
+
+                <div class="card-apple p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-danger/10 rounded-xl flex items-center justify-center">
+                            <i class="fa fa-calculator text-danger text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-2xl font-bold" id="avg-profit-per-user">$72.15</p>
+                            <p class="text-tertiary text-sm" data-i18n="avg_profit_per_user">人均利润</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <span class="text-success">↗ +8%</span>
+                        <span class="text-tertiary ml-2" data-i18n="vs_last_period">较上期</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 图表区域 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- 收入趋势 -->
+                <div class="card-apple p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold" data-i18n="revenue_trend">收入趋势</h3>
+                        <div class="flex gap-2">
+                            <button class="text-xs px-3 py-1 rounded-full bg-primary text-white" onclick="switchTrendView('daily')">日</button>
+                            <button class="text-xs px-3 py-1 rounded-full text-tertiary hover:bg-light" onclick="switchTrendView('weekly')">周</button>
+                            <button class="text-xs px-3 py-1 rounded-full text-tertiary hover:bg-light" onclick="switchTrendView('monthly')">月</button>
+                        </div>
+                    </div>
+                    <canvas id="revenueTrendChart" height="300"></canvas>
+                </div>
+
+                <!-- 收入来源分布 -->
+                <div class="card-apple p-6">
+                    <h3 class="text-lg font-semibold mb-4" data-i18n="revenue_sources">收入来源分布</h3>
+                    <canvas id="revenueSourceChart" height="300"></canvas>
+                </div>
+            </div>
+
+            <!-- 详细数据表格 -->
+            <div class="card-apple">
+                <div class="p-4 border-b border-border">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold" data-i18n="detailed_data">详细数据</h3>
+                        <button class="btn-outline-black">
+                            <i class="fa fa-download mr-2"></i>
+                            <span data-i18n="export_excel">导出Excel</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="date">日期</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="vpp_revenue">VPP收益</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="device_rental">设备租赁</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="service_fee">服务费用</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="total_revenue">总收入</th>
+                                <th class="px-4 py-3 text-left text-sm font-medium text-tertiary" data-i18n="growth_rate">增长率</th>
+                            </tr>
+                        </thead>
+                        <tbody id="profit-table-body">
+                            <!-- 动态生成的数据 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const translations = {
+            zh: {
+                profit_analysis: '利润分析',
+                filter_conditions: '筛选条件',
+                time_range: '时间范围',
+                today: '今天',
+                this_week: '本周',
+                this_month: '本月',
+                this_quarter: '本季度',
+                this_year: '今年',
+                profit_type: '收益类型',
+                all_types: '所有类型',
+                vpp_revenue: 'VPP收益',
+                device_rental: '设备租赁',
+                service_fee: '服务费用',
+                region: '地区',
+                all_regions: '所有地区',
+                analyze: '分析',
+                total_revenue: '总收入',
+                net_profit: '净利润',
+                profit_margin: '利润率',
+                avg_profit_per_user: '人均利润',
+                vs_last_period: '较上期',
+                revenue_trend: '收入趋势',
+                revenue_sources: '收入来源分布',
+                detailed_data: '详细数据',
+                export_excel: '导出Excel',
+                date: '日期',
+                growth_rate: '增长率',
+                nav_home: '首页',
+                auth_management: '授权管理',
+                nav_profit: '利润分析',
+                nav_family: '家庭管理',
+                nav_analysis: '数据分析',
+                nav_organization: '组织管理',
+                nav_push_strategy: '推送策略',
+                nav_operation_log: '操作日志',
+                nav_message_center: '消息中心',
+                nav_settings: '设置'
+            },
+            en: {
+                profit_analysis: 'Profit Analysis',
+                filter_conditions: 'Filter Conditions',
+                time_range: 'Time Range',
+                today: 'Today',
+                this_week: 'This Week',
+                this_month: 'This Month',
+                this_quarter: 'This Quarter',
+                this_year: 'This Year',
+                profit_type: 'Profit Type',
+                all_types: 'All Types',
+                vpp_revenue: 'VPP Revenue',
+                device_rental: 'Device Rental',
+                service_fee: 'Service Fee',
+                region: 'Region',
+                all_regions: 'All Regions',
+                analyze: 'Analyze',
+                total_revenue: 'Total Revenue',
+                net_profit: 'Net Profit',
+                profit_margin: 'Profit Margin',
+                avg_profit_per_user: 'Avg Profit per User',
+                vs_last_period: 'vs last period',
+                revenue_trend: 'Revenue Trend',
+                revenue_sources: 'Revenue Sources',
+                detailed_data: 'Detailed Data',
+                export_excel: 'Export Excel',
+                date: 'Date',
+                growth_rate: 'Growth Rate',
+                nav_home: 'Home',
+                auth_management: 'Authorization Management',
+                nav_profit: 'Profit Analysis',
+                nav_family: 'Family Management',
+                nav_analysis: 'Data Analysis',
+                nav_organization: 'Organization Management',
+                nav_push_strategy: 'Push Strategy',
+                nav_operation_log: 'Operation Log',
+                nav_message_center: 'Message Center',
+                nav_settings: 'Settings'
+            }
+        };
+
+        let currentLang = localStorage.getItem('language') || 'zh';
+        let revenueTrendChart, revenueSourceChart;
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+            document.getElementById('current-lang').textContent = lang === 'zh' ? '中文' : 'English';
+            updateCharts();
+            generateTableData();
+        }
+
+        function init() {
+            changeLanguage(currentLang);
+            initCharts();
+            generateTableData();
+            initEventListeners();
+        }
+
+        function initCharts() {
+            // 收入趋势图
+            const trendCtx = document.getElementById('revenueTrendChart').getContext('2d');
+            revenueTrendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                    datasets: [{
+                        label: currentLang === 'zh' ? '总收入' : 'Total Revenue',
+                        data: [45000, 52000, 48000, 65000, 78000, 85000],
+                        borderColor: '#0071e3',
+                        backgroundColor: 'rgba(0, 113, 227, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + (value / 1000) + 'K';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 收入来源分布图
+            const sourceCtx = document.getElementById('revenueSourceChart').getContext('2d');
+            revenueSourceChart = new Chart(sourceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        currentLang === 'zh' ? 'VPP收益' : 'VPP Revenue',
+                        currentLang === 'zh' ? '设备租赁' : 'Device Rental',
+                        currentLang === 'zh' ? '服务费用' : 'Service Fee',
+                        currentLang === 'zh' ? '其他' : 'Others'
+                    ],
+                    datasets: [{
+                        data: [55, 25, 15, 5],
+                        backgroundColor: ['#0071e3', '#34c759', '#ff9500', '#ff3b30'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts() {
+            if (revenueTrendChart) {
+                revenueTrendChart.data.datasets[0].label = currentLang === 'zh' ? '总收入' : 'Total Revenue';
+                revenueTrendChart.update();
+            }
+
+            if (revenueSourceChart) {
+                revenueSourceChart.data.labels = [
+                    currentLang === 'zh' ? 'VPP收益' : 'VPP Revenue',
+                    currentLang === 'zh' ? '设备租赁' : 'Device Rental',
+                    currentLang === 'zh' ? '服务费用' : 'Service Fee',
+                    currentLang === 'zh' ? '其他' : 'Others'
+                ];
+                revenueSourceChart.update();
+            }
+        }
+
+        function generateTableData() {
+            const tbody = document.getElementById('profit-table-body');
+            const dates = ['2024-06-01', '2024-06-02', '2024-06-03', '2024-06-04', '2024-06-05', '2024-06-06'];
+            const data = [
+                [2800, 1200, 400, 4400, '+12%'],
+                [3200, 1100, 350, 4650, '+18%'],
+                [2950, 1350, 420, 4720, '+8%'],
+                [3100, 1250, 380, 4730, '+15%'],
+                [3400, 1400, 450, 5250, '+22%'],
+                [3600, 1300, 500, 5400, '+28%']
+            ];
+
+            tbody.innerHTML = dates.map((date, index) => `
+                <tr class="border-b border-border hover:bg-light/50 transition-colors">
+                    <td class="px-4 py-3 text-sm">${date}</td>
+                    <td class="px-4 py-3 text-sm">$${data[index][0].toLocaleString()}</td>
+                    <td class="px-4 py-3 text-sm">$${data[index][1].toLocaleString()}</td>
+                    <td class="px-4 py-3 text-sm">$${data[index][2].toLocaleString()}</td>
+                    <td class="px-4 py-3 text-sm font-medium">$${data[index][3].toLocaleString()}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <span class="text-success">${data[index][4]}</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateAnalysis() {
+            // 模拟数据更新
+            console.log('更新分析数据...');
+        }
+
+        function switchTrendView(period) {
+            // 切换趋势视图
+            document.querySelectorAll('.card-apple button[onclick*="switchTrendView"]').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('text-tertiary', 'hover:bg-light');
+            });
+            event.target.classList.add('bg-primary', 'text-white');
+            event.target.classList.remove('text-tertiary', 'hover:bg-light');
+        }
+
+        function initEventListeners() {
+            // 语言切换
+            const langToggleBtn = document.getElementById('lang-toggle-btn');
+            const langDropdown = document.getElementById('lang-dropdown');
+            
+            langToggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                langDropdown.classList.toggle('show');
+            });
+            
+            document.querySelectorAll('.lang-option').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const lang = this.getAttribute('data-lang');
+                    changeLanguage(lang);
+                    langDropdown.classList.remove('show');
+                });
+            });
+            
+            document.addEventListener('click', function() {
+                langDropdown.classList.remove('show');
+            });
+
+            // 移动端菜单切换
+            document.getElementById('menu-toggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('show');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

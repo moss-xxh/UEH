@@ -1,0 +1,11 @@
+测试步骤：
+
+1. 打开 device-detail.html 文件
+2. 点击底部菜单栏的第二个按钮（基础信息按钮 - 带有勾选图标的按钮）
+3. 页面会切换到基础信息页面
+4. 在"电芯电压"部分，你会看到"详情 >"文字
+5. 点击"详情 >"即可显示电芯电压详情弹窗
+
+或者你可以在浏览器控制台中直接执行以下命令来切换到基础信息页面：
+document.getElementById('infoContent').classList.add('active');
+document.getElementById('homeContent').classList.remove('active');

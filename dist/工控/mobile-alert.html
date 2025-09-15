@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>告警信息 - 工控数据管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
+            font-size: 14px;
+            color: #444;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        /* 顶部导航栏 */
+        .mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(180deg, #5DD5E1 0%, #4ECAE3 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .back-btn {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .page-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        /* 筛选栏 */
+        .filter-bar {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            z-index: 90;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .search-group {
+            flex: 1;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .filter-input {
+            width: 100%;
+            height: 36px;
+            padding: 0 10px;
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            font-size: 13px;
+            background: #f9f9f9;
+        }
+        
+        .date-group {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #f9f9f9;
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            padding: 0 8px;
+            height: 36px;
+        }
+        
+        .date-input {
+            border: none;
+            background: transparent;
+            font-size: 11px;
+            width: 72px;
+            padding: 0;
+            height: auto;
+        }
+        
+        .date-input:focus {
+            outline: none;
+        }
+        
+        .date-separator {
+            color: #999;
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+        
+        .filter-btn {
+            height: 36px;
+            padding: 0 14px;
+            background: #4ECAE3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .filter-btn:active {
+            background: #3DB8D0;
+        }
+        
+        /* 主内容区 */
+        .mobile-content {
+            padding-top: 86px; /* 50px header + 36px filter + margin */
+            padding-bottom: 70px;
+            min-height: 100vh;
+            background: #f5f5f5;
+        }
+        
+        /* 告警列表 */
+        .alert-list {
+            padding: 10px;
+        }
+        
+        .alert-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            border-left: 4px solid #4ECAE3;
+        }
+        
+        .alert-header {
+            margin-bottom: 8px;
+        }
+        
+        .alert-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .alert-desc {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+        
+        .alert-time {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+        
+        .empty-text {
+            font-size: 14px;
+        }
+        
+        /* 加载更多 */
+        .load-more {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .load-more-btn {
+            padding: 10px 30px;
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 20px;
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .load-more-btn:active {
+            background: #f9f9f9;
+        }
+        
+        /* 底部导航栏 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 55px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #4ECAE3;
+        }
+        
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            opacity: 0.6;
+            font-size: 20px;
+        }
+        
+        .nav-item.active .nav-icon {
+            opacity: 1;
+        }
+        
+        .nav-text {
+            font-size: 11px;
+        }
+        
+        /* 语言切换器 */
+        .lang-switch {
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        /* 针对小屏幕优化 */
+        @media (max-width: 380px) {
+            .filter-row {
+                flex-wrap: wrap;
+            }
+            
+            .search-group {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+            
+            .date-group {
+                flex: 1;
+            }
+            
+            .mobile-content {
+                padding-top: 120px; /* 调整内容区域顶部间距 */
+            }
+        }
+        
+        /* 确保在更大屏幕上两个输入框大小一致 */
+        @media (min-width: 400px) {
+            .search-group,
+            .date-group {
+                min-width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="mobile-header">
+        <div class="back-btn" onclick="history.back()">‹</div>
+        <div class="page-title" data-lang="alertInfo">告警信息</div>
+        <div class="header-actions">
+            <div class="lang-switch" onclick="toggleLanguage()">
+                <span data-lang="langText">中文</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 筛选栏 -->
+    <div class="filter-bar">
+        <div class="filter-row">
+            <div class="search-group">
+                <input type="text" class="filter-input" placeholder="搜索告警内容" data-lang-placeholder="searchAlert">
+            </div>
+            <div class="date-group">
+                <input type="date" class="date-input" value="2024-12-19">
+                <span class="date-separator">至</span>
+                <input type="date" class="date-input" value="2024-12-19">
+            </div>
+            <button class="filter-btn" data-lang="search">搜索</button>
+        </div>
+    </div>
+    
+    <!-- 主内容区 -->
+    <div class="mobile-content">
+        <div class="alert-list">
+            <!-- 告警项 -->
+            <div class="alert-item">
+                <div class="alert-header">
+                    <div class="alert-title" data-lang="diskSpaceAlert">磁盘空间不足告警</div>
+                </div>
+                <div class="alert-desc" data-lang="diskSpaceDesc">磁盘空间（95%），超过标准值（85%）</div>
+                <div class="alert-time">2024-12-19 14:25:32</div>
+            </div>
+            
+            <div class="alert-item">
+                <div class="alert-header">
+                    <div class="alert-title" data-lang="cpuUsageAlert">CPU使用率过高告警</div>
+                </div>
+                <div class="alert-desc" data-lang="cpuUsageDesc">CPU使用率（92%），超过标准值（85%）</div>
+                <div class="alert-time">2024-12-19 14:20:15</div>
+            </div>
+            
+            <div class="alert-item">
+                <div class="alert-header">
+                    <div class="alert-title" data-lang="memoryUsageAlert">内存占用过高告警</div>
+                </div>
+                <div class="alert-desc" data-lang="memoryUsageDesc">内存使用率（94%），超过标准值（90%）</div>
+                <div class="alert-time">2024-12-19 14:18:45</div>
+            </div>
+            
+            <div class="alert-item">
+                <div class="alert-header">
+                    <div class="alert-title" data-lang="temperatureAlert">开发板温度过高告警</div>
+                </div>
+                <div class="alert-desc" data-lang="temperatureDesc">开发板温度（75°C），超过标准值（70°C）</div>
+                <div class="alert-time">2024-12-19 14:10:08</div>
+            </div>
+            
+            <div class="alert-item">
+                <div class="alert-header">
+                    <div class="alert-title" data-lang="networkLatencyAlert">网络延迟告警</div>
+                </div>
+                <div class="alert-desc" data-lang="networkLatencyDesc">网络延迟（250ms），超过标准值（200ms）</div>
+                <div class="alert-time">2024-12-19 13:45:22</div>
+            </div>
+            
+            <!-- 加载更多 -->
+            <div class="load-more">
+                <button class="load-more-btn" data-lang="loadMore">加载更多</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 底部导航栏 -->
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="navigateTo('mobile-index.html')">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-text" data-lang="home">首页</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('mobile-device.html')">
+            <div class="nav-icon">📱</div>
+            <div class="nav-text" data-lang="device">设备</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('mobile-gateway.html')">
+            <div class="nav-icon">📡</div>
+            <div class="nav-text" data-lang="status">状态</div>
+        </div>
+        <div class="nav-item active" onclick="navigateTo('mobile-alert.html')">
+            <div class="nav-icon">⚠️</div>
+            <div class="nav-text" data-lang="alert">告警</div>
+        </div>
+        <div class="nav-item" onclick="navigateTo('mobile-maintenance.html')">
+            <div class="nav-icon">🔧</div>
+            <div class="nav-text" data-lang="more">更多</div>
+        </div>
+    </div>
+    
+    <script>
+        // 多语言配置
+        const translations = {
+            zh: {
+                alertInfo: '告警信息',
+                langText: '中文',
+                searchAlert: '搜索告警内容',
+                search: '搜索',
+                diskSpaceAlert: '磁盘空间不足告警',
+                diskSpaceDesc: '磁盘空间（95%），超过标准值（85%）',
+                cpuUsageAlert: 'CPU使用率过高告警',
+                cpuUsageDesc: 'CPU使用率（92%），超过标准值（85%）',
+                memoryUsageAlert: '内存占用过高告警',
+                memoryUsageDesc: '内存使用率（94%），超过标准值（90%）',
+                temperatureAlert: '开发板温度过高告警',
+                temperatureDesc: '开发板温度（75°C），超过标准值（70°C）',
+                networkLatencyAlert: '网络延迟告警',
+                networkLatencyDesc: '网络延迟（250ms），超过标准值（200ms）',
+                loadMore: '加载更多',
+                home: '首页',
+                device: '设备',
+                status: '状态',
+                alert: '告警',
+                more: '更多'
+            },
+            en: {
+                alertInfo: 'Alert Info',
+                langText: 'EN',
+                searchAlert: 'Search alert content',
+                search: 'Search',
+                diskSpaceAlert: 'Disk Space Alert',
+                diskSpaceDesc: 'Disk space (95%), exceeds standard (85%)',
+                cpuUsageAlert: 'CPU Usage Alert',
+                cpuUsageDesc: 'CPU usage (92%), exceeds standard (85%)',
+                memoryUsageAlert: 'Memory Usage Alert',
+                memoryUsageDesc: 'Memory usage (94%), exceeds standard (90%)',
+                temperatureAlert: 'Board Temperature Alert',
+                temperatureDesc: 'Board temperature (75°C), exceeds standard (70°C)',
+                networkLatencyAlert: 'Network Latency Alert',
+                networkLatencyDesc: 'Network latency (250ms), exceeds standard (200ms)',
+                loadMore: 'Load More',
+                home: 'Home',
+                device: 'Device',
+                status: 'Status',
+                alert: 'Alert',
+                more: 'More'
+            }
+        };
+        
+        let currentLang = 'zh';
+        
+        // 切换语言
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            updateLanguage();
+        }
+        
+        // 更新页面语言
+        function updateLanguage() {
+            document.querySelectorAll('[data-lang]').forEach(element => {
+                const key = element.getAttribute('data-lang');
+                if (translations[currentLang][key]) {
+                    element.textContent = translations[currentLang][key];
+                }
+            });
+            
+            // 更新placeholder
+            document.querySelectorAll('[data-lang-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-lang-placeholder');
+                if (translations[currentLang][key]) {
+                    element.placeholder = translations[currentLang][key];
+                }
+            });
+        }
+        
+        // 导航函数
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateLanguage();
+        });
+    </script>
+</body>
+</html>

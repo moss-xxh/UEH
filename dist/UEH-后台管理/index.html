@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UEH Energy Management - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        
+        .bg-cover-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 50vw;
+            height: 100vh;
+            opacity: 1;
+            z-index: 5;
+            pointer-events: none;
+            object-fit: cover;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: #f9fafb;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        
+        .input-field:focus {
+            border-color: #000000;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+        
+        .input-field:focus + .input-icon {
+            color: #000000;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: #000000;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .loading {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .lang-selector {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            z-index: 20;
+        }
+        
+        .lang-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            z-index: 10;
+            margin-top: 0.5rem;
+            min-width: 8rem;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .lang-dropdown.show {
+            display: block;
+        }
+        
+        .logo-container {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+        }
+        
+        .custom-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .custom-checkbox.checked {
+            background: #000000;
+            border-color: #000000;
+        }
+        
+        .custom-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 640px) {
+            .login-container {
+                margin: 20px;
+                padding: 32px 24px;
+            }
+            
+            .lang-toggle {
+                top: 16px;
+                right: 16px;
+            }
+            
+            .bg-cover-image {
+                opacity: 0.08;
+            }
+        }
+        
+        @media (max-height: 800px) {
+            .bg-cover-image {
+                opacity: 0.12;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Cover Image Background -->
+    <img src="封面.jpg" alt="Cover" class="bg-cover-image">
+    
+    <!-- Language Toggle -->
+    <div class="lang-selector">
+        <button id="lang-toggle-btn" class="flex items-center px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+            <span id="current-lang" class="mr-1">English</span>
+            <i class="fas fa-chevron-down text-xs"></i>
+        </button>
+        <div id="lang-dropdown" class="lang-dropdown">
+            <button class="lang-option w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors" data-lang="zh">
+                中文
+            </button>
+            <button class="lang-option w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors" data-lang="en">
+                English
+            </button>
+        </div>
+    </div>
+    
+    
+    <!-- Main Content -->
+    <div class="flex min-h-screen">
+        <!-- Left side is for image (already positioned) -->
+        <!-- Right side for login -->
+        <div class="w-1/2 ml-auto flex items-center justify-center p-4">
+            <div class="p-12 w-full max-w-md fade-in">
+            <!-- Branding -->
+            <div class="logo-container">
+                <img src="新logo.png" alt="UEH Logo" class="mx-auto mb-4 max-w-32 max-h-32 object-contain">
+                <h1 class="text-2xl font-bold text-gray-800 mb-2" data-i18n="login_title">UEH Energy Management</h1>
+                <p class="text-gray-600 text-sm" data-i18n="login_subtitle">Welcome back! Please sign in to continue.</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="space-y-6">
+                <div class="input-group">
+                    <input type="text" id="username" class="input-field" placeholder=" " required>
+                    <i class="fas fa-user input-icon"></i>
+                    <label for="username" class="sr-only" data-i18n="username_label">Username</label>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="password" class="input-field" placeholder=" " required>
+                    <i class="fas fa-lock input-icon"></i>
+                    <button type="button" id="togglePassword" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <label for="password" class="sr-only" data-i18n="password_label">Password</label>
+                </div>
+                
+                
+                <button type="submit" class="btn-primary">
+                    <span class="flex items-center justify-center">
+                        <span id="loginText" data-i18n="login_btn">Sign In</span>
+                        <div class="loading ml-2" id="loadingSpinner"></div>
+                    </span>
+                </button>
+                
+            </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script>
+        // Language translations
+        const translations = {
+            en: {
+                login_title: 'UEH Energy Management',
+                login_subtitle: 'Welcome back! Please sign in to continue.',
+                username_label: 'Username',
+                password_label: 'Password',
+                remember_me: 'Remember me',
+                login_btn: 'Sign In',
+                forgot_password: 'Forgot your password?',
+                login_success: 'Login successful! Redirecting...',
+                login_error: 'Invalid username or password',
+                forgot_password_msg: 'Please contact administrator to reset password',
+                footer_text: '© 2024 UEH Energy Management System. All rights reserved.',
+                username_required: 'Username is required',
+                password_required: 'Password is required'
+            },
+            zh: {
+                login_title: 'UEH 能源管理系统',
+                login_subtitle: '欢迎回来！请登录以继续。',
+                username_label: '用户名',
+                password_label: '密码',
+                remember_me: '记住我',
+                login_btn: '登录',
+                forgot_password: '忘记密码？',
+                login_success: '登录成功！正在跳转...',
+                login_error: '用户名或密码错误',
+                forgot_password_msg: '请联系管理员重置密码',
+                footer_text: '© 2024 UEH 能源管理系统。保留所有权利。',
+                username_required: '请输入用户名',
+                password_required: '请输入密码'
+            }
+        };
+        
+        let currentLang = 'en';
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up placeholders
+            updatePlaceholders();
+            
+            // Language toggle
+            document.getElementById('lang-toggle-btn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                const dropdown = document.getElementById('lang-dropdown');
+                dropdown.classList.toggle('show');
+            });
+            
+            // Language options
+            document.querySelectorAll('.lang-option').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const selectedLang = this.getAttribute('data-lang');
+                    currentLang = selectedLang;
+                    changeLanguage(currentLang);
+                    updatePlaceholders();
+                    document.getElementById('lang-dropdown').classList.remove('show');
+                });
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+                document.getElementById('lang-dropdown').classList.remove('show');
+            });
+            
+            
+            // Password toggle
+            document.getElementById('togglePassword').addEventListener('click', function() {
+                const passwordField = document.getElementById('password');
+                const icon = this.querySelector('i');
+                
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    icon.className = 'fas fa-eye-slash';
+                } else {
+                    passwordField.type = 'password';
+                    icon.className = 'fas fa-eye';
+                }
+            });
+            
+            // Form submission
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleLogin();
+            });
+            
+            // Forgot password
+            document.getElementById('forgotPassword').addEventListener('click', function(e) {
+                e.preventDefault();
+                showToast(translations[currentLang].forgot_password_msg, 'error');
+            });
+            
+            changeLanguage(currentLang);
+        });
+        
+        function updatePlaceholders() {
+            document.getElementById('username').placeholder = translations[currentLang].username_label;
+            document.getElementById('password').placeholder = translations[currentLang].password_label;
+        }
+        
+        function changeLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('current-lang').textContent = lang === 'en' ? 'English' : '中文';
+            document.title = translations[lang].login_title;
+            
+            // Update all translatable elements
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+            
+            updatePlaceholders();
+        }
+        
+        function handleLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const loginBtn = document.querySelector('.btn-primary');
+            const loginText = document.getElementById('loginText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            // Show loading state
+            loginBtn.disabled = true;
+            loginText.style.opacity = '0.7';
+            loadingSpinner.style.display = 'block';
+            
+            // Direct login without validation
+            setTimeout(() => {
+                showToast(translations[currentLang].login_success, 'success');
+                
+                // Save login data
+                const loginData = {
+                    username: username || 'admin',
+                    loginTime: new Date().toISOString()
+                };
+                
+                sessionStorage.setItem('loginData', JSON.stringify(loginData));
+                
+                // Redirect to admin page
+                setTimeout(() => {
+                    window.location.href = 'admin.html';
+                }, 1500);
+                
+            }, 1000);
+        }
+        
+        function showToast(message, type = 'success') {
+            // Remove existing toast
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            // Create new toast
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Show toast
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            // Hide toast
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // Check if already logged in
+        function checkLoginStatus() {
+            const storedLogin = localStorage.getItem('loginData') || sessionStorage.getItem('loginData');
+            if (storedLogin) {
+                const loginData = JSON.parse(storedLogin);
+                console.log('Already logged in:', loginData.username);
+            }
+        }
+        
+        checkLoginStatus();
+    </script>
+</body>
+</html>

@@ -1,0 +1,3302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设备详情 - 北能智能光伏管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #1d1d1f;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        
+        /* iPhone 13 手机外壳 */
+        .phone-container {
+            width: 390px;
+            height: 844px;
+            background: #ffffff;
+            border-radius: 47px;
+            position: relative;
+            overflow: hidden;
+            /* 手机外壳边框 */
+            border: 4px solid #1d1d1f;
+            /* 3D立体效果阴影 */
+            box-shadow: 
+                /* 主要阴影 */
+                0 30px 80px rgba(0, 0, 0, 0.25),
+                0 15px 40px rgba(0, 0, 0, 0.15),
+                /* 边框内阴影 */
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+                /* 侧边高光 */
+                -2px 0 0 rgba(255, 255, 255, 0.05),
+                2px 0 0 rgba(0, 0, 0, 0.1);
+            /* 3D变换 */
+            transform: perspective(1000px) rotateX(-5deg) rotateY(2deg);
+            transition: all 0.3s ease;
+        }
+        
+        .phone-container:hover {
+            transform: perspective(1000px) rotateX(-2deg) rotateY(1deg) scale(1.02);
+            box-shadow: 
+                0 40px 100px rgba(0, 0, 0, 0.3),
+                0 20px 50px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+                -3px 0 0 rgba(255, 255, 255, 0.08),
+                3px 0 0 rgba(0, 0, 0, 0.15);
+        }
+        
+        /* 手机外壳材质纹理 */
+        .phone-container::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            background: linear-gradient(135deg, 
+                #2c3e50 0%,
+                #34495e 25%,
+                #2c3e50 50%,
+                #1a252f 75%,
+                #0f1419 100%);
+            border-radius: 51px;
+            z-index: -1;
+            /* 金属质感 */
+            background-image: 
+                linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%),
+                radial-gradient(circle at 30% 30%, rgba(255,255,255,0.05) 0%, transparent 50%);
+        }
+        
+        /* 侧边按钮 */
+        .phone-container::after {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 180px;
+            width: 6px;
+            height: 60px;
+            background: linear-gradient(180deg, #34495e, #2c3e50, #1a252f);
+            border-radius: 3px 0 0 3px;
+            box-shadow: inset 1px 0 0 rgba(255,255,255,0.1);
+        }
+        
+        .container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 刘海设计 */
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 210px;
+            height: 30px;
+            background: #000000;
+            border-radius: 0 0 20px 20px;
+            z-index: 100;
+        }
+        
+        /* 状态栏 */
+        .status-bar {
+            height: 47px;
+            padding: 0 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 17px;
+            font-weight: 600;
+            color: #1d1d1f;
+            background: transparent;
+            padding-bottom: 6px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .status-time {
+            font-weight: 700;
+        }
+        
+        .status-icons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .battery {
+            width: 24px;
+            height: 12px;
+            border: 1px solid #1f2937;
+            border-radius: 2px;
+            position: relative;
+        }
+        
+        .battery::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            top: 3px;
+            width: 2px;
+            height: 6px;
+            background: #1f2937;
+            border-radius: 0 1px 1px 0;
+        }
+        
+        .battery-level {
+            width: 70%;
+            height: 8px;
+            background: #1f2937;
+            border-radius: 1px;
+            margin: 1px;
+        }
+        
+        /* 导航栏 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px 12px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 47px;
+            z-index: 10;
+        }
+
+        .back-btn {
+            background: rgba(116, 116, 128, 0.08);
+            border: none;
+            padding: 9px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            width: 38px;
+            height: 38px;
+        }
+        
+        .back-btn:hover {
+            background: rgba(116, 116, 128, 0.12);
+            transform: scale(1.02);
+        }
+        
+        .back-btn:active {
+            transform: scale(0.96);
+            background: rgba(116, 116, 128, 0.16);
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 600;
+            color: #1d1d1f;
+            letter-spacing: -0.41px;
+        }
+
+        .menu-btn {
+            background: rgba(116, 116, 128, 0.08);
+            border: none;
+            padding: 9px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            width: 38px;
+            height: 38px;
+        }
+        
+        .menu-btn:hover {
+            background: rgba(116, 116, 128, 0.12);
+            transform: scale(1.02);
+        }
+        
+        .menu-btn:active {
+            transform: scale(0.96);
+            background: rgba(116, 116, 128, 0.16);
+        }
+
+        /* 主要内容 */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 20px 100px 20px;
+            background: #f2f2f7;
+        }
+        
+        
+        /* 电池信息行 */
+        .battery-info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0 0 0;
+            padding: 20px 24px;
+            background: #f8f9fa;
+            border-radius: 16px;
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .battery-info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex: 1;
+        }
+
+        .battery-info-item:last-child {
+            align-items: flex-end;
+        }
+
+        .info-label {
+            color: #8e8e93;
+            font-size: 13px;
+            margin-bottom: 4px;
+            font-weight: 400;
+        }
+
+        .info-value {
+            color: #1d1d1f;
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: -0.41px;
+        }
+
+        /* 电池状态卡片 */
+        .battery-section {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 32px 24px;
+            margin: 16px 0 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+        }
+        
+        .battery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .battery-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d1d1f;
+            letter-spacing: -0.45px;
+        }
+        
+        .battery-mode {
+            font-size: 15px;
+            color: #30d158;
+            font-weight: 500;
+            background: rgba(48, 209, 88, 0.1);
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        .battery-circle {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 24px;
+        }
+
+        .circle-bg {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                #30d158 0deg,
+                #30d158 176.4deg,
+                #e5e5ea 176.4deg,
+                #e5e5ea 360deg
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 6px;
+        }
+        
+        .circle-bg::before {
+            content: '';
+            position: absolute;
+            width: calc(100% - 12px);
+            height: calc(100% - 12px);
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .circle-inner {
+            width: calc(100% - 12px);
+            height: calc(100% - 12px);
+            border-radius: 50%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .battery-icon {
+            font-size: 28px;
+            margin-bottom: 4px;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+        }
+
+        .battery-percentage {
+            font-size: 36px;
+            font-weight: 600;
+            color: #1d1d1f;
+            line-height: 1;
+            letter-spacing: -0.5px;
+        }
+
+        .battery-status {
+            font-size: 15px;
+            color: #8e8e93;
+            margin-top: 20px;
+            font-weight: 400;
+        }
+
+
+        /* MOS开关区域 */
+        .mos-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .mos-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 24px 16px;
+            text-align: center;
+            transition: all 0.15s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+        }
+        
+        .mos-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mos-card:active {
+            transform: scale(0.98);
+        }
+
+        .mos-label {
+            font-size: 15px;
+            font-weight: 500;
+            color: #1d1d1f;
+            margin-bottom: 16px;
+            letter-spacing: -0.24px;
+        }
+
+        .switch {
+            width: 56px;
+            height: 32px;
+            border-radius: 16px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin: 0 auto;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .switch.on {
+            background: #34c759;
+            box-shadow: 
+                inset 0 1px 2px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(52, 199, 89, 0.2);
+        }
+
+        .switch.off {
+            background: #e9e9eb;
+        }
+
+        .switch-thumb {
+            width: 28px;
+            height: 28px;
+            border-radius: 14px;
+            background: #ffffff;
+            position: absolute;
+            top: 2px;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.2),
+                0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .switch.on .switch-thumb {
+            right: 2px;
+        }
+
+        .switch.off .switch-thumb {
+            left: 2px;
+        }
+
+        /* 数据卡片网格 */
+        .data-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .data-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 24px 16px;
+            text-align: center;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .data-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .data-card:active {
+            transform: scale(0.98);
+        }
+
+        .data-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(0, 122, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #007aff;
+            font-size: 16px;
+            margin: 0 auto 16px;
+        }
+
+        .data-label {
+            font-size: 13px;
+            color: #8e8e93;
+            margin-bottom: 12px;
+            font-weight: 400;
+        }
+
+        .data-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1d1d1f;
+            letter-spacing: -0.5px;
+        }
+        
+        .data-unit {
+            font-size: 14px;
+            color: #8e8e93;
+            font-weight: 400;
+        }
+
+        /* 图标 */
+        .icon {
+            display: inline-block;
+            font-style: normal;
+        }
+        
+        /* 页面切换 */
+        .content-page {
+            display: none;
+        }
+        
+        .content-page.active {
+            display: block;
+        }
+        
+        /* 基础信息页面样式 */
+        .info-status-section {
+            margin-bottom: 24px;
+        }
+        
+        .info-status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+            transition: all 0.15s ease;
+        }
+        
+        .status-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(0, 122, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #007aff;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        
+        .status-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .status-value {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 2px;
+            letter-spacing: -0.41px;
+        }
+        
+        .status-label {
+            font-size: 13px;
+            color: #8e8e93;
+            font-weight: 400;
+        }
+        
+        /* 详细信息区域 */
+        .detail-section {
+            background: #ffffff;
+            border-radius: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transition: all 0.15s ease;
+        }
+        
+        /* 电芯电压区域悬停效果 */
+        a[href="voltage-detail.html"]:hover {
+            background-color: rgba(0, 0, 0, 0.02) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        a[href="voltage-detail.html"]:active {
+            background-color: rgba(0, 0, 0, 0.05) !important;
+            transform: scale(0.99);
+        }
+        
+        a[href="voltage-detail.html"]:hover .section-action {
+            background-color: rgba(0, 122, 255, 0.1);
+            color: #007aff !important;
+        }
+        
+        a[href="voltage-detail.html"]:hover .section-action svg {
+            fill: #007aff;
+        }
+        
+        a[href="voltage-detail.html"]:hover .section-action svg path {
+            stroke: #007aff;
+        }
+        
+        a[href="voltage-detail.html"]:hover .detail-section {
+            border-color: rgba(0, 122, 255, 0.1);
+        }
+        
+        /* 温度区域悬停效果 */
+        a[href="temperature-detail.html"]:hover {
+            background-color: rgba(0, 0, 0, 0.02) !important;
+        }
+        
+        a[href="temperature-detail.html"]:active {
+            background-color: rgba(0, 0, 0, 0.05) !important;
+            transform: scale(0.99);
+        }
+        
+        a[href="temperature-detail.html"]:hover .section-action {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: #007aff !important;
+        }
+        
+        a[href="temperature-detail.html"]:hover .section-action svg {
+            fill: #007aff;
+        }
+        
+        a[href="temperature-detail.html"]:hover .section-action svg path {
+            stroke: #007aff;
+        }
+        
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+            background: rgba(0, 0, 0, 0.02);
+        }
+        
+        .section-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 122, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #007aff;
+            margin-right: 16px;
+        }
+        
+        .section-title {
+            font-size: 17px;
+            font-weight: 500;
+            color: #1d1d1f;
+            letter-spacing: -0.41px;
+        }
+        
+        .section-action {
+            font-size: 15px;
+            color: #8e8e93;
+            cursor: pointer;
+            transition: color 0.15s ease;
+        }
+        
+        .section-action:hover {
+            color: #007aff;
+        }
+        
+        .detail-list {
+            padding: 0;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+            transition: background-color 0.15s ease;
+        }
+        
+        .detail-row:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        /* 网格布局的行 */
+        .detail-row-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            padding: 16px 24px;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .detail-row-grid:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .detail-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .detail-icon {
+            width: 28px;
+            height: 28px;
+            background: rgba(0, 122, 255, 0.1);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #007aff;
+            margin-right: 12px;
+        }
+        
+        .detail-label {
+            font-size: 17px;
+            color: #1d1d1f;
+            font-weight: 400;
+        }
+        
+        /* 在网格布局中的标签样式 */
+        .detail-item .detail-label {
+            font-size: 13px;
+            color: #8e8e93;
+            font-weight: 400;
+        }
+        
+        .detail-value {
+            font-size: 17px;
+            font-weight: 500;
+            color: #1d1d1f;
+            letter-spacing: -0.41px;
+        }
+        
+        /* 在网格布局中的值样式 */
+        .detail-item .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        
+        .detail-arrow {
+            font-size: 17px;
+            color: #c7c7cc;
+            font-weight: 400;
+        }
+        
+        
+        /* 底部菜单栏 */
+        .bottom-menu {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 84px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0 24px;
+        }
+        
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            color: #8e8e93;
+            padding: 8px 12px;
+            border-radius: 12px;
+            position: relative;
+        }
+        
+        .menu-item:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+        
+        .menu-item:active {
+            transform: scale(0.95);
+            background: rgba(0, 0, 0, 0.08);
+        }
+        
+        .menu-item.active {
+            color: #007aff;
+        }
+        
+        .menu-item.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32px;
+            height: 2px;
+            background: #007aff;
+            border-radius: 1px;
+        }
+        
+        .menu-item svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+        }
+        
+        .menu-label {
+            font-size: 10px;
+            font-weight: 500;
+            text-align: center;
+            letter-spacing: -0.1px;
+        }
+        
+
+        
+        /* 并机汇总头部卡片 */
+        .summary-header-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .summary-header-content {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+        
+        .summary-header-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .summary-header-label {
+            font-size: 15px;
+            color: #8e8e93;
+            font-weight: 400;
+        }
+        
+        .summary-header-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1d1d1f;
+            letter-spacing: -0.5px;
+        }
+        
+        .summary-header-divider {
+            width: 1px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 平均值统计小卡片 */
+        .avg-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .avg-stat-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+            transition: all 0.15s ease;
+        }
+        
+        .avg-stat-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .avg-stat-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 122, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .avg-stat-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+        }
+        
+        .avg-stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d1d1f;
+            letter-spacing: -0.41px;
+        }
+        
+        .avg-stat-label {
+            font-size: 13px;
+            color: #8e8e93;
+            font-weight: 400;
+        }
+        
+        /* 告警空状态 */
+        .alert-empty-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 24px;
+            text-align: center;
+        }
+        
+        .alert-empty-text {
+            margin-top: 16px;
+            color: #8e8e93;
+            font-size: 15px;
+            font-weight: 400;
+        }
+        
+        /* 设置页面样式 */
+        .settings-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin: 16px 0 24px 0;
+            letter-spacing: -0.5px;
+        }
+        
+        .settings-list {
+            background: #ffffff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            border: 0.5px solid rgba(0, 0, 0, 0.04);
+        }
+        
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            min-height: 60px;
+        }
+        
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        
+        .settings-item:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        
+        .settings-item:active {
+            background: rgba(0, 0, 0, 0.08);
+            transform: scale(0.98);
+        }
+        
+        .settings-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+            pointer-events: none;  /* 让点击事件穿透到父元素 */
+        }
+        
+        .settings-item > * {
+            pointer-events: none;  /* 确保所有子元素不拦截点击事件 */
+        }
+        
+        .settings-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(0, 199, 190, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .settings-label {
+            font-size: 17px;
+            font-weight: 400;
+            color: #1d1d1f;
+            letter-spacing: -0.41px;
+        }
+        
+        .settings-text {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .settings-arrow {
+            flex-shrink: 0;
+            opacity: 0.4;
+            transition: all 0.15s ease;
+        }
+        
+        .settings-item:hover .settings-arrow {
+            opacity: 0.6;
+            transform: translateX(2px);
+        }
+        
+        /* iOS风格弹窗 */
+        .dialog-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .dialog-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .dialog {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 300px;
+            background: rgba(246, 246, 248, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 14px;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+        }
+        
+        .dialog.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        
+        .dialog-header {
+            padding: 20px 20px 12px;
+            text-align: center;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.04);
+        }
+        
+        .dialog-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000000;
+            letter-spacing: -0.41px;
+            margin-bottom: 4px;
+        }
+        
+        .dialog-subtitle {
+            font-size: 13px;
+            color: #8e8e93;
+            font-weight: 400;
+            margin-top: 4px;
+        }
+        
+        .dialog-content {
+            padding: 16px 20px;
+        }
+        
+        .dialog-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 17px;
+            font-weight: 400;
+            color: #000000;
+            background: rgba(142, 142, 147, 0.12);
+            border: none;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        
+        .dialog-input:focus {
+            background: rgba(142, 142, 147, 0.16);
+        }
+        
+        .dialog-input::placeholder {
+            color: #8e8e93;
+        }
+        
+        .dialog-char-count {
+            text-align: center;
+            font-size: 12px;
+            color: #8e8e93;
+            margin-top: 8px;
+        }
+        
+        .dialog-buttons {
+            display: flex;
+            border-top: 0.5px solid rgba(0, 0, 0, 0.2);
+        }
+        
+        .dialog-button {
+            flex: 1;
+            padding: 16px;
+            background: transparent;
+            border: none;
+            font-size: 17px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            position: relative;
+        }
+        
+        .dialog-button:first-child::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 0.5px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .dialog-button:active {
+            background: rgba(0, 0, 0, 0.06);
+        }
+        
+        .dialog-button.cancel {
+            color: #007aff;
+        }
+        
+        .dialog-button.confirm {
+            color: #007aff;
+            font-weight: 600;
+        }
+        
+        .dialog-button.confirm:disabled {
+            color: #8e8e93;
+            cursor: not-allowed;
+        }
+        
+        /* 底部滑出菜单样式 */
+        .bottom-sheet-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1400;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .bottom-sheet-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .bottom-sheet {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-radius: 24px 24px 47px 47px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            z-index: 1500;
+            max-height: 380px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .bottom-sheet.active {
+            transform: translateY(0);
+        }
+        
+        .bottom-sheet-header {
+            padding: 20px 20px 16px;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .bottom-sheet-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d1d1f;
+            letter-spacing: -0.41px;
+        }
+        
+        .bottom-sheet-close {
+            width: 30px;
+            height: 30px;
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.06);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .bottom-sheet-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .bottom-sheet-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        
+        .sheet-item {
+            padding: 16px 24px;
+            font-size: 17px;
+            color: #1d1d1f;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .sheet-item:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        
+        .sheet-item:active {
+            background: rgba(0, 0, 0, 0.04);
+        }
+        
+        .sheet-item.selected {
+            color: #007aff;
+            font-weight: 500;
+        }
+        
+        .sheet-item.selected::after {
+            content: '✓';
+            color: #007aff;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 10px;
+            }
+            
+            .phone-container {
+                width: 350px;
+                height: 760px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="container">
+            <!-- iPhone 13 刘海 -->
+            <div class="notch"></div>
+            
+            <!-- 状态栏 -->
+            <div class="status-bar">
+                <div class="status-time">1:36</div>
+                <div class="status-icons">
+                    <svg width="18" height="18" fill="#1f2937" viewBox="0 0 20 20">
+                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
+                    </svg>
+                    <svg width="18" height="18" fill="#1f2937" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.415 1.415zM9 16a1 1 0 011-1v0a1 1 0 110 2v0a1 1 0 01-1-1z"></path>
+                    </svg>
+                    <div class="battery">
+                        <div class="battery-level"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 导航栏 -->
+            <div class="header">
+                <button class="back-btn" onclick="goBack()">
+                    <svg width="24" height="24" fill="#007aff" viewBox="0 0 24 24">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                    </svg>
+                </button>
+                <div class="header-title">设备详情</div>
+                <button class="menu-btn">
+                    <svg width="24" height="24" fill="#86868b" viewBox="0 0 24 24">
+                        <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 主要内容 -->
+            <div class="main-content">
+                <!-- 首页内容 -->
+                <div id="homeContent" class="content-page active">
+                    <!-- 电池状态 -->
+                    <div class="battery-section">
+                        <div class="battery-header">
+                            <div class="battery-title">电池状态</div>
+                            <div class="battery-mode">静置</div>
+                        </div>
+                        
+                        <div class="battery-circle">
+                            <div class="circle-bg">
+                                <div class="circle-inner">
+                                    <div class="battery-icon">🔋</div>
+                                    <div class="battery-percentage">49%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="battery-status">当前电量状态</div>
+                        
+                        <!-- 地址和循环次数信息 -->
+                        <div class="battery-info-row">
+                            <div class="battery-info-item">
+                                <div class="info-label">地址</div>
+                                <div class="info-value">0</div>
+                            </div>
+                            <div class="battery-info-item">
+                                <div class="info-label">循环次数</div>
+                                <div class="info-value">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MOS开关 -->
+                    <div class="mos-section">
+                        <div class="mos-card">
+                            <div class="mos-label">充电MOS</div>
+                            <div class="switch on" onclick="toggleSwitch(this)">
+                                <div class="switch-thumb"></div>
+                            </div>
+                        </div>
+                        <div class="mos-card">
+                            <div class="mos-label">放电MOS</div>
+                            <div class="switch on" onclick="toggleSwitch(this)">
+                                <div class="switch-thumb"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据信息 -->
+                    <div class="data-section">
+                        <div class="data-card">
+                            <div class="data-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24">
+                                    <defs>
+                                        <linearGradient id="voltageGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path fill="url(#voltageGradient)" d="M13 14H11V9H13M13 18H11V16H13M1 21H23L12 2L1 21Z"/>
+                                    <path fill="#FF6B35" d="M12 2L22 20H2L12 2Z" opacity="0.3"/>
+                                </svg>
+                            </div>
+                            <div class="data-label">总电压</div>
+                            <div class="data-value">52.69<span class="data-unit"> V</span></div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24">
+                                    <defs>
+                                        <linearGradient id="currentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#4FC3F7;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#29B6F6;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="12" cy="12" r="10" fill="url(#currentGradient)"/>
+                                    <path fill="#FFFFFF" d="M8 12L10 10V11H14V10L16 12L14 14V13H10V14L8 12Z"/>
+                                    <circle cx="12" cy="12" r="6" fill="none" stroke="#1976D2" stroke-width="1" opacity="0.5"/>
+                                </svg>
+                            </div>
+                            <div class="data-label">总电流</div>
+                            <div class="data-value">0<span class="data-unit"> A</span></div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24">
+                                    <defs>
+                                        <linearGradient id="powerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#AB47BC;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#8E24AA;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="12" cy="12" r="10" fill="url(#powerGradient)"/>
+                                    <path fill="#FFFFFF" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7.5,14L10,11.5L11.5,13L16.5,8L18,9.5L11.5,16L7.5,12V14Z"/>
+                                    <circle cx="12" cy="12" r="8" fill="none" stroke="#FFFFFF" stroke-width="0.5" opacity="0.3"/>
+                                </svg>
+                            </div>
+                            <div class="data-label">功率</div>
+                            <div class="data-value">0<span class="data-unit"> kW</span></div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M14 14.76V5.5A2.5 2.5 0 0 0 9 5.5V14.76A4.5 4.5 0 1 0 14 14.76Z" stroke="#FF3B30" stroke-width="2" fill="none"/>
+                                    <circle cx="11.5" cy="18" r="2.5" fill="#FF3B30"/>
+                                    <path d="M11.5 6V15" stroke="#FF3B30" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="data-label">温度</div>
+                            <div class="data-value">26.9<span class="data-unit"> °C</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 基础信息内容 -->
+                <div id="infoContent" class="content-page">
+                    <!-- 上部状态卡片 -->
+                    <div class="info-status-section">
+                        <div class="info-status-grid">
+                            <div class="status-item">
+                                <div class="status-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <rect x="3" y="6" width="18" height="12" rx="2" stroke="#30D158" stroke-width="2" fill="none"/>
+                                        <rect x="5" y="8" width="10" height="8" fill="#30D158" opacity="0.9"/>
+                                        <path d="M21 10V14" stroke="#30D158" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="status-content">
+                                    <div class="status-value">49%</div>
+                                    <div class="status-label">电量</div>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="12" r="9" stroke="#5AC8FA" stroke-width="2" fill="none"/>
+                                        <circle cx="12" cy="12" r="6" stroke="#5AC8FA" stroke-width="1.5" fill="none" opacity="0.6"/>
+                                        <circle cx="12" cy="12" r="3" fill="#5AC8FA"/>
+                                    </svg>
+                                </div>
+                                <div class="status-content">
+                                    <div class="status-value">100%</div>
+                                    <div class="status-label">SOH</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-status-grid">
+                            <div class="status-item">
+                                <div class="status-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="#FF9500" stroke="#FF9500" stroke-width="0.5" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="status-content">
+                                    <div class="status-value">52.69V</div>
+                                    <div class="status-label">电压</div>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="12" r="9" stroke="#007AFF" stroke-width="2" fill="none"/>
+                                        <path d="M8 12H16M12 8L16 12L12 16" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <circle cx="6" cy="12" r="1" fill="#007AFF"/>
+                                        <circle cx="18" cy="12" r="1" fill="#007AFF"/>
+                                    </svg>
+                                </div>
+                                <div class="status-content">
+                                    <div class="status-value">0A</div>
+                                    <div class="status-label">当前设备</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 电芯电压区域 - 整个卡片可点击热区 -->
+                    <a href="voltage-detail.html" style="text-decoration: none; color: inherit; display: block; transition: all 0.2s ease; border-radius: 24px;">
+                        <div class="detail-section" style="cursor: pointer; transition: all 0.2s ease;">
+                            <div class="section-header" style="padding: 20px;">
+                                <div class="section-left">
+                                    <div class="section-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="#FF9500" stroke="#FF9500" stroke-width="0.5" stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div class="section-title">电芯电压</div>
+                                </div>
+                                <div class="section-action" style="color: #8e8e93; padding: 12px; margin: -12px; border-radius: 8px; transition: all 0.15s ease;">
+                                    <span>详情</span>
+                                    <svg width="8" height="14" fill="#8e8e93" viewBox="0 0 8 14" style="margin-left: 4px; transition: all 0.15s ease;">
+                                        <path d="M1 1L7 7L1 13" stroke="#8e8e93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="detail-list">
+                                <div class="detail-row-grid">
+                                    <div class="detail-item">
+                                        <div class="detail-label">最高电压编号</div>
+                                        <div class="detail-value">5</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="detail-label">最高电压</div>
+                                        <div class="detail-value">3295mV</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row-grid">
+                                    <div class="detail-item">
+                                        <div class="detail-label">最低电压编号</div>
+                                        <div class="detail-value">3</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="detail-label">最低电压</div>
+                                        <div class="detail-value">3291mV</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 温度区域 - 整体可点击 -->
+                    <a href="temperature-detail.html" style="text-decoration: none; color: inherit; display: block; padding: 8px; margin: -8px; border-radius: 16px; transition: background-color 0.15s ease;">
+                    <div class="detail-section" style="cursor: pointer;">
+                        <div class="section-header" style="padding: 20px;">
+                            <div class="section-left">
+                                <div class="section-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M14 14.76V5.5A2.5 2.5 0 0 0 9 5.5V14.76A4.5 4.5 0 1 0 14 14.76Z" stroke="#FF3B30" stroke-width="2" fill="none"/>
+                                        <circle cx="11.5" cy="18" r="2.5" fill="#FF3B30"/>
+                                        <path d="M11.5 6V15" stroke="#FF3B30" stroke-width="1.5" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="section-title">温度</div>
+                            </div>
+                            <div class="section-action" style="color: #8e8e93; padding: 12px; margin: -12px; border-radius: 8px;">
+                                <span style="pointer-events: auto;">详情</span>
+                                <svg width="8" height="14" fill="#8e8e93" viewBox="0 0 8 14" style="margin-left: 4px; pointer-events: auto;">
+                                    <path d="M1 1L7 7L1 13" stroke="#8e8e93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                </svg>
+                            </div>
+                        </div>
+                            <div class="detail-list">
+                                <div class="detail-row-grid">
+                                    <div class="detail-item">
+                                        <div class="detail-label">最高温度编号</div>
+                                        <div class="detail-value">2</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="detail-label">最高温度</div>
+                                        <div class="detail-value">24.9°C</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row-grid">
+                                    <div class="detail-item">
+                                        <div class="detail-label">最低温度编号</div>
+                                        <div class="detail-value">4</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="detail-label">最低温度</div>
+                                        <div class="detail-value">24.9°C</div>
+                                    </div>
+                                </div>
+                                <div class="detail-row-grid">
+                                    <div class="detail-item">
+                                        <div class="detail-label">MOS温度</div>
+                                        <div class="detail-value">26.7°C</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="detail-label">环境温度</div>
+                                        <div class="detail-value">26.9°C</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </a>
+
+                </div>
+
+                <!-- 并机汇总内容 -->
+                <div id="alertsContent" class="content-page">
+                    <!-- 顶部统计卡片 -->
+                    <div class="summary-header-card">
+                        <div class="summary-header-content">
+                            <div class="summary-header-row">
+                                <span class="summary-header-label">并机数量</span>
+                                <span class="summary-header-value">1</span>
+                            </div>
+                            <div class="summary-header-divider"></div>
+                            <div class="summary-header-row">
+                                <span class="summary-header-label">在线数量</span>
+                                <span class="summary-header-value">1</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 平均值统计卡片 - 使用与基础信息页面相同的样式 -->
+                    <div class="info-status-section">
+                        <div class="info-status-grid">
+                            <div class="status-item">
+                                <div class="status-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <rect x="3" y="6" width="18" height="12" rx="2" stroke="#30D158" stroke-width="2" fill="none"/>
+                                        <rect x="5" y="8" width="10" height="8" fill="#30D158" opacity="0.9"/>
+                                        <path d="M21 10V14" stroke="#30D158" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="status-content">
+                                    <div class="status-value">49%</div>
+                                    <div class="status-label">平均电量</div>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="12" r="9" stroke="#5AC8FA" stroke-width="2" fill="none"/>
+                                        <circle cx="12" cy="12" r="6" stroke="#5AC8FA" stroke-width="1.5" fill="none" opacity="0.6"/>
+                                        <circle cx="12" cy="12" r="3" fill="#5AC8FA"/>
+                                    </svg>
+                                </div>
+                                <div class="status-content">
+                                    <div class="status-value">100%</div>
+                                    <div class="status-label">平均SOH</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-status-grid">
+                            <div class="status-item">
+                                <div class="status-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="#FF9500" stroke="#FF9500" stroke-width="0.5" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="status-content">
+                                    <div class="status-value">52.69V</div>
+                                    <div class="status-label">平均电压</div>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="12" r="9" stroke="#007AFF" stroke-width="2" fill="none"/>
+                                        <path d="M8 12H16M12 8L16 12L12 16" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <circle cx="6" cy="12" r="1" fill="#007AFF"/>
+                                        <circle cx="18" cy="12" r="1" fill="#007AFF"/>
+                                    </svg>
+                                </div>
+                                <div class="status-content">
+                                    <div class="status-value">0A</div>
+                                    <div class="status-label">汇总电流</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 汇总电芯电压 -->
+                    <div class="detail-section">
+                        <div class="section-header">
+                            <div class="section-left">
+                                <div class="section-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="#FF9500" stroke="#FF9500" stroke-width="0.5" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="section-title">汇总电芯电压</div>
+                            </div>
+                        </div>
+                        <div class="detail-list">
+                            <div class="detail-row-grid">
+                                <div class="detail-item">
+                                    <div class="detail-label">最高电压编号</div>
+                                    <div class="detail-value">0</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">最高电压</div>
+                                    <div class="detail-value">3295mV</div>
+                                </div>
+                            </div>
+                            <div class="detail-row-grid">
+                                <div class="detail-item">
+                                    <div class="detail-label">最低电压编号</div>
+                                    <div class="detail-value">0</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">最低电压</div>
+                                    <div class="detail-value">3291mV</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 汇总温度 -->
+                    <div class="detail-section">
+                        <div class="section-header">
+                            <div class="section-left">
+                                <div class="section-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M14 14.76V5.5A2.5 2.5 0 0 0 9 5.5V14.76A4.5 4.5 0 1 0 14 14.76Z" stroke="#FF3B30" stroke-width="2" fill="none"/>
+                                        <circle cx="11.5" cy="18" r="2.5" fill="#FF3B30"/>
+                                        <path d="M11.5 6V15" stroke="#FF3B30" stroke-width="1.5" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="section-title">汇总温度</div>
+                            </div>
+                        </div>
+                        <div class="detail-list">
+                            <div class="detail-row-grid">
+                                <div class="detail-item">
+                                    <div class="detail-label">最高温度编号</div>
+                                    <div class="detail-value">0</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">最高温度</div>
+                                    <div class="detail-value">24.9°C</div>
+                                </div>
+                            </div>
+                            <div class="detail-row-grid">
+                                <div class="detail-item">
+                                    <div class="detail-label">最低温度编号</div>
+                                    <div class="detail-value">0</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">最低温度</div>
+                                    <div class="detail-value">24.9°C</div>
+                                </div>
+                            </div>
+                            <div class="detail-row-grid">
+                                <div class="detail-item">
+                                    <div class="detail-label">MOS温度</div>
+                                    <div class="detail-value">26.8°C</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">环境温度</div>
+                                    <div class="detail-value">26.9°C</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 并机设备列表 -->
+                    <div class="detail-section">
+                        <div class="section-header">
+                            <div class="section-left">
+                                <div class="section-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <rect x="3" y="3" width="7" height="7" stroke="#007AFF" stroke-width="2" fill="none"/>
+                                        <rect x="14" y="3" width="7" height="7" stroke="#007AFF" stroke-width="2" fill="none"/>
+                                        <rect x="3" y="14" width="7" height="7" stroke="#007AFF" stroke-width="2" fill="none"/>
+                                        <rect x="14" y="14" width="7" height="7" stroke="#007AFF" stroke-width="2" fill="none"/>
+                                    </svg>
+                                </div>
+                                <div class="section-title">并机设备列表</div>
+                            </div>
+                            <div class="section-action">管理 ></div>
+                        </div>
+                        <div class="detail-list">
+                            <div class="alert-empty-box">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                    <rect x="4" y="4" width="16" height="16" stroke="#C7C7CC" stroke-width="1.5" fill="none"/>
+                                    <path d="M12 8V16M8 12H16" stroke="#C7C7CC" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <div class="alert-empty-text">暂无并机设备</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 设置内容 -->
+                <div id="settingsContent" class="content-page">
+                    <div class="settings-title">设置</div>
+                    
+                    <!-- 设置列表 -->
+                    <div class="settings-list">
+                        <!-- 逆变器参数设置 -->
+                        <div class="settings-item" onclick="handleSettingsClick('inverter')">
+                            <div class="settings-left">
+                                <div class="settings-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <rect x="4" y="4" width="16" height="16" rx="2" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+                                        <path d="M8 10H16M8 14H16" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+                                        <circle cx="6" cy="10" r="1" fill="#FFFFFF"/>
+                                        <circle cx="6" cy="14" r="1" fill="#FFFFFF"/>
+                                    </svg>
+                                </div>
+                                <span class="settings-label">逆变器参数设置</span>
+                            </div>
+                            <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 6L15 12L9 18" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+
+                        <!-- 网络配置 -->
+                        <div class="settings-item" onclick="showNetworkConfig()">
+                            <div class="settings-left">
+                                <div class="settings-icon" style="background: rgba(94, 92, 230, 1);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M1 9L12 2L23 9" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M5 12L12 7L19 12" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M9 15L12 12.5L15 15" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <circle cx="12" cy="18" r="1.5" fill="#FFFFFF"/>
+                                    </svg>
+                                </div>
+                                <span class="settings-label">网络配置</span>
+                            </div>
+                            <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 6L15 12L9 18" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+
+                        <!-- 蓝牙名称设置 -->
+                        <div class="settings-item" onclick="handleSettingsClick('bluetooth')">
+                            <div class="settings-left">
+                                <div class="settings-icon" style="background: rgba(0, 122, 255, 1);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 2L17 7L13 11L17 15L12 20V12L8 16L6 14L10 10L6 6L8 4L12 8V2Z" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                    </svg>
+                                </div>
+                                <span class="settings-label">蓝牙名称设置</span>
+                            </div>
+                            <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 6L15 12L9 18" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+
+                        <!-- BMS参数设置 -->
+                        <div class="settings-item" onclick="handleSettingsClick('bms')">
+                            <div class="settings-left">
+                                <div class="settings-icon" style="background: rgba(52, 199, 89, 1);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 2L22 7V11C22 16.5 18.5 21.08 12 22C5.5 21.08 2 16.5 2 11V7L12 2Z" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+                                        <path d="M8 11L11 14L16 9" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <span class="settings-label">BMS参数设置</span>
+                            </div>
+                            <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 6L15 12L9 18" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+
+                        <!-- BMS固件升级 -->
+                        <div class="settings-item" onclick="handleSettingsClick('firmware')">
+                            <div class="settings-left">
+                                <div class="settings-icon" style="background: rgba(88, 86, 214, 1);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 2L17 7H13V13H11V7H7L12 2Z" fill="#FFFFFF"/>
+                                        <rect x="4" y="15" width="16" height="6" rx="2" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+                                    </svg>
+                                </div>
+                                <span class="settings-label">BMS固件升级</span>
+                                <span class="new-badge" id="firmware-badge" style="display: none; margin-left: 8px; padding: 2px 8px; background: #ff3b30; color: white; border-radius: 10px; font-size: 11px; font-weight: 600;">NEW</span>
+                            </div>
+                            <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 6L15 12L9 18" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+
+                        <!-- 语言切换 -->
+                        <div class="settings-item" onclick="handleSettingsClick('language')">
+                            <div class="settings-left">
+                                <div class="settings-icon" style="background: rgba(255, 159, 10, 1);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12.87 15.07L10.33 12.56L10.36 12.53C12.1 10.59 13.34 8.36 14.07 6H17V4H10V2H8V4H1V6H12.17C11.5 7.92 10.44 9.75 9 11.35C8.07 10.32 7.3 9.19 6.69 8H4.69C5.42 9.63 6.42 11.17 7.67 12.56L2.58 17.58L4 19L9 14L12.11 17.11L12.87 15.07M18.5 10H16.5L12 22H14L15.12 19H19.87L21 22H23L18.5 10M15.88 17L17.5 12.67L19.12 17H15.88Z" fill="#FFFFFF"/>
+                                    </svg>
+                                </div>
+                                <span class="settings-label">语言切换</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="settings-value" id="language-value" style="color: #8e8e93; font-size: 17px;">简体中文</span>
+                                <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M9 6L15 12L9 18" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- BMS软件版本 -->
+                        <div class="settings-item" onclick="handleSettingsClick('version')">
+                            <div class="settings-left">
+                                <div class="settings-icon" style="background: rgba(255, 69, 58, 1);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="12" r="10" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+                                        <path d="M12 8V12M12 16H12.01" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="settings-text">
+                                    <span class="settings-label">BMS软件版本: V1.02.01</span>
+                                </div>
+                            </div>
+                            <svg class="settings-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 6L15 12L9 18" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 底部菜单 -->
+            <div class="bottom-menu">
+                <div class="menu-item active" onclick="switchMenu('home')">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                    <span class="menu-label">基本信息</span>
+                </div>
+                <div class="menu-item" onclick="switchMenu('alerts')">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                    </svg>
+                    <span class="menu-label">并机汇总</span>
+                </div>
+                <div class="menu-item" onclick="switchMenu('settings')">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                    </svg>
+                    <span class="menu-label">设置</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- iOS风格弹窗 - 网络配置 -->
+            <div class="dialog-overlay" id="network-dialog-overlay" onclick="closeNetworkDialog()"></div>
+            <div class="dialog" id="network-dialog" style="width: 340px;">
+                <div class="dialog-header">
+                    <div class="dialog-title">网络配置</div>
+                    <div class="dialog-subtitle" style="margin-top: 8px;">选择WiFi网络并输入密码</div>
+                </div>
+                <div class="dialog-content" style="padding: 20px 24px;">
+                    <!-- WiFi列表 -->
+                    <div style="margin-bottom: 20px;">
+                        <div style="font-size: 13px; color: #8e8e93; margin-bottom: 12px; font-weight: 500;">可用网络</div>
+                        <div id="wifi-list" style="background: #f2f2f7; border-radius: 12px; overflow: hidden;">
+                            <div class="wifi-item" onclick="selectWifi(this, 'BeiNeng_5G')" style="padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(0, 0, 0, 0.1); cursor: pointer;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#1d1d1f">
+                                        <path d="M1 9L12 2L23 9M5 12L12 7L19 12M9 15L12 12.5L15 15" stroke="#1d1d1f" stroke-width="2" fill="none"/>
+                                    </svg>
+                                    <span style="font-size: 16px; color: #1d1d1f;">BeiNeng_5G</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#8e8e93">
+                                        <path d="M18 8H20C20 4.7 16.3 2 12 2V4C15.2 4 18 5.8 18 8M14 8H16C16 6.9 14.1 6 12 6V8C13 8 14 8 14 8M21 16L13 16V9.7C13.6 9.4 14 8.7 14 8C14 6.9 13.1 6 12 6S10 6.9 10 8C10 8.7 10.4 9.4 11 9.7V16L3 16C2.4 16 2 16.4 2 17V20C2 20.6 2.4 21 3 21H21C21.6 21 22 20.6 22 20V17C22 16.4 21.6 16 21 16"/>
+                                    </svg>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="wifi-check" style="display: none;">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#007aff"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="wifi-item" onclick="selectWifi(this, 'BeiNeng_2.4G')" style="padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid rgba(0, 0, 0, 0.1); cursor: pointer;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#1d1d1f">
+                                        <path d="M1 9L12 2L23 9M5 12L12 7L19 12" stroke="#1d1d1f" stroke-width="2" fill="none"/>
+                                    </svg>
+                                    <span style="font-size: 16px; color: #1d1d1f;">BeiNeng_2.4G</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#8e8e93">
+                                        <path d="M18 8H20C20 4.7 16.3 2 12 2V4C15.2 4 18 5.8 18 8M14 8H16C16 6.9 14.1 6 12 6V8C13 8 14 8 14 8M21 16L13 16V9.7C13.6 9.4 14 8.7 14 8C14 6.9 13.1 6 12 6S10 6.9 10 8C10 8.7 10.4 9.4 11 9.7V16L3 16C2.4 16 2 16.4 2 17V20C2 20.6 2.4 21 3 21H21C21.6 21 22 20.6 22 20V17C22 16.4 21.6 16 21 16"/>
+                                    </svg>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="wifi-check" style="display: none;">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#007aff"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="wifi-item" onclick="selectWifi(this, 'Guest_Network')" style="padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#1d1d1f">
+                                        <path d="M1 9L12 2L23 9" stroke="#1d1d1f" stroke-width="2" fill="none"/>
+                                    </svg>
+                                    <span style="font-size: 16px; color: #1d1d1f;">Guest_Network</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 12px; color: #8e8e93;">开放</span>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="wifi-check" style="display: none;">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#007aff"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 密码输入框 -->
+                    <div id="password-section" style="display: none;">
+                        <div style="font-size: 13px; color: #8e8e93; margin-bottom: 12px; font-weight: 500;">WiFi密码</div>
+                        <input type="password" id="wifi-password" placeholder="请输入密码" style="width: 100%; padding: 12px 16px; background: #f2f2f7; border: none; border-radius: 12px; font-size: 16px; color: #1d1d1f; outline: none;">
+                        <div style="margin-top: 8px; font-size: 12px; color: #8e8e93;">密码将被安全保存</div>
+                    </div>
+                </div>
+                <div class="dialog-actions">
+                    <button class="dialog-cancel" onclick="closeNetworkDialog()">取消</button>
+                    <button class="dialog-confirm" onclick="confirmNetwork()">连接</button>
+                </div>
+            </div>
+            
+            <!-- iOS风格弹窗 - 固件升级 -->
+            <div class="dialog-overlay" id="firmware-dialog-overlay" onclick="closeFirmwareDialog()"></div>
+            <div class="dialog" id="firmware-dialog" style="width: 320px;">
+                <div class="dialog-header">
+                    <div class="dialog-title">固件更新</div>
+                    <div class="dialog-subtitle" style="margin-top: 8px; line-height: 1.4;">发现新版本 V1.03.00</div>
+                </div>
+                <div class="dialog-content" style="padding: 20px 24px;">
+                    <div style="font-size: 14px; color: #8e8e93; line-height: 1.5;">
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-weight: 500; color: #1d1d1f; margin-bottom: 8px;">更新内容：</div>
+                            <ul style="padding-left: 20px; margin: 0;">
+                                <li>优化电池管理算法</li>
+                                <li>提升系统稳定性</li>
+                                <li>修复已知问题</li>
+                                <li>新增温度保护功能</li>
+                            </ul>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 0.5px solid rgba(0, 0, 0, 0.1);">
+                            <span style="color: #1d1d1f;">当前版本</span>
+                            <span style="font-weight: 500; color: #8e8e93;">V1.02.01</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px 0 0 0;">
+                            <span style="color: #1d1d1f;">最新版本</span>
+                            <span style="font-weight: 500; color: #34c759;">V1.03.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="dialog-buttons">
+                    <button class="dialog-button cancel" onclick="closeFirmwareDialog()">稍后更新</button>
+                    <button class="dialog-button confirm" onclick="startFirmwareUpdate()">立即更新</button>
+                </div>
+            </div>
+            
+            <!-- iOS风格弹窗 - 版本信息 -->
+            <div class="dialog-overlay" id="version-dialog-overlay" onclick="closeVersionDialog()"></div>
+            <div class="dialog" id="version-dialog" style="width: 320px;">
+                <div class="dialog-header">
+                    <div class="dialog-title">版本信息</div>
+                </div>
+                <div class="dialog-content" style="padding: 0;">
+                    <div style="padding: 20px 24px; border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 17px; color: #1d1d1f;">硬件版本</span>
+                            <span style="font-size: 17px; color: #8e8e93; font-weight: 500;">V2.1.0</span>
+                        </div>
+                    </div>
+                    <div style="padding: 20px 24px; border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 17px; color: #1d1d1f;">软件版本</span>
+                            <span style="font-size: 17px; color: #8e8e93; font-weight: 500;">V1.02.01</span>
+                        </div>
+                    </div>
+                    <div style="padding: 20px 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 17px; color: #1d1d1f;">协议版本</span>
+                            <span style="font-size: 17px; color: #8e8e93; font-weight: 500;">V3.0.5</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="dialog-buttons">
+                    <button class="dialog-button confirm" onclick="closeVersionDialog()" style="width: 100%; border-right: none;">确定</button>
+                </div>
+            </div>
+            
+            <!-- 底部滑出菜单 - 语言选择 -->
+            <div id="language-sheet-overlay" class="bottom-sheet-overlay" onclick="closeLanguageSheet()"></div>
+            <div id="language-sheet" class="bottom-sheet">
+                <div class="bottom-sheet-header">
+                    <div class="bottom-sheet-title">选择语言</div>
+                    <button class="bottom-sheet-close" onclick="closeLanguageSheet()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="#8e8e93" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="bottom-sheet-content" id="language-sheet-content"></div>
+            </div>
+            <!-- iOS风格弹窗 - 蓝牙 -->
+            <div class="dialog-overlay" id="dialog-overlay" onclick="closeBluetoothDialog()"></div>
+            <div class="dialog" id="bluetooth-dialog">
+                <div class="dialog-header">
+                    <div class="dialog-title">修改蓝牙名称</div>
+                    <div class="dialog-subtitle">当前名称：BMS_001</div>
+                </div>
+                <div class="dialog-content">
+                    <input type="text" 
+                           class="dialog-input" 
+                           id="bluetooth-name-input"
+                           placeholder="输入新名称" 
+                           maxlength="20"
+                           oninput="updateBluetoothInput()">
+                    <div class="dialog-char-count" id="bluetooth-char-count">0/20</div>
+                </div>
+                <div class="dialog-buttons">
+                    <button class="dialog-button cancel" onclick="closeBluetoothDialog()">取消</button>
+                    <button class="dialog-button confirm" id="bluetooth-confirm-btn" onclick="saveBluetoothName()" disabled>完成</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 跳转到电压详情页面
+        function goToVoltageDetail() {
+            console.log('准备跳转到电压详情页面');
+            try {
+                window.location.href = 'voltage-detail.html';
+            } catch(e) {
+                console.error('跳转失败:', e);
+                // 备用方案
+                window.open('voltage-detail.html', '_self');
+            }
+        }
+        
+        // 立即将函数挂载到window对象
+        window.goToVoltageDetail = goToVoltageDetail;
+        
+        // 工作的电压详情函数 - 从修复版移植过来
+        function showWorkingVoltageDetail() {
+            
+            // 创建遮罩层
+            const overlay = document.createElement('div');
+            overlay.id = 'working-voltage-overlay';
+            overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 99999; display: flex; align-items: center; justify-content: center;';
+            
+            // 弹窗内容
+            overlay.innerHTML = '<div style="background: white; width: 90%; max-width: 400px; border-radius: 20px; padding: 25px; position: relative;">' +
+                '<button onclick="document.getElementById(\'working-voltage-overlay\').remove()" style="position: absolute; right: 15px; top: 15px; border: none; background: #f0f0f0; width: 30px; height: 30px; border-radius: 50%; font-size: 18px; cursor: pointer;">✕</button>' +
+                '<div style="display: flex; align-items: center; margin-bottom: 25px;">' +
+                    '<div style="width: 50px; height: 50px; background: linear-gradient(135deg, #00D4AA, #00E5BB); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 24px;">⚡</div>' +
+                    '<h3 style="color: #00D4AA; margin: 0;">电芯电压</h3>' +
+                '</div>' +
+                '<div style="background: #f8f8f8; padding: 15px; border-radius: 10px; margin-bottom: 15px;">' +
+                    '<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">' +
+                        '<span style="color: #666;">最高电压编号:</span>' +
+                        '<input type="text" value="5" style="width: 60px; text-align: center; border: 1px solid #ddd; border-radius: 4px; padding: 4px;">' +
+                    '</div>' +
+                    '<div style="display: flex; justify-content: space-between;">' +
+                        '<span style="color: #666;">最高电压:</span>' +
+                        '<div>' +
+                            '<input type="text" value="3295" style="width: 80px; text-align: center; border: 1px solid #ddd; border-radius: 4px; padding: 4px;">' +
+                            '<span style="color: #999; margin-left: 5px;">mV</span>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="background: #f8f8f8; padding: 15px; border-radius: 10px; margin-bottom: 15px;">' +
+                    '<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">' +
+                        '<span style="color: #666;">最低电压编号:</span>' +
+                        '<input type="text" value="3" style="width: 60px; text-align: center; border: 1px solid #ddd; border-radius: 4px; padding: 4px;">' +
+                    '</div>' +
+                    '<div style="display: flex; justify-content: space-between;">' +
+                        '<span style="color: #666;">最低电压:</span>' +
+                        '<div>' +
+                            '<input type="text" value="3291" style="width: 80px; text-align: center; border: 1px solid #ddd; border-radius: 4px; padding: 4px;">' +
+                            '<span style="color: #999; margin-left: 5px;">mV</span>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="background: #f8f8f8; padding: 15px; border-radius: 10px;">' +
+                    '<div style="color: #666; margin-bottom: 10px;">电芯个数: <strong style="color: #333;">16</strong></div>' +
+                    '<div style="height: 150px; background: white; border-radius: 8px; padding: 10px; overflow-y: auto; border: 1px solid #e0e0e0;">' +
+                        '<div style="color: #999; text-align: center; margin-top: 50px;">电芯详细信息</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+            
+            document.body.appendChild(overlay);
+            
+            // 点击遮罩关闭
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    overlay.remove();
+                }
+            });
+        }
+        
+        // 将函数挂载到window对象，确保全局可访问
+        window.showWorkingVoltageDetail = showWorkingVoltageDetail;
+        
+        // 返回功能
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // 如果没有历史记录，跳转到首页
+                window.location.href = 'index.html';
+            }
+        }
+
+        // 切换开关状态
+        function toggleSwitch(element) {
+            if (element.classList.contains('on')) {
+                element.classList.remove('on');
+                element.classList.add('off');
+            } else {
+                element.classList.remove('off');
+                element.classList.add('on');
+            }
+        }
+
+        // 更新电池进度条
+        function updateBatteryLevel(percentage) {
+            const degrees = (percentage / 100) * 360;
+            const circleBg = document.querySelector('.circle-bg');
+            const batteryPercentage = document.querySelector('.battery-percentage');
+            
+            circleBg.style.background = `conic-gradient(
+                from 0deg,
+                #10B981 0deg,
+                #10B981 ${degrees}deg,
+                #333 ${degrees}deg,
+                #333 360deg
+            )`;
+            
+            batteryPercentage.textContent = `${percentage}%`;
+        }
+
+        // 菜单切换功能
+        function switchMenu(menuType) {
+            // 移除所有菜单项的active状态
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(item => item.classList.remove('active'));
+            
+            // 为当前点击的菜单项添加active状态
+            event.currentTarget.classList.add('active');
+            
+            // 隐藏所有内容页面
+            const contentPages = document.querySelectorAll('.content-page');
+            contentPages.forEach(page => page.classList.remove('active'));
+            
+            // 根据菜单类型显示对应页面
+            switch(menuType) {
+                case 'home':
+                    document.getElementById('homeContent').classList.add('active');
+                    break;
+                case 'info':
+                    document.getElementById('infoContent').classList.add('active');
+                    break;
+                case 'alerts':
+                    document.getElementById('alertsContent').classList.add('active');
+                    break;
+                case 'settings':
+                    document.getElementById('settingsContent').classList.add('active');
+                    break;
+            }
+        }
+
+        // 设置项点击处理
+        function handleSettingsClick(type) {
+            console.log('handleSettingsClick被调用，类型：', type);
+            switch(type) {
+                case 'inverter':
+                    window.location.href = 'inverter-settings.html';
+                    break;
+                case 'bluetooth':
+                    showBluetoothDialog();
+                    break;
+                case 'bms':
+                    window.location.href = 'bms-settings.html';
+                    break;
+                case 'firmware':
+                    showFirmwareDialog();
+                    break;
+                case 'language':
+                    showLanguageSheet();
+                    break;
+                case 'version':
+                    showVersionDialog();
+                    break;
+            }
+        }
+
+        // 显示蓝牙名称修改弹窗
+        function showBluetoothDialog() {
+            const overlay = document.getElementById('dialog-overlay');
+            const dialog = document.getElementById('bluetooth-dialog');
+            const input = document.getElementById('bluetooth-name-input');
+            
+            // 重置输入框
+            input.value = '';
+            updateBluetoothInput();
+            
+            // 显示弹窗
+            overlay.classList.add('active');
+            setTimeout(() => {
+                dialog.classList.add('active');
+                // 自动聚焦输入框
+                setTimeout(() => {
+                    input.focus();
+                }, 300);
+            }, 10);
+        }
+        
+        // 关闭蓝牙名称修改弹窗
+        function closeBluetoothDialog() {
+            const overlay = document.getElementById('dialog-overlay');
+            const dialog = document.getElementById('bluetooth-dialog');
+            
+            dialog.classList.remove('active');
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 300);
+        }
+        
+        // 更新蓝牙输入状态
+        function updateBluetoothInput() {
+            const input = document.getElementById('bluetooth-name-input');
+            const charCount = document.getElementById('bluetooth-char-count');
+            const confirmBtn = document.getElementById('bluetooth-confirm-btn');
+            const value = input.value;
+            
+            // 更新字符计数
+            charCount.textContent = `${value.length}/20`;
+            
+            // 验证输入（只允许字母、数字和下划线）
+            const isValid = /^[a-zA-Z0-9_]+$/.test(value);
+            
+            // 如果包含无效字符，移除它们
+            if (value && !isValid) {
+                input.value = value.replace(/[^a-zA-Z0-9_]/g, '');
+                updateBluetoothInput();
+                return;
+            }
+            
+            // 启用/禁用确认按钮
+            confirmBtn.disabled = !value || value === 'BMS_001';
+        }
+        
+        // 保存蓝牙名称
+        function saveBluetoothName() {
+            const input = document.getElementById('bluetooth-name-input');
+            const subtitle = document.querySelector('.dialog-subtitle');
+            const newName = input.value.trim();
+            
+            if (!newName) return;
+            
+            // 更新显示
+            subtitle.textContent = `当前名称：${newName}`;
+            
+            // 关闭弹窗
+            closeBluetoothDialog();
+            
+            // 显示成功提示
+            showToast('蓝牙名称已更新');
+        }
+        
+        // 显示提示信息
+        function showToast(message) {
+            // 创建提示元素
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: absolute;
+                top: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 12px 24px;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 2000;
+                animation: fadeInOut 2s ease;
+            `;
+            toast.textContent = message;
+            
+            // 检查动画是否已存在
+            if (!document.querySelector('style[data-toast-animation]')) {
+                const style = document.createElement('style');
+                style.setAttribute('data-toast-animation', 'true');
+                style.textContent = `
+                    @keyframes fadeInOut {
+                        0% { opacity: 0; transform: translate(-50%, -10px); }
+                        20% { opacity: 1; transform: translate(-50%, 0); }
+                        80% { opacity: 1; transform: translate(-50%, 0); }
+                        100% { opacity: 0; transform: translate(-50%, -10px); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // 添加到容器内
+            const container = document.querySelector('.phone-container');
+            if (container) {
+                container.appendChild(toast);
+            }
+            
+            // 2秒后移除
+            setTimeout(() => {
+                if (toast && toast.parentNode) {
+                    toast.remove();
+                }
+            }, 2000);
+        }
+
+        // 显示固件升级弹窗
+        function showFirmwareDialog() {
+            // 检查是否有新版本（这里模拟有新版本的情况）
+            const hasNewVersion = true; // 实际应该从服务器获取
+            
+            if (hasNewVersion) {
+                // 如果有新版本，显示升级弹窗
+                const overlay = document.getElementById('firmware-dialog-overlay');
+                const dialog = document.getElementById('firmware-dialog');
+                
+                // 显示弹窗
+                overlay.classList.add('active');
+                setTimeout(() => {
+                    dialog.classList.add('active');
+                }, 10);
+                
+                // 显示NEW标记（如果之前没有显示）
+                const badge = document.getElementById('firmware-badge');
+                if (badge) {
+                    badge.style.display = 'inline-block';
+                }
+            } else {
+                // 如果没有新版本，显示提示
+                showToast('当前已是最新版本');
+            }
+        }
+        
+        // 关闭固件升级弹窗
+        // 网络配置相关函数
+        let selectedWifi = null;
+        
+        function showNetworkConfig() {
+            const overlay = document.getElementById('network-dialog-overlay');
+            const dialog = document.getElementById('network-dialog');
+            
+            overlay.classList.add('active');
+            setTimeout(() => {
+                dialog.classList.add('active');
+            }, 10);
+        }
+        
+        function closeNetworkDialog() {
+            const overlay = document.getElementById('network-dialog-overlay');
+            const dialog = document.getElementById('network-dialog');
+            
+            dialog.classList.remove('active');
+            setTimeout(() => {
+                overlay.classList.remove('active');
+                // 重置选择状态
+                document.querySelectorAll('.wifi-check').forEach(check => {
+                    check.style.display = 'none';
+                });
+                document.querySelectorAll('.wifi-item').forEach(item => {
+                    item.style.background = 'transparent';
+                });
+                document.getElementById('password-section').style.display = 'none';
+                document.getElementById('wifi-password').value = '';
+                selectedWifi = null;
+            }, 300);
+        }
+        
+        function selectWifi(element, wifiName) {
+            // 重置所有选择状态
+            document.querySelectorAll('.wifi-item').forEach(item => {
+                item.style.background = 'transparent';
+                item.querySelector('.wifi-check').style.display = 'none';
+            });
+            
+            // 设置当前选择状态
+            element.style.background = 'rgba(0, 122, 255, 0.1)';
+            element.querySelector('.wifi-check').style.display = 'block';
+            selectedWifi = wifiName;
+            
+            // 判断是否需要密码
+            if (wifiName === 'Guest_Network') {
+                // 开放网络，不需要密码
+                document.getElementById('password-section').style.display = 'none';
+            } else {
+                // 需要密码
+                document.getElementById('password-section').style.display = 'block';
+                document.getElementById('wifi-password').focus();
+            }
+        }
+        
+        function confirmNetwork() {
+            if (!selectedWifi) {
+                showToast('请选择一个WiFi网络');
+                return;
+            }
+            
+            const password = document.getElementById('wifi-password').value;
+            if (selectedWifi !== 'Guest_Network' && !password) {
+                showToast('请输入WiFi密码');
+                return;
+            }
+            
+            // 模拟连接过程
+            closeNetworkDialog();
+            showToast(`正在连接到 ${selectedWifi}...`);
+            
+            setTimeout(() => {
+                showToast(`已成功连接到 ${selectedWifi}`);
+            }, 2000);
+        }
+        
+        function closeFirmwareDialog() {
+            const overlay = document.getElementById('firmware-dialog-overlay');
+            const dialog = document.getElementById('firmware-dialog');
+            
+            dialog.classList.remove('active');
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 300);
+        }
+        
+        // 开始固件更新
+        function startFirmwareUpdate() {
+            // 关闭弹窗
+            closeFirmwareDialog();
+            
+            // 显示更新中提示
+            showToast('固件开始更新，请勿断开设备...');
+            
+            // 隐藏NEW标记
+            const badge = document.getElementById('firmware-badge');
+            if (badge) {
+                badge.style.display = 'none';
+            }
+            
+            // 模拟更新过程
+            setTimeout(() => {
+                showToast('固件更新成功！');
+            }, 3000);
+        }
+        
+        // 显示版本信息弹窗
+        function showVersionDialog() {
+            const overlay = document.getElementById('version-dialog-overlay');
+            const dialog = document.getElementById('version-dialog');
+            
+            // 显示弹窗
+            overlay.classList.add('active');
+            setTimeout(() => {
+                dialog.classList.add('active');
+            }, 10);
+        }
+        
+        // 关闭版本信息弹窗
+        function closeVersionDialog() {
+            const overlay = document.getElementById('version-dialog-overlay');
+            const dialog = document.getElementById('version-dialog');
+            
+            dialog.classList.remove('active');
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 300);
+        }
+        
+        // 显示语言选择菜单
+        function showLanguageSheet() {
+            const overlay = document.getElementById('language-sheet-overlay');
+            const sheet = document.getElementById('language-sheet');
+            const sheetContent = document.getElementById('language-sheet-content');
+            
+            // 语言选项
+            const languages = [
+                { code: 'zh-CN', name: '简体中文' },
+                { code: 'zh-TW', name: '繁體中文' },
+                { code: 'en', name: 'English' },
+                { code: 'ja', name: '日本語' },
+                { code: 'ko', name: '한국어' },
+                { code: 'es', name: 'Español' },
+                { code: 'fr', name: 'Français' },
+                { code: 'de', name: 'Deutsch' },
+                { code: 'ru', name: 'Русский' },
+                { code: 'ar', name: 'العربية' }
+            ];
+            
+            // 获取当前选中的语言
+            const currentLanguage = document.getElementById('language-value').textContent;
+            
+            // 清空并填充选项
+            sheetContent.innerHTML = '';
+            languages.forEach(lang => {
+                const item = document.createElement('div');
+                item.className = 'sheet-item';
+                if (lang.name === currentLanguage) {
+                    item.classList.add('selected');
+                }
+                item.textContent = lang.name;
+                item.onclick = () => selectLanguage(lang.name);
+                sheetContent.appendChild(item);
+            });
+            
+            // 显示菜单
+            overlay.classList.add('active');
+            setTimeout(() => {
+                sheet.classList.add('active');
+            }, 10);
+        }
+        
+        // 关闭语言选择菜单
+        function closeLanguageSheet() {
+            const overlay = document.getElementById('language-sheet-overlay');
+            const sheet = document.getElementById('language-sheet');
+            
+            sheet.classList.remove('active');
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 300);
+        }
+        
+        // 选择语言
+        function selectLanguage(language) {
+            document.getElementById('language-value').textContent = language;
+            closeLanguageSheet();
+            
+            // 显示选择动画效果
+            const languageItem = document.querySelector('#language-value').closest('.settings-item');
+            languageItem.style.background = 'rgba(0, 122, 255, 0.1)';
+            setTimeout(() => {
+                languageItem.style.background = '';
+            }, 300);
+            
+            // 显示提示
+            showToast('语言已切换至 ' + language);
+        }
+
+        
+        // 简单的弹窗函数 - 挂载到window上以便测试
+        window.showSimpleVoltageDialog = function showSimpleVoltageDialog() {
+            console.log('显示电压详情弹窗');
+            
+            // 先移除可能存在的旧弹窗
+            const oldOverlay = document.getElementById('voltage-overlay-simple');
+            if (oldOverlay) {
+                oldOverlay.remove();
+            }
+            
+            // 创建新弹窗
+            const overlay = document.createElement('div');
+            overlay.id = 'voltage-overlay-simple';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 99999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            overlay.innerHTML = `
+                <div style="
+                    background: white;
+                    width: 90%;
+                    max-width: 400px;
+                    border-radius: 20px;
+                    padding: 20px;
+                    position: relative;
+                ">
+                    <button onclick="document.getElementById('voltage-overlay-simple').remove()" style="
+                        position: absolute;
+                        right: 15px;
+                        top: 15px;
+                        border: none;
+                        background: #f0f0f0;
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 15px;
+                        font-size: 20px;
+                        cursor: pointer;
+                        color: #666;
+                    ">×</button>
+                    
+                    <h3 style="color: #00D4AA; margin-bottom: 20px;">电芯电压详情</h3>
+                    
+                    <div style="background: #f8f8f8; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                        <p style="margin: 5px 0; color: #666;">最高电压编号: <span style="float: right; color: #333;">5</span></p>
+                        <p style="margin: 5px 0; color: #666;">最高电压: <span style="float: right; color: #333;">3295 mV</span></p>
+                    </div>
+                    
+                    <div style="background: #f8f8f8; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                        <p style="margin: 5px 0; color: #666;">最低电压编号: <span style="float: right; color: #333;">3</span></p>
+                        <p style="margin: 5px 0; color: #666;">最低电压: <span style="float: right; color: #333;">3291 mV</span></p>
+                    </div>
+                    
+                    <div style="background: #f8f8f8; padding: 15px; border-radius: 10px;">
+                        <p style="margin: 5px 0; color: #666;">电芯个数: <span style="float: right; color: #333;">16</span></p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            // 点击遮罩关闭
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    overlay.remove();
+                }
+            });
+        }
+        
+        // 页面加载完成后的动画
+        document.addEventListener('DOMContentLoaded', function() {
+            // 自动切换到基础信息页面以便测试
+            setTimeout(() => {
+                document.getElementById('infoContent').classList.add('active');
+                document.getElementById('homeContent').classList.remove('active');
+                // 更新菜单按钮状态
+                document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+                document.querySelectorAll('.menu-item')[1].classList.add('active');
+                
+                // 移除了额外的JavaScript点击事件，使用<a>标签自然链接
+            }, 500);
+            
+            // 为数据卡片添加加载动画
+            const cards = document.querySelectorAll('.data-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+        
+        
+        // 显示电芯电压详情 - 移到全局作用域
+        window.showVoltageDetail = function() {
+            console.log('showVoltageDetail 被调用');
+            try {
+                // 创建详情弹窗
+                const detailHtml = `
+                <div class="voltage-detail-overlay" id="voltage-detail-overlay" onclick="closeVoltageDetail()">
+                    <div class="voltage-detail-container" onclick="event.stopPropagation()">
+                        <div class="voltage-detail-header">
+                            <button class="voltage-detail-back" onclick="closeVoltageDetail()">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M15 19L8 12L15 5" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="voltage-detail-title">基本信息 · 电芯电压</div>
+                        </div>
+                        
+                        <div class="voltage-detail-content">
+                            <!-- 电芯电压标题部分 -->
+                            <div class="voltage-header-section">
+                                <div class="voltage-icon-box">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="#00D4AA" stroke="#00D4AA" stroke-width="0.5" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <span class="voltage-title-text">电芯电压</span>
+                            </div>
+                            
+                            <!-- 最高/最低电压信息 -->
+                            <div class="voltage-stats-section">
+                                <div class="voltage-stat-row">
+                                    <span class="voltage-stat-label">最高电压编号:</span>
+                                    <div class="voltage-stat-right">
+                                        <span class="voltage-stat-label">最高电压:</span>
+                                        <span class="voltage-stat-unit">mV</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="voltage-stat-row">
+                                    <span class="voltage-stat-label">最低电压编号:</span>
+                                    <div class="voltage-stat-right">
+                                        <span class="voltage-stat-label">最低电压:</span>
+                                        <span class="voltage-stat-unit">mV</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 分隔线 -->
+                            <div class="voltage-divider"></div>
+                            
+                            <!-- 电芯个数部分 -->
+                            <div class="voltage-cells-section">
+                                <span class="voltage-cells-label">电芯个数:</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 添加样式
+            if (!document.getElementById('voltage-detail-styles')) {
+                const style = document.createElement('style');
+                style.id = 'voltage-detail-styles';
+                style.textContent = `
+                    .voltage-detail-overlay {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0, 0, 0, 0.5);
+                        z-index: 9999;
+                        display: flex;
+                        align-items: flex-start;
+                        justify-content: center;
+                        padding-top: 0;
+                        animation: fadeIn 0.3s ease;
+                    }
+                    
+                    .voltage-detail-container {
+                        background: #f6f6f6;
+                        width: 100%;
+                        max-width: 430px;
+                        height: 100vh;
+                        overflow: hidden;
+                        animation: slideInFromRight 0.3s ease;
+                    }
+                    
+                    .voltage-detail-header {
+                        background: white;
+                        padding: 0;
+                        height: 60px;
+                        display: flex;
+                        align-items: center;
+                        border-bottom: 1px solid #e0e0e0;
+                        position: relative;
+                    }
+                    
+                    .voltage-detail-back {
+                        width: 44px;
+                        height: 44px;
+                        border: none;
+                        background: none;
+                        cursor: pointer;
+                        padding: 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-left: 8px;
+                    }
+                    
+                    .voltage-detail-title {
+                        position: absolute;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        font-size: 17px;
+                        font-weight: 600;
+                        color: #000;
+                    }
+                    
+                    .voltage-detail-content {
+                        padding: 20px;
+                        background: #f6f6f6;
+                        height: calc(100vh - 60px);
+                        overflow-y: auto;
+                    }
+                    
+                    .voltage-header-section {
+                        display: flex;
+                        align-items: center;
+                        margin-bottom: 30px;
+                        padding: 0 5px;
+                    }
+                    
+                    .voltage-icon-box {
+                        width: 56px;
+                        height: 56px;
+                        background: linear-gradient(135deg, #00D4AA 0%, #00E5BB 100%);
+                        border-radius: 14px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-right: 15px;
+                        box-shadow: 0 4px 12px rgba(0, 212, 170, 0.3);
+                    }
+                    
+                    .voltage-icon-box svg {
+                        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+                    }
+                    
+                    .voltage-title-text {
+                        font-size: 20px;
+                        color: #00D4AA;
+                        font-weight: 600;
+                    }
+                    
+                    .voltage-stats-section {
+                        background: white;
+                        border-radius: 12px;
+                        padding: 20px;
+                        margin-bottom: 20px;
+                    }
+                    
+                    .voltage-stat-row {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 15px 0;
+                        border-bottom: 1px solid #f0f0f0;
+                    }
+                    
+                    .voltage-stat-row:last-child {
+                        border-bottom: none;
+                    }
+                    
+                    .voltage-stat-label {
+                        font-size: 16px;
+                        color: #666;
+                    }
+                    
+                    .voltage-stat-right {
+                        display: flex;
+                        align-items: center;
+                        gap: 15px;
+                    }
+                    
+                    .voltage-stat-unit {
+                        font-size: 16px;
+                        color: #999;
+                    }
+                    
+                    .voltage-divider {
+                        height: 1px;
+                        background: #e0e0e0;
+                        margin: 20px 0;
+                    }
+                    
+                    .voltage-cells-section {
+                        background: white;
+                        border-radius: 12px;
+                        padding: 20px;
+                        min-height: 300px;
+                    }
+                    
+                    .voltage-cells-label {
+                        font-size: 16px;
+                        color: #666;
+                        display: block;
+                        margin-bottom: 20px;
+                    }
+                    
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                    
+                    @keyframes slideInFromRight {
+                        from {
+                            transform: translateX(100%);
+                        }
+                        to {
+                            transform: translateX(0);
+                        }
+                    }
+                    
+                    @keyframes fadeOut {
+                        from { opacity: 1; }
+                        to { opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // 添加到页面
+            console.log('准备添加HTML到页面');
+            const div = document.createElement('div');
+            div.innerHTML = detailHtml;
+            console.log('HTML内容已创建');
+            document.body.appendChild(div.firstElementChild);
+            console.log('弹窗已添加到页面');
+            } catch (error) {
+                console.error('showVoltageDetail 函数执行出错:', error);
+                alert('显示详情时出错: ' + error.message);
+            }
+        }
+        
+        // 显示温度详情
+        window.showTemperatureDetail = function() {
+            console.log('showTemperatureDetail 被调用');
+            // 创建温度详情弹窗
+            const detailHtml = `
+                <div class="temp-detail-overlay" id="temp-detail-overlay" onclick="closeTempDetail()">
+                    <div class="temp-detail-container" onclick="event.stopPropagation()">
+                        <div class="temp-detail-header">
+                            <button class="temp-detail-back" onclick="closeTempDetail()">‹</button>
+                            <div class="temp-detail-title">基本信息 · 温度</div>
+                        </div>
+                        
+                        <div class="temp-detail-content">
+                            <div class="temp-info-card">
+                                <div class="temp-info-header">
+                                    <div class="temp-info-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <path d="M14 14.76V5.5A2.5 2.5 0 0 0 9 5.5V14.76A4.5 4.5 0 1 0 14 14.76Z" stroke="#FF3B30" stroke-width="2" fill="none"/>
+                                            <circle cx="11.5" cy="18" r="2.5" fill="#FF3B30"/>
+                                        </svg>
+                                    </div>
+                                    <div class="temp-info-title">温度</div>
+                                </div>
+                                
+                                <div class="temp-info-row">
+                                    <div class="temp-info-label">最高温度编号：</div>
+                                    <div class="temp-info-value">
+                                        <span class="temp-value-number">2</span>
+                                        <div style="flex: 1;"></div>
+                                        <span class="temp-info-label">最高温度：</span>
+                                        <span class="temp-value-number">24.9</span>
+                                        <span class="temp-value-unit">°C</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="temp-info-row">
+                                    <div class="temp-info-label">最低温度编号：</div>
+                                    <div class="temp-info-value">
+                                        <span class="temp-value-number">4</span>
+                                        <div style="flex: 1;"></div>
+                                        <span class="temp-info-label">最低温度：</span>
+                                        <span class="temp-value-number">24.9</span>
+                                        <span class="temp-value-unit">°C</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="temp-info-row">
+                                    <div class="temp-info-label">MOS温度：</div>
+                                    <div class="temp-info-value">
+                                        <span class="temp-value-number">26.7</span>
+                                        <span class="temp-value-unit">°C</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="temp-info-row">
+                                    <div class="temp-info-label">环境温度：</div>
+                                    <div class="temp-info-value">
+                                        <span class="temp-value-number">26.9</span>
+                                        <span class="temp-value-unit">°C</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="temp-cell-count">
+                                    <div class="temp-count-label">温度传感器个数：</div>
+                                    <div class="temp-count-value">4</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 添加样式
+            if (!document.getElementById('temp-detail-styles')) {
+                const style = document.createElement('style');
+                style.id = 'temp-detail-styles';
+                style.textContent = `
+                    .temp-detail-overlay {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0, 0, 0, 0.5);
+                        z-index: 9999;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        animation: fadeIn 0.3s ease;
+                    }
+                    
+                    .temp-detail-container {
+                        background: white;
+                        width: 90%;
+                        max-width: 400px;
+                        max-height: 80vh;
+                        border-radius: 16px;
+                        overflow: hidden;
+                        animation: slideUp 0.3s ease;
+                    }
+                    
+                    .temp-detail-header {
+                        background: white;
+                        padding: 15px;
+                        display: flex;
+                        align-items: center;
+                        border-bottom: 1px solid #e0e0e0;
+                    }
+                    
+                    .temp-detail-back {
+                        width: 30px;
+                        height: 30px;
+                        border: none;
+                        background: none;
+                        font-size: 24px;
+                        cursor: pointer;
+                        padding: 0;
+                        margin-right: 10px;
+                    }
+                    
+                    .temp-detail-title {
+                        flex: 1;
+                        text-align: center;
+                        font-size: 16px;
+                        font-weight: 500;
+                        margin-right: 40px;
+                    }
+                    
+                    .temp-detail-content {
+                        padding: 20px;
+                        overflow-y: auto;
+                        max-height: calc(80vh - 70px);
+                    }
+                    
+                    .temp-info-card {
+                        background: #fff3f3;
+                        border-radius: 12px;
+                        padding: 20px;
+                    }
+                    
+                    .temp-info-header {
+                        display: flex;
+                        align-items: center;
+                        margin-bottom: 20px;
+                        padding-bottom: 15px;
+                        border-bottom: 1px solid #ffe0e0;
+                    }
+                    
+                    .temp-info-icon {
+                        width: 40px;
+                        height: 40px;
+                        background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+                        border-radius: 10px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-right: 12px;
+                    }
+                    
+                    .temp-info-title {
+                        font-size: 18px;
+                        color: #ff3b30;
+                        font-weight: 500;
+                    }
+                    
+                    .temp-info-row {
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 12px 0;
+                        border-bottom: 1px solid #ffe8e8;
+                    }
+                    
+                    .temp-info-row:last-of-type {
+                        border-bottom: none;
+                    }
+                    
+                    .temp-info-label {
+                        color: #666;
+                        font-size: 14px;
+                    }
+                    
+                    .temp-info-value {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    
+                    .temp-value-number {
+                        font-size: 16px;
+                        font-weight: 600;
+                        color: #333;
+                    }
+                    
+                    .temp-value-unit {
+                        color: #999;
+                        font-size: 14px;
+                    }
+                    
+                    .temp-cell-count {
+                        margin-top: 20px;
+                        padding-top: 20px;
+                        border-top: 1px solid #ffe0e0;
+                    }
+                    
+                    .temp-count-label {
+                        color: #666;
+                        font-size: 14px;
+                        margin-bottom: 8px;
+                    }
+                    
+                    .temp-count-value {
+                        font-size: 28px;
+                        font-weight: 600;
+                        color: #ff3b30;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // 添加到页面
+            const div = document.createElement('div');
+            div.innerHTML = detailHtml;
+            document.body.appendChild(div.firstElementChild);
+        }
+        
+        // 关闭温度详情
+        window.closeTempDetail = function() {
+            const overlay = document.getElementById('temp-detail-overlay');
+            if (overlay) {
+                overlay.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    overlay.remove();
+                }, 300);
+            }
+        }
+        
+        // 关闭电芯电压详情 - 移到全局作用域
+        window.closeVoltageDetail = function() {
+            const overlay = document.getElementById('voltage-detail-overlay');
+            if (overlay) {
+                overlay.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    overlay.remove();
+                }, 300);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据页面调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            min-height: 50px;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>数据页面调试工具</h1>
+    
+    <div class="test-container">
+        <h2>1. 直接访问数据页面</h2>
+        <button onclick="window.open('data.html', '_blank')">在新窗口打开 data.html</button>
+        <button onclick="document.getElementById('dataFrame').src='data.html'">在 iframe 中加载</button>
+    </div>
+    
+    <div class="test-container">
+        <h2>2. 测试函数调用</h2>
+        <button onclick="testFunction('switchDataTab', 'ems')">测试 switchDataTab('ems')</button>
+        <button onclick="testFunction('switchSubTab', 'overall', 'history')">测试 switchSubTab('overall', 'history')</button>
+        <button onclick="testFunction('openSettings', 'overall')">测试 openSettings('overall')</button>
+        <div id="testResult" class="result"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>3. 数据页面 iframe</h2>
+        <iframe id="dataFrame" src="data.html"></iframe>
+    </div>
+    
+    <script>
+        function testFunction(funcName, ...args) {
+            const resultDiv = document.getElementById('testResult');
+            const iframe = document.getElementById('dataFrame');
+            
+            try {
+                if (iframe.contentWindow && iframe.contentWindow[funcName]) {
+                    iframe.contentWindow[funcName](...args);
+                    resultDiv.innerHTML = `<span style="color: green;">✓ 成功调用 ${funcName}(${args.join(', ')})</span>`;
+                } else {
+                    resultDiv.innerHTML = `<span style="color: red;">✗ 函数 ${funcName} 不存在或 iframe 未加载完成</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span style="color: red;">✗ 错误: ${error.message}</span>`;
+                console.error(error);
+            }
+        }
+        
+        // 监听 iframe 加载完成
+        document.getElementById('dataFrame').onload = function() {
+            console.log('Data page loaded in iframe');
+            
+            // 检查关键函数是否存在
+            const funcs = ['switchDataTab', 'switchSubTab', 'openSettings', 'renderComponentData'];
+            const iframe = document.getElementById('dataFrame');
+            
+            funcs.forEach(func => {
+                if (iframe.contentWindow && iframe.contentWindow[func]) {
+                    console.log(`✓ ${func} 函数存在`);
+                } else {
+                    console.log(`✗ ${func} 函数不存在`);
+                }
+            });
+        };
+    </script>
+</body>
+</html>

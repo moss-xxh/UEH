@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>直接测试时间条件渲染</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 50px;
+        }
+        .test-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .conditions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .time-condition-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+        button {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>直接测试时间条件渲染</h1>
+    
+    <button onclick="testRender()">测试渲染时间条件</button>
+    
+    <div class="test-container">
+        <h3>充电时间条件</h3>
+        <div id="chargeConditionsList" class="conditions-list">
+            <!-- 充电条件将在这里显示 -->
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h3>放电时间条件</h3>
+        <div id="dischargeConditionsList" class="conditions-list">
+            <!-- 放电条件将在这里显示 -->
+        </div>
+    </div>
+
+    <script>
+        // 简化的时间条件数据
+        const testTimeConditions = {
+            charge: [
+                { id: 'test-charge-1', start: '22:00', end: '06:00' },
+                { id: 'test-charge-2', start: '02:00', end: '05:00' }
+            ],
+            discharge: [
+                { id: 'test-discharge-1', start: '16:00', end: '21:00' },
+                { id: 'test-discharge-2', start: '18:00', end: '20:00' }
+            ]
+        };
+        
+        function testRender() {
+            console.log('Testing render...');
+            
+            // 渲染充电条件
+            const chargeContainer = document.getElementById('chargeConditionsList');
+            chargeContainer.innerHTML = '';
+            
+            testTimeConditions.charge.forEach((condition, index) => {
+                const item = document.createElement('div');
+                item.className = 'time-condition-item';
+                item.innerHTML = `
+                    <div style="width: 4px; height: 20px; background: #00ff88; border-radius: 2px;"></div>
+                    <span>时间范围:</span>
+                    <input type="time" value="${condition.start}" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 8px; border-radius: 4px;">
+                    <span>-</span>
+                    <input type="time" value="${condition.end}" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 8px; border-radius: 4px;">
+                    <button style="background: #ff4757; color: #fff; padding: 4px 8px; font-size: 12px;">删除</button>
+                `;
+                chargeContainer.appendChild(item);
+            });
+            
+            // 渲染放电条件
+            const dischargeContainer = document.getElementById('dischargeConditionsList');
+            dischargeContainer.innerHTML = '';
+            
+            testTimeConditions.discharge.forEach((condition, index) => {
+                const item = document.createElement('div');
+                item.className = 'time-condition-item';
+                item.innerHTML = `
+                    <div style="width: 4px; height: 20px; background: #ffc107; border-radius: 2px;"></div>
+                    <span>时间范围:</span>
+                    <input type="time" value="${condition.start}" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 8px; border-radius: 4px;">
+                    <span>-</span>
+                    <input type="time" value="${condition.end}" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 8px; border-radius: 4px;">
+                    <button style="background: #ff4757; color: #fff; padding: 4px 8px; font-size: 12px;">删除</button>
+                `;
+                dischargeContainer.appendChild(item);
+            });
+            
+            console.log('Render complete!');
+        }
+    </script>
+</body>
+</html>

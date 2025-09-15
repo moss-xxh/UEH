@@ -1,0 +1,383 @@
+/* 科技感UI增强样式 */
+
+/* ========== 全局动画效果 ========== */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(30, 144, 255, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(30, 144, 255, 0.8), 0 0 30px rgba(30, 144, 255, 0.4); }
+}
+
+@keyframes slideInUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes borderFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* ========== 科技感背景纹理 ========== */
+.tech-pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 0;
+    background-image: 
+        repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(30, 144, 255, 0.1) 35px, rgba(30, 144, 255, 0.1) 70px),
+        repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(30, 144, 255, 0.05) 35px, rgba(30, 144, 255, 0.05) 70px);
+}
+
+/* ========== 增强头部导航栏 ========== */
+.header {
+    position: relative;
+    overflow: hidden;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.1) 50%, 
+        transparent 100%);
+    animation: headerShine 8s ease-in-out infinite;
+}
+
+@keyframes headerShine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        #00d4ff 20%, 
+        #1e90ff 50%, 
+        #00d4ff 80%, 
+        transparent 100%);
+    animation: borderFlow 3s ease-in-out infinite;
+    background-size: 200% 100%;
+}
+
+/* ========== 科技感按钮增强 ========== */
+.header-btn {
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+.header-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.header-btn:hover::before {
+    width: 100px;
+    height: 100px;
+}
+
+/* ========== 卡片3D效果 ========== */
+.overview-card,
+.param-section,
+.control-section,
+.settings-section {
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.overview-card:hover,
+.param-section:hover,
+.control-section:hover {
+    transform: translateY(-5px) rotateX(2deg);
+    box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.1),
+        0 5px 15px rgba(30, 144, 255, 0.2);
+}
+
+/* ========== 数据卡片光效 ========== */
+.overview-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(30, 144, 255, 0.8) 50%, 
+        transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.overview-card:hover::before {
+    opacity: 1;
+    animation: borderFlow 2s linear infinite;
+}
+
+/* ========== 状态指示器增强 ========== */
+.status-dot {
+    position: relative;
+    box-shadow: 0 0 0 rgba(74, 222, 128, 0.4);
+    animation: statusPulse 2s infinite;
+}
+
+@keyframes statusPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(74, 222, 128, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+    }
+}
+
+/* ========== 输入框科技感 ========== */
+.form-input,
+.param-input {
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(30, 144, 255, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.form-input:focus,
+.param-input:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #00d4ff;
+    box-shadow: 
+        0 0 0 3px rgba(0, 212, 255, 0.1),
+        inset 0 0 20px rgba(0, 212, 255, 0.05);
+}
+
+/* ========== 导航项悬停效果 ========== */
+.nav-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+    transition: width 0.3s;
+}
+
+.nav-item:hover::after {
+    width: 100%;
+}
+
+/* ========== 图表容器增强 ========== */
+.chart-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.chart-container::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        #00d4ff 0%, 
+        transparent 40%, 
+        transparent 60%, 
+        #1e90ff 100%);
+    border-radius: 16px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: -1;
+}
+
+.chart-container:hover::before {
+    opacity: 0.5;
+    animation: borderRotate 4s linear infinite;
+}
+
+@keyframes borderRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ========== 告警动画增强 ========== */
+.alarm-level.critical {
+    animation: criticalPulse 1s ease-in-out infinite;
+}
+
+@keyframes criticalPulse {
+    0%, 100% { 
+        background: #fee2e2; 
+        transform: scale(1);
+    }
+    50% { 
+        background: #fecaca; 
+        transform: scale(1.05);
+    }
+}
+
+/* ========== 加载动画优化 ========== */
+.loading-spinner {
+    border: 2px solid rgba(30, 144, 255, 0.1);
+    border-top: 2px solid #00d4ff;
+    box-shadow: 
+        0 0 10px rgba(0, 212, 255, 0.5),
+        inset 0 0 10px rgba(0, 212, 255, 0.1);
+}
+
+/* ========== 数值变化动画 ========== */
+.metric-value {
+    transition: all 0.3s ease;
+}
+
+.metric-value.updating {
+    animation: valueUpdate 0.5s ease;
+}
+
+@keyframes valueUpdate {
+    0% { transform: scale(1); color: inherit; }
+    50% { transform: scale(1.1); color: #00d4ff; }
+    100% { transform: scale(1); color: inherit; }
+}
+
+/* ========== 科技感分割线 ========== */
+.tech-divider {
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(30, 144, 255, 0.3) 25%, 
+        rgba(0, 212, 255, 0.5) 50%, 
+        rgba(30, 144, 255, 0.3) 75%, 
+        transparent 100%);
+    margin: 30px 0;
+    position: relative;
+}
+
+.tech-divider::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 5px;
+    background: #00d4ff;
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+}
+
+/* ========== 悬浮提示增强 ========== */
+[title] {
+    position: relative;
+}
+
+[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.9);
+    color: #00d4ff;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    animation: tooltipShow 0.3s 0.5s forwards;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+@keyframes tooltipShow {
+    to { opacity: 1; transform: translateX(-50%) translateY(-5px); }
+}
+
+/* ========== 滚动条美化 ========== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #00d4ff 0%, #1e90ff 100%);
+    border-radius: 4px;
+    box-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #00b8e6 0%, #1873cc 100%);
+}
+
+/* ========== 响应式优化 ========== */
+@media (max-width: 1280px) {
+    .tech-pattern {
+        opacity: 0.02;
+    }
+    
+    .overview-card:hover,
+    .param-section:hover {
+        transform: translateY(-3px);
+    }
+}
+
+/* ========== 深色主题特殊效果 ========== */
+[data-theme="dark"] .tech-pattern {
+    opacity: 0.05;
+}
+
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .param-input {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(0, 212, 255, 0.2);
+}
+
+[data-theme="dark"] .overview-card:hover::before {
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(0, 212, 255, 0.6) 50%, 
+        transparent 100%);
+}
