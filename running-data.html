@@ -202,19 +202,6 @@
             color: var(--color-danger);
         }
         
-        .dispatch-status {
-            font-weight: 600;
-            text-align: center;
-        }
-        
-        .dispatched-yes {
-            color: var(--color-success) !important;
-        }
-        
-        .dispatched-no {
-            color: var(--color-danger) !important;
-        }
-        
         /* Back button container and styles */
         .back-button-container {
             margin-bottom: 20px;
@@ -366,7 +353,6 @@
                         <th data-i18n-key="runningData.table.gridUsage">电网用电量 (kWh)</th>
                         <th data-i18n-key="runningData.table.feedIn">馈网量 (kWh)</th>
                         <th data-i18n-key="runningData.table.price">价格 ($/kWh)</th>
-                        <th data-i18n-key="runningData.table.dispatched">是否被调度</th>
                     </tr>
                 </thead>
                 <tbody id="dataTableBody">
@@ -488,12 +474,10 @@
             const familyName = window.familyName;
 
             while (currentTime <= endTime) {
-                // Generate data every 5 minutes
+                // Generate data every 30 minutes
                 const gridUsage = (Math.random() * 10 + 5).toFixed(2);
                 const feedIn = (Math.random() * 8).toFixed(2);
                 const price = (Math.random() * 0.3 + 0.1).toFixed(3);
-                // Generate dispatch status (Y/N) - roughly 30% chance of being dispatched
-                const dispatched = Math.random() < 0.3 ? 'Y' : 'N';
 
                 tableData.push({
                     meterNumber: meterNumber || 'METER-001',
@@ -501,12 +485,11 @@
                     gridUsage: parseFloat(gridUsage),
                     feedIn: parseFloat(feedIn),
                     price: parseFloat(price),
-                    dispatched: dispatched,
                     family: familyName
                 });
 
-                // Add 5 minutes
-                currentTime.setMinutes(currentTime.getMinutes() + 5);
+                // Add 30 minutes
+                currentTime.setMinutes(currentTime.getMinutes() + 30);
             }
 
             totalRecords = tableData.length;
@@ -541,7 +524,6 @@
                     <td>${row.gridUsage}</td>
                     <td>${row.feedIn}</td>
                     <td class="${row.price > 0.2 ? 'price-negative' : 'price-positive'}">$${row.price}</td>
-                    <td class="dispatch-status ${row.dispatched === 'Y' ? 'dispatched-yes' : 'dispatched-no'}">${row.dispatched}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -596,10 +578,10 @@
             const endTime = new Date(endDate);
             endTime.setHours(23, 59, 59);
 
-            // CSV headers - 电表，时间，电网用电量，馈网量，价格，是否被调度，地区，家庭
+            // CSV headers - 电表，时间，电网用电量，馈网量，价格，地区，家庭
             const headers = window.i18n && window.i18n.getCurrentLanguage() === 'en' 
-                ? 'NMI,Time,Grid Usage (kWh),To Grid (kWh),Price ($/kWh),Dispatched,Region,Family\n'
-                : '电表,时间,电网用电量 (kWh),馈网量 (kWh),价格 ($/kWh),是否被调度,地区,家庭\n';
+                ? 'NMI,Time,Grid Usage (kWh),To Grid (kWh),Price ($/kWh),Region,Family\n'
+                : '电表,时间,电网用电量 (kWh),馈网量 (kWh),价格 ($/kWh),地区,家庭\n';
             
             let csv = '\ufeff' + headers; // Add BOM for Excel UTF-8 support
 
@@ -607,12 +589,11 @@
                 const gridUsage = (Math.random() * 10 + 5).toFixed(2);
                 const feedIn = (Math.random() * 8).toFixed(2);
                 const price = (Math.random() * 0.3 + 0.1).toFixed(3);
-                const dispatched = Math.random() < 0.3 ? 'Y' : 'N';
                 const region = window.i18n && window.i18n.getCurrentLanguage() === 'en' ? 'Sydney' : '悉尼';
                 
-                csv += `${meterNumber},${formatDateTime(currentTime)},${gridUsage},${feedIn},${price},${dispatched},${region},${familyName}\n`;
+                csv += `${meterNumber},${formatDateTime(currentTime)},${gridUsage},${feedIn},${price},${region},${familyName}\n`;
                 
-                currentTime.setMinutes(currentTime.getMinutes() + 5);
+                currentTime.setMinutes(currentTime.getMinutes() + 30);
             }
 
             // Download as Excel-compatible CSV

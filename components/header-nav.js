@@ -82,7 +82,7 @@ class HeaderNav {
     
     createHeaderHTML() {
         const navItems = [
-            { href: 'index.html', i18nKey: 'nav.home', key: 'home' },
+            { href: 'dashboard.html', i18nKey: 'nav.home', key: 'home' },
             { href: '002.html', i18nKey: 'nav.profit', key: 'profit' },
             { href: 'family-new.html', i18nKey: 'nav.family', key: 'family' },
             { href: '001.html', i18nKey: 'nav.analysis', key: 'analysis' },
@@ -296,7 +296,7 @@ class HeaderNav {
         const logo = document.querySelector('.header .logo');
         if (logo) {
             logo.addEventListener('click', () => {
-                window.location.href = 'index.html';
+                window.location.href = 'dashboard.html';
             });
         }
     }

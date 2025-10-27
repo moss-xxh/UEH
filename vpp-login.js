@@ -216,8 +216,8 @@ async function handleLogin(e) {
             localStorage.setItem('userEmail', email);
             localStorage.setItem('isLoggedIn', 'true');
             
-            // Redirect to index page immediately
-            window.location.href = 'index.html';
+            // Redirect to main dashboard page immediately
+            window.location.href = 'dashboard.html';
         } catch (error) {
             showMessage('Login failed. Please try again.', 'error');
         }
