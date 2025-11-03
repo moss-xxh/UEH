@@ -73,6 +73,10 @@ class I18n {
         // 定义多语言文本
         this.translations = {
             zh: {
+                // 通用翻译
+                brand: "品牌",
+                model: "型号",
+                version: "版本号",
                 nav: {
                     home: "首页",
                     profit: "获利",
@@ -1028,7 +1032,7 @@ class I18n {
                         allStatus: "所有状态",
                         allActivity: "所有活跃度",
                         deviceStatus: "所有设备状态",
-                        operationMode: "所有运行模式",
+                        allBrands: "所有品牌",
                         userName: "请输入用户名称...",
                         deviceCode: "请输入设备编码...",
                         meterNumber: "请输入电表编号...",
@@ -1043,16 +1047,18 @@ class I18n {
                         userName: "用户名称",
                         location: "地址",
                         activity: "活跃度",
-                        yesterdayProfit: "昨日获利 ($)",
-                        todayProfit: "今日获利 ($)",
-                        totalProfit: "累计获利 ($)",
-                        cumulativeProfit: "累计获利 ($)",
-                        avgProfit: "日均获利 ($)",
+                        meterNumber: "表号",
+                        brand: "品牌",
+                        version: "版本号",
+                        yesterdayProfit: "昨日盈利 ($)",
+                        todayProfit: "今日盈利 ($)",
+                        totalProfit: "累计盈利 ($)",
+                        cumulativeProfit: "累计盈利 ($)",
+                        avgProfit: "日均盈利 ($)",
                         deviceCode: "设备编码",
                         deviceStatus: "设备状态",
                         operationMode: "运行模式",
                         flowDirection: "流向/来源",
-                        meterNumber: "电表",
                         soc: "SOC",
                         todayDischarge: "今日放电 (kWh)",
                         usageDays: "使用天数 (天)",
@@ -1069,7 +1075,6 @@ class I18n {
                         discharging: "放电中",
                         standby: "待机",
                         offline: "离线",
-                        offlineDuration: "时长",
                         lightOn: "有亮灯",
                         lightOff: "没有亮灯",
                         missingBattery: "缺少电池"
@@ -1138,8 +1143,6 @@ class I18n {
                         owner: "所属用户",
                         todayProfit: "今日获利",
                         avgProfit: "日均获利",
-                        manufacturer: "厂商",
-                        version: "版本号",
                         totalRevenue: "累计获利",
                         todayDischarge: "今日放电量",
                         avgDischarge: "日均放电量",
@@ -1702,7 +1705,7 @@ class I18n {
                         allActivity: "所有活跃度",
                         deviceCode: "请输入设备编码...",
                         deviceStatus: "所有设备状态",
-                        operationMode: "所有运行模式",
+                        allBrands: "所有品牌",
                         allRegions: "所有地区",
                         meterNumber: "请输入电表编号..."
                     },
@@ -1715,7 +1718,6 @@ class I18n {
                         discharging: "放电中",
                         standby: "待机",
                         offline: "离线",
-                        offlineDuration: "时长",
                         lightOn: "有亮灯",
                         lightOff: "没有亮灯",
                         missingBattery: "缺少电池"
@@ -1730,18 +1732,18 @@ class I18n {
                         search: "查询",
                         reset: "重置",
                         export: "导出",
-                        exportDetail: "导出明细",
+                        exportDetail: "导出运行数据",
                         refresh: "刷新",
                         viewDetails: "查看详情",
                         runningData: "运行数据"
                     },
                     exportDetail: {
-                        title: "导出明细",
+                        title: "导出运行数据",
                         selectDate: "选择日期",
                         hint: "只能选择单个日期的数据进行导出",
                         confirmExport: "确认导出",
                         selectDateError: "请选择日期",
-                        exportSuccess: "明细数据导出成功"
+                        exportSuccess: "运行数据导出成功"
                     },
                     table: {
                         user: "用户",
@@ -1776,6 +1778,8 @@ class I18n {
                         address: "地址",
                         meterNumber: "电表",
                         deviceCode: "设备编码",
+                        manufacturer: "厂商",
+                        version: "版本号",
                         batteryCapacity: "电池容量",
                         soc: "SOC",
                         status: "状态",
@@ -1785,8 +1789,6 @@ class I18n {
                         realtimePower: "实时功率",
                         todayProfit: "今日获利",
                         avgProfit: "日均获利",
-                        manufacturer: "厂商",
-                        version: "版本号",
                         totalRevenue: "累计获利",
                         todayCharge: "今日充电量",
                         todayDischarge: "今日放电量",
@@ -1926,6 +1928,10 @@ class I18n {
             },
             
             en: {
+                // Common translations
+                brand: "Brand",
+                model: "Model",
+                version: "Version",
                 nav: {
                     home: "Home",
                     profit: "Profit",
@@ -2968,7 +2974,7 @@ class I18n {
                         allStatus: "All Status",
                         allActivity: "All Activity",
                         deviceStatus: "All Device Status",
-                        operationMode: "All Operation Mode",
+                        allBrands: "All Brands",
                         userName: "Enter user name...",
                         deviceCode: "Enter device code...",
                         meterNumber: "Enter NMI...",
@@ -2982,6 +2988,9 @@ class I18n {
                         userName: "User Name",
                         location: "Location",
                         activity: "Activity",
+                        meterNumber: "Meter Number",
+                        brand: "Brand",
+                        version: "Version",
                         yesterdayProfit: "Yesterday's Profit ($)",
                         todayProfit: "Today's Profit ($)",
                         totalProfit: "Total Profit ($)",
@@ -2991,7 +3000,6 @@ class I18n {
                         deviceStatus: "Device Status",
                         operationMode: "Operation Mode",
                         flowDirection: "Flow/Source",
-                        meterNumber: "NMI",
                         soc: "SOC",
                         todayDischarge: "Today's Discharge (kWh)",
                         usageDays: "Usage Days",
@@ -3008,7 +3016,6 @@ class I18n {
                         discharging: "Discharging",
                         standby: "Standby",
                         offline: "Offline",
-                        offlineDuration: "Time",
                         lightOn: "Light On",
                         lightOff: "Light Off",
                         missingBattery: "Missing Battery"
@@ -3077,8 +3084,6 @@ class I18n {
                         owner: "Owner",
                         todayProfit: "Today's Profit",
                         avgProfit: "Avg Daily Profit",
-                        manufacturer: "Manufacturer",
-                        version: "Version",
                         totalRevenue: "Total Revenue",
                         todayDischarge: "Today's Discharge",
                         avgDischarge: "Avg Discharge",
@@ -3623,8 +3628,9 @@ class I18n {
                         allActivity: "All Activity",
                         deviceCode: "Enter device code...",
                         deviceStatus: "All Device Status",
-                        operationMode: "All Operation Mode",
-                        allRegions: "All Regions"
+                        allBrands: "All Brands",
+                        allRegions: "All Regions",
+                        meterNumber: "Enter NMI..."
                     },
                     activityStatus: {
                         active: "Active",
@@ -3635,7 +3641,6 @@ class I18n {
                         discharging: "Discharging",
                         standby: "Standby",
                         offline: "Offline",
-                        offlineDuration: "Time",
                         lightOn: "Light On",
                         lightOff: "Light Off",
                         missingBattery: "Missing Battery"
@@ -3650,19 +3655,20 @@ class I18n {
                         search: "Search",
                         reset: "Reset",
                         export: "Export",
-                        exportDetail: "Export Details",
+                        exportDetail: "Export Running Data",
                         refresh: "Refresh",
                         expand: "Expand",
                         collapse: "Collapse",
-                        viewDetails: "View Details"
+                        viewDetails: "View Details",
+                        runningData: "Running Data"
                     },
                     exportDetail: {
-                        title: "Export Details",
+                        title: "Export Running Data",
                         selectDate: "Select Date",
                         hint: "You can only export data for a single date",
                         confirmExport: "Confirm Export",
                         selectDateError: "Please select a date",
-                        exportSuccess: "Details exported successfully"
+                        exportSuccess: "Running data exported successfully"
                     },
                     table: {
                         user: "User",
@@ -3697,17 +3703,17 @@ class I18n {
                         address: "Address",
                         meterNumber: "NMI",
                         deviceCode: "Device Code",
+                        manufacturer: "Manufacturer",
+                        version: "Version",
                         batteryCapacity: "Battery Capacity",
                         soc: "SOC",
                         status: "Status",
                         operatingDays: "Operating Days",
-                        owner: "Owner", 
+                        owner: "Owner",
                         day: "Day",
                         realtimePower: "Realtime Power",
                         todayProfit: "Today's Profit",
                         avgProfit: "Avg Daily Profit",
-                        manufacturer: "Manufacturer",
-                        version: "Version",
                         totalRevenue: "Total Revenue",
                         todayCharge: "Today's Charge",
                         todayDischarge: "Today's Discharge",

@@ -314,27 +314,33 @@
         
         /* Specific column widths for better layout */
         .data-table th:nth-child(1),
-        .data-table td:nth-child(1) { min-width: 80px; }
+        .data-table td:nth-child(1) { min-width: 100px; } /* 用户 */
         .data-table th:nth-child(2),
-        .data-table td:nth-child(2) { min-width: 100px; }
+        .data-table td:nth-child(2) { min-width: 100px; } /* 表号 */
         .data-table th:nth-child(3),
-        .data-table td:nth-child(3) { min-width: 120px; }
+        .data-table td:nth-child(3) { min-width: 100px; } /* 品牌 */
         .data-table th:nth-child(4),
-        .data-table td:nth-child(4) { min-width: 120px; }
+        .data-table td:nth-child(4) { min-width: 100px; } /* 型号 */
         .data-table th:nth-child(5),
-        .data-table td:nth-child(5) { min-width: 120px; }
+        .data-table td:nth-child(5) { min-width: 140px; } /* 设备编码 */
         .data-table th:nth-child(6),
-        .data-table td:nth-child(6) { min-width: 120px; }
+        .data-table td:nth-child(6) {
+            min-width: 200px;
+            max-width: 280px;
+            white-space: normal;
+        } /* 版本号 - 支持多行 */
         .data-table th:nth-child(7),
-        .data-table td:nth-child(7) { min-width: 100px; }
+        .data-table td:nth-child(7) { min-width: 140px; } /* 设备状态 */
         .data-table th:nth-child(8),
-        .data-table td:nth-child(8) { min-width: 80px; }
+        .data-table td:nth-child(8) { min-width: 120px; } /* 运行模式 */
         .data-table th:nth-child(9),
-        .data-table td:nth-child(9) { min-width: 120px; }
+        .data-table td:nth-child(9) { min-width: 100px; } /* SOC */
         .data-table th:nth-child(10),
-        .data-table td:nth-child(10) { min-width: 200px; }
+        .data-table td:nth-child(10) { min-width: 120px; } /* 昨日盈利 */
         .data-table th:nth-child(11),
-        .data-table td:nth-child(11) { min-width: 100px; }
+        .data-table td:nth-child(11) { min-width: 120px; } /* 今日盈利 */
+        .data-table th:nth-child(12),
+        .data-table td:nth-child(12) { min-width: 120px; } /* 累计盈利 */
 
         /* Page Header */
         .page-header {
@@ -581,15 +587,17 @@
             .data-table th:nth-child(6),
             .data-table td:nth-child(6) { min-width: 100px; }
             .data-table th:nth-child(7),
-            .data-table td:nth-child(7) { min-width: 80px; }
+            .data-table td:nth-child(7) { min-width: 100px; }
             .data-table th:nth-child(8),
-            .data-table td:nth-child(8) { min-width: 60px; }
+            .data-table td:nth-child(8) { min-width: 80px; }
             .data-table th:nth-child(9),
-            .data-table td:nth-child(9) { min-width: 100px; }
+            .data-table td:nth-child(9) { min-width: 60px; }
             .data-table th:nth-child(10),
-            .data-table td:nth-child(10) { min-width: 150px; }
+            .data-table td:nth-child(10) { min-width: 100px; }
             .data-table th:nth-child(11),
-            .data-table td:nth-child(11) { min-width: 80px; }
+            .data-table td:nth-child(11) { min-width: 150px; }
+            .data-table th:nth-child(12),
+            .data-table td:nth-child(12) { min-width: 80px; }
             
             /* Fixed action column on mobile */
             .data-table .fixed-action-column {
@@ -1274,7 +1282,14 @@
                         <option value="NT">NT - 北领地</option>
                         <option value="ACT">ACT - 首都领地</option>
                     </select>
-                    
+
+                    <!-- Brand Filter -->
+                    <select class="filter-select" id="brandFilter" onchange="handleBrandFilter(this.value)">
+                        <option value="" data-i18n-key="family.placeholder.allBrands">所有品牌</option>
+                        <option value="FOX ESS">FOX ESS</option>
+                        <option value="ipotisedge">ipotisedge</option>
+                    </select>
+
                     <input type="text" class="search-input" id="searchInput" data-i18n-placeholder="family.placeholder.userName" placeholder="请输入用户名称..." onkeyup="handleSearch(this.value)">
                     
                     <input type="text" class="search-input" id="meterInput" data-i18n-placeholder="family.placeholder.meterNumber" placeholder="请输入电表编号..." onkeyup="handleMeterSearch(this.value)">
@@ -1294,16 +1309,7 @@
                             <option value="missingBattery" data-i18n-key="family.deviceStates.missingBattery">无电池</option>
                         </optgroup>
                     </select>
-                    
-                    <!-- Operation Mode Filter -->
-                    <select class="filter-select" id="operationModeFilter" onchange="handleOperationModeFilter(this.value)">
-                        <option value="" data-i18n-key="family.placeholder.operationMode">所有运行模式</option>
-                        <option value="0" data-i18n-key="family.operationMode.0">自用模式</option>
-                        <option value="1" data-i18n-key="family.operationMode.1">并网优先模式</option>
-                        <option value="2" data-i18n-key="family.operationMode.2">预留模式</option>
-                        <option value="3" data-i18n-key="family.operationMode.3">备用模式</option>
-                    </select>
-                    
+
                     <div class="filter-actions">
                         <button class="filter-btn primary" onclick="applyFilters()">
                             <span>🔍</span>
@@ -1345,28 +1351,10 @@
                             <tr>
                                 <th data-i18n-key="family.table.user">用户</th>
                                 <th data-i18n-key="family.table.meterNumber">表号</th>
-                                <th>
-                                    <span data-i18n-key="family.table.yesterdayProfit">昨日获利 ($)</span>
-                                    <span class="sort-buttons">
-                                        <button class="sort-btn sort-asc" onclick="sortTable('yesterdayProfit', 'asc', this)" title="升序">▲</button>
-                                        <button class="sort-btn sort-desc" onclick="sortTable('yesterdayProfit', 'desc', this)" title="降序">▼</button>
-                                    </span>
-                                </th>
-                                <th>
-                                    <span data-i18n-key="family.table.todayProfit">今日获利 ($)</span>
-                                    <span class="sort-buttons">
-                                        <button class="sort-btn sort-asc" onclick="sortTable('todayProfit', 'asc', this)" title="升序">▲</button>
-                                        <button class="sort-btn sort-desc" onclick="sortTable('todayProfit', 'desc', this)" title="降序">▼</button>
-                                    </span>
-                                </th>
-                                <th>
-                                    <span data-i18n-key="family.table.totalProfit">累计获利 ($)</span>
-                                    <span class="sort-buttons">
-                                        <button class="sort-btn sort-asc" onclick="sortTable('totalProfit', 'asc', this)" title="升序">▲</button>
-                                        <button class="sort-btn sort-desc" onclick="sortTable('totalProfit', 'desc', this)" title="降序">▼</button>
-                                    </span>
-                                </th>
+                                <th data-i18n-key="brand">品牌</th>
+                                <th data-i18n-key="model">型号</th>
                                 <th data-i18n-key="family.table.deviceCode">设备编码</th>
+                                <th data-i18n-key="version">版本号</th>
                                 <th data-i18n-key="family.table.deviceStatus">设备状态</th>
                                 <th data-i18n-key="family.table.operationMode">运行模式</th>
                                 <th>
@@ -1377,17 +1365,24 @@
                                     </span>
                                 </th>
                                 <th>
-                                    <span data-i18n-key="family.table.socValue">电池价值</span>
+                                    <span data-i18n-key="family.table.yesterdayProfit">昨日盈利 ($)</span>
                                     <span class="sort-buttons">
-                                        <button class="sort-btn sort-asc" onclick="sortTable('socValue', 'asc', this)" title="升序">▲</button>
-                                        <button class="sort-btn sort-desc" onclick="sortTable('socValue', 'desc', this)" title="降序">▼</button>
+                                        <button class="sort-btn sort-asc" onclick="sortTable('yesterdayProfit', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('yesterdayProfit', 'desc', this)" title="降序">▼</button>
                                     </span>
                                 </th>
                                 <th>
-                                    <span data-i18n-key="family.table.batteryCost">每kWh成本</span>
+                                    <span data-i18n-key="family.table.todayProfit">今日盈利 ($)</span>
                                     <span class="sort-buttons">
-                                        <button class="sort-btn sort-asc" onclick="sortTable('batteryCost', 'asc', this)" title="升序">▲</button>
-                                        <button class="sort-btn sort-desc" onclick="sortTable('batteryCost', 'desc', this)" title="降序">▼</button>
+                                        <button class="sort-btn sort-asc" onclick="sortTable('todayProfit', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('todayProfit', 'desc', this)" title="降序">▼</button>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span data-i18n-key="family.table.totalProfit">累计盈利 ($)</span>
+                                    <span class="sort-buttons">
+                                        <button class="sort-btn sort-asc" onclick="sortTable('totalProfit', 'asc', this)" title="升序">▲</button>
+                                        <button class="sort-btn sort-desc" onclick="sortTable('totalProfit', 'desc', this)" title="降序">▼</button>
                                     </span>
                                 </th>
                                 <th data-i18n-key="family.table.action" class="fixed-action-column">操作</th>
@@ -1554,6 +1549,8 @@
             const locations = ['NSW', 'NSW', 'NSW', 'Perth WA', 'Adelaide SA', 'Gold Coast QLD', 'Canberra ACT', 'Newcastle NSW', 'Hobart TAS', 'Darwin NT'];
             const statuses = ['active', 'inactive'];
             const deviceStatuses = ['charging', 'discharging', 'standby', 'offline'];
+            const brands = ['FOX ESS', 'ipotisedge'];
+            const ipoModels = ['IPS-6K-L120-S', 'IPS-8K-L150-S', 'IPS-10K-L200-S'];
             
             const data = [];
             let offlineCount = 0;
@@ -1591,14 +1588,12 @@
                     dischargingDestination = Math.random() > 0.5 ? 'load' : 'grid';
                 }
 
-                // Add offline duration for offline devices (in minutes)
-                let offlineDuration = null;
-                if (deviceStatus === 'offline') {
-                    // Random duration between 30 minutes to 10 hours (30-600 minutes)
-                    offlineDuration = Math.floor(Math.random() * 570 + 30);
-                }
+                // 随机选择品牌 (50% FOX, 50% IPO)
+                const brand = brands[Math.floor(Math.random() * brands.length)];
+                const isFox = brand === 'FOX ESS';
 
-                data.push({
+                // 构建设备数据
+                const deviceData = {
                     id: i + 1,
                     name: names[i % names.length],
                     nameKey: `family.userName${(i % 10) + 1}`,
@@ -1616,10 +1611,28 @@
                     operationMode: Math.floor(Math.random() * 4), // 0-3: 自用模式、并网优先模式、预留模式、备用模式
                     chargingSource: chargingSource,
                     dischargingDestination: dischargingDestination,
-                    offlineDuration: offlineDuration,
                     usageDays: Math.floor(Math.random() * 300 + 30),
-                    batteryMissing: batteryMissing
-                });
+                    batteryMissing: batteryMissing,
+                    brand: brand
+                };
+
+                // 根据品牌添加型号和版本信息
+                if (isFox) {
+                    // FOX设备：没有型号，有3个版本
+                    deviceData.model = null;
+                    deviceData.managerVersion = `1.${50 + Math.floor(Math.random() * 20)}`;
+                    deviceData.slaveVersion = `1.${Math.floor(Math.random() * 20).toString().padStart(2, '0')}`;
+                    deviceData.masterVersion = `1.${40 + Math.floor(Math.random() * 15)}`;
+                } else {
+                    // IPO设备：有型号，有4个版本
+                    deviceData.model = ipoModels[Math.floor(Math.random() * ipoModels.length)];
+                    deviceData.IPOMDSPVersion = `G9504-050200-12_0225${30 + Math.floor(Math.random() * 20)}`;
+                    deviceData.CSBVersion = `0225${30 + Math.floor(Math.random() * 20)}`;
+                    deviceData.DCDCVersion = `0206${Math.floor(Math.random() * 20).toString().padStart(2, '0')}`;
+                    deviceData.SDSPVersion = `0202${Math.floor(Math.random() * 20).toString().padStart(2, '0')}`;
+                }
+
+                data.push(deviceData);
             }
             
             // Sort data by device status: discharging first, then standby, then offline
@@ -1801,14 +1814,6 @@
             }, 1000);
         });
 
-        // Format offline duration to hours:minutes
-        function formatOfflineDuration(minutes) {
-            if (!minutes) return '';
-            const hours = Math.floor(minutes / 60);
-            const mins = minutes % 60;
-            return `${hours}:${String(mins).padStart(2, '0')}`;
-        }
-
         // Get flow direction based on device status and actual data
         function getFlowDirection(family) {
             try {
@@ -1842,13 +1847,12 @@
                     `${solarIndicator}光伏→电池<br>${gridIndicator}电网→电池`;
                     
             } else if (family.deviceStatus === 'standby') {
-                return isEnglish ?
-                    '<span class="flow-indicator inactive">●</span>Standby' :
+                return isEnglish ? 
+                    '<span class="flow-indicator inactive">●</span>Standby' : 
                     '<span class="flow-indicator inactive">●</span>待机';
             } else {
-                // Don't show duration in flow direction column (right side)
-                return isEnglish ?
-                    '<span class="flow-indicator offline">●</span>Offline' :
+                return isEnglish ? 
+                    '<span class="flow-indicator offline">●</span>Offline' : 
                     '<span class="flow-indicator offline">●</span>离线';
             }
             } catch (error) {
@@ -1870,28 +1874,46 @@
                                     family.deviceStatus === 'discharging' ? 'discharging' :
                                     family.deviceStatus === 'standby' ? 'standby' : 'offline';
 
-            let deviceStatusText = '';
-            if (family.deviceStatus === 'charging') {
-                deviceStatusText = window.i18n ? window.i18n.getText('family.deviceStates.charging') : '充电';
-            } else if (family.deviceStatus === 'discharging') {
-                deviceStatusText = window.i18n ? window.i18n.getText('family.deviceStates.discharging') : '放电';
-            } else if (family.deviceStatus === 'standby') {
-                deviceStatusText = window.i18n ? window.i18n.getText('family.deviceStates.standby') : '待机';
-            } else {
-                const offlineText = window.i18n ? window.i18n.getText('family.deviceStates.offline') : '离线';
-                const durationLabel = window.i18n ? window.i18n.getText('family.deviceStates.offlineDuration') : '时长';
-                // Show duration in device status column (left side)
-                const duration = family.offlineDuration ? `<br>(${durationLabel}: ${formatOfflineDuration(family.offlineDuration)})` : '';
-                deviceStatusText = `${offlineText}${duration}`;
+            const deviceStatusText = family.deviceStatus === 'charging' ? (window.i18n ? window.i18n.getText('family.deviceStates.charging') : '充电') :
+                                   family.deviceStatus === 'discharging' ? (window.i18n ? window.i18n.getText('family.deviceStates.discharging') : '放电') :
+                                   family.deviceStatus === 'standby' ? (window.i18n ? window.i18n.getText('family.deviceStates.standby') : '待机') :
+                                   (window.i18n ? window.i18n.getText('family.deviceStates.offline') : '离线');
+
+            // 品牌和型号直接从数据中获取，不做翻译处理
+            const brand = family.brand || '-';
+
+            // 型号显示：FOX品牌显示"--"，其他品牌显示model字段
+            const modelDisplay = brand.toLowerCase().includes('fox') ? '--' : (family.model || '-');
+
+            // 根据品牌类型构建多版本号显示
+            let versionDisplay = '-';
+            if (brand.toLowerCase().includes('fox')) {
+                // FOX ESS 设备显示3个版本
+                const versions = [];
+                if (family.managerVersion) versions.push(`Manager: ${family.managerVersion}`);
+                if (family.slaveVersion) versions.push(`Slave: ${family.slaveVersion}`);
+                if (family.masterVersion) versions.push(`Master: ${family.masterVersion}`);
+                versionDisplay = versions.length > 0 ? versions.join('<br>') : '-';
+            } else if (brand.toLowerCase().includes('ipotis') || brand.toLowerCase().includes('ipo')) {
+                // ipotisedge 设备显示4个版本
+                const versions = [];
+                if (family.IPOMDSPVersion) versions.push(`IPOMDSP: ${family.IPOMDSPVersion}`);
+                if (family.CSBVersion) versions.push(`CSB: ${family.CSBVersion}`);
+                if (family.DCDCVersion) versions.push(`DCDC: ${family.DCDCVersion}`);
+                if (family.SDSPVersion) versions.push(`SDSP: ${family.SDSPVersion}`);
+                versionDisplay = versions.length > 0 ? versions.join('<br>') : '-';
+            } else if (family.version) {
+                // 通用版本号
+                versionDisplay = family.version;
             }
 
             row.innerHTML = `
                 <td>${window.i18n ? window.i18n.getText(family.nameKey) : family.name}</td>
                 <td>${family.meterNumber}</td>
-                <td style="cursor: pointer; color: var(--color-primary);" onclick="openDischargeDrawer('${family.id}', 'yesterday')">$${family.yesterdayProfit}</td>
-                <td style="cursor: pointer; color: var(--color-primary);" onclick="openDischargeDrawer('${family.id}', 'today')">$${family.todayProfit}</td>
-                <td>$${family.totalProfit || Math.floor(family.todayProfit * 30)}</td>
+                <td>${brand}</td>
+                <td>${modelDisplay}</td>
                 <td>${family.deviceCode}</td>
+                <td style="font-size: 11px; line-height: 1.6; color: var(--color-text-secondary);">${versionDisplay}</td>
                 <td style="display: flex; align-items: flex-start; gap: 12px; width: 100%;">
                     <div style="flex-shrink: 0;">
                         <span class="status-badge ${deviceStatusClass}">
@@ -1908,16 +1930,17 @@
                 </td>
                 <td>
                     <span class="operation-mode-badge mode-${family.operationMode}">
-                        ${window.i18n ? window.i18n.getText('family.operationMode.' + family.operationMode) : 
-                          (family.operationMode === 0 ? '自用模式' : 
-                           family.operationMode === 1 ? '并网优先模式' : 
+                        ${window.i18n ? window.i18n.getText('family.operationMode.' + family.operationMode) :
+                          (family.operationMode === 0 ? '自用模式' :
+                           family.operationMode === 1 ? '并网优先模式' :
                            family.operationMode === 2 ? '预留模式' : '备用模式')
                         }
                     </span>
                 </td>
                 <td>${family.soc}%</td>
-                <td>$${(family.soc * 15).toFixed(2)}</td>
-                <td>$${(family.soc * 0.5).toFixed(2)}</td>
+                <td style="cursor: pointer; color: var(--color-primary);" onclick="openDischargeDrawer('${family.id}', 'yesterday')">$${family.yesterdayProfit}</td>
+                <td style="cursor: pointer; color: var(--color-primary);" onclick="openDischargeDrawer('${family.id}', 'today')">$${family.todayProfit}</td>
+                <td>$${family.totalProfit || Math.floor(family.todayProfit * 30)}</td>
                 <td class="fixed-action-column">
                     <div class="action-buttons">
                         <button class="action-btn edit" onclick="viewFamilyDetails(${family.id})">
@@ -1979,10 +2002,10 @@
                 }
             }
 
-            // Apply operation mode filter
-            const operationModeValue = document.getElementById('operationModeFilter').value;
-            if (operationModeValue) {
-                window.filteredData = window.filteredData.filter(family => family.operationMode.toString() === operationModeValue);
+            // Apply brand filter
+            const brandValue = document.getElementById('brandFilter').value;
+            if (brandValue) {
+                window.filteredData = window.filteredData.filter(family => family.brand === brandValue);
             }
 
             // Update pagination
@@ -2280,13 +2303,33 @@
             
             switch(tab) {
                 case 'basicInfo':
+                    // 构建版本号显示
+                    let versionInfo = '-';
+                    const brand = family.brand || '-';
+                    if (brand.toLowerCase().includes('fox')) {
+                        const versions = [];
+                        if (family.managerVersion) versions.push(`Manager: ${family.managerVersion}`);
+                        if (family.slaveVersion) versions.push(`Slave: ${family.slaveVersion}`);
+                        if (family.masterVersion) versions.push(`Master: ${family.masterVersion}`);
+                        versionInfo = versions.length > 0 ? versions.join('<br>') : '-';
+                    } else if (brand.toLowerCase().includes('ipotis') || brand.toLowerCase().includes('ipo')) {
+                        const versions = [];
+                        if (family.IPOMDSPVersion) versions.push(`IPOMDSP: ${family.IPOMDSPVersion}`);
+                        if (family.CSBVersion) versions.push(`CSB: ${family.CSBVersion}`);
+                        if (family.DCDCVersion) versions.push(`DCDC: ${family.DCDCVersion}`);
+                        if (family.SDSPVersion) versions.push(`SDSP: ${family.SDSPVersion}`);
+                        versionInfo = versions.length > 0 ? versions.join('<br>') : '-';
+                    } else if (family.version) {
+                        versionInfo = family.version;
+                    }
+
                     content.innerHTML = `
-                        <!-- 用户信息 -->
+                        <!-- 基本信息 -->
                         <div class="drawer-category-section">
-                            <h4 class="drawer-category-title">👤 ${window.i18n ? window.i18n.getText('family.drawer.userInfo') : '用户'}</h4>
+                            <h4 class="drawer-category-title">📋 ${window.i18n ? window.i18n.getText('family.drawer.tabs.basicInfo') : '基本信息'}</h4>
                             <div class="drawer-info-grid">
                                 <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.owner') : '用户'}</div>
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.owner') : '所属用户'}</div>
                                     <div class="drawer-info-value">
                                         ${window.i18n ? window.i18n.getText(family.nameKey) : family.name}
                                         <span class="status-badge ${family.status === 'active' ? 'active' : 'inactive'}" style="margin-left: 8px;">
@@ -2309,15 +2352,15 @@
                                 </div>
                                 <div class="drawer-info-item">
                                     <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.manufacturer') : '厂商'}</div>
-                                    <div class="drawer-info-value">${family.manufacturer || 'FOX ESS'}</div>
+                                    <div class="drawer-info-value">${brand}</div>
                                 </div>
                                 <div class="drawer-info-item">
                                     <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.version') : '版本号'}</div>
-                                    <div class="drawer-info-value">${family.version || 'v2.5.1'}</div>
+                                    <div class="drawer-info-value" style="font-size: 11px; line-height: 1.6;">${versionInfo}</div>
                                 </div>
                                 <div class="drawer-info-item">
                                     <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.operatingDays') : '运行天数'}</div>
-                                    <div class="drawer-info-value">${Math.floor(Math.random() * 300 + 200)}${window.i18n ? window.i18n.getText('family.drawer.day') : '天'}</div>
+                                    <div class="drawer-info-value">${family.usageDays || Math.floor(Math.random() * 300 + 200)}${window.i18n ? window.i18n.getText('family.drawer.day') : '天'}</div>
                                 </div>
                                 <div class="drawer-info-item">
                                     <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.totalRevenue') : '累计获利'}</div>
@@ -2735,8 +2778,8 @@
             // This will be handled by applyFilters function
         }
 
-        function handleOperationModeFilter(value) {
-            console.log('Operation mode filter:', value);
+        function handleBrandFilter(value) {
+            console.log('Brand filter:', value);
             // This will be handled by applyFilters function
         }
 
@@ -2768,8 +2811,8 @@
             document.getElementById('meterInput').value = '';
             document.getElementById('deviceCodeInput').value = '';
             document.getElementById('deviceStatusFilter').value = '';
-            document.getElementById('operationModeFilter').value = '';
-            
+            document.getElementById('brandFilter').value = '';
+
             currentPage = 1;
             loadFamilyCards();
         }
@@ -3060,7 +3103,7 @@
         window.handleDeviceCodeSearch = handleDeviceCodeSearch;
         window.handleRegionFilter = handleRegionFilter;
         window.handleDeviceStatusFilter = handleDeviceStatusFilter;
-        window.handleOperationModeFilter = handleOperationModeFilter;
+        window.handleBrandFilter = handleBrandFilter;
         window.applyFilters = applyFilters;
         window.resetFilters = resetFilters;
         window.exportData = exportData;
@@ -3235,147 +3278,7 @@
                 hours.push(i + ':00');
             }
             
-            // Define ALL events with precise time (hour:minute and command)
-            // These will be automatically grouped into 5-minute windows
-            const allEventsRaw = [
-                { time: '6:00', command: 'charging' },
-                { time: '6:02', command: 'stopCharging' },
-                { time: '6:03', command: 'discharging' },
-                { time: '14:00', command: 'discharging' },
-                { time: '14:02', command: 'stopDischarging' },
-                { time: '14:03', command: 'charging' },
-                { time: '14:05', command: 'stopCharging' },
-                { time: '19:00', command: 'stopDischarging' },
-                { time: '23:00', command: 'discharging' },
-                { time: '23:02', command: 'stopDischarging' },
-                { time: '23:03', command: 'charging' },
-                { time: '23:05', command: 'stopCharging' }
-            ];
-
-            // Translate commands based on current language
-            const currentLang = localStorage.getItem('app_language') || 'zh';
-            const isEnglish = currentLang === 'en';
-
-            // Get translations - use i18n if available, otherwise use default based on language
-            const commandTranslations = {
-                charging: (window.i18n && window.i18n.getText('family.drawer.charging')) || (isEnglish ? 'Charging' : '充电'),
-                stopCharging: (window.i18n && window.i18n.getText('family.drawer.stopCharging')) || (isEnglish ? 'Stop Charging' : '停止充电'),
-                discharging: (window.i18n && window.i18n.getText('family.drawer.discharging')) || (isEnglish ? 'Discharging' : '放电'),
-                stopDischarging: (window.i18n && window.i18n.getText('family.drawer.stopDischarging')) || (isEnglish ? 'Stop Discharging' : '停止放电')
-            };
-
-            // Group events by 5-minute windows
-            // Convert time to minutes for easier comparison
-            function timeToMinutes(timeStr) {
-                const [h, m] = timeStr.split(':').map(Number);
-                return h * 60 + m;
-            }
-
-            // Group events within 5-minute windows
-            const eventGroups = [];
-            const sortedEvents = [...allEventsRaw].sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
-
-            let currentGroup = [];
-            let groupStartTime = null;
-
-            sortedEvents.forEach(event => {
-                const eventMinutes = timeToMinutes(event.time);
-
-                if (groupStartTime === null || eventMinutes - groupStartTime <= 5) {
-                    // Within 5 minutes of group start, add to current group
-                    if (groupStartTime === null) {
-                        groupStartTime = eventMinutes;
-                    }
-                    currentGroup.push(event);
-                } else {
-                    // Outside 5-minute window, start new group
-                    eventGroups.push([...currentGroup]);
-                    currentGroup = [event];
-                    groupStartTime = eventMinutes;
-                }
-            });
-
-            // Don't forget the last group
-            if (currentGroup.length > 0) {
-                eventGroups.push(currentGroup);
-            }
-
-            // Organize by hour for tooltip lookup
-            const eventsData = {};
-            eventGroups.forEach(group => {
-                const hour = parseInt(group[0].time.split(':')[0]);
-                if (!eventsData[hour]) {
-                    eventsData[hour] = [];
-                }
-                eventsData[hour].push({
-                    events: group.map(e => ({
-                        time: e.time,
-                        command: commandTranslations[e.command]
-                    })),
-                    isMultiple: group.length > 1
-                });
-            });
-
             const option = {
-                tooltip: {
-                    trigger: 'axis',
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                    textStyle: {
-                        color: '#fff',
-                        fontSize: 13
-                    },
-                    formatter: function(params) {
-                        const hour = parseInt(params[0].axisValue);
-
-                        let html = `<div style="padding: 8px; min-width: 150px;">`;
-
-                        // Show events if any
-                        if (eventsData[hour] && eventsData[hour].length > 0) {
-                            // Color mapping based on command type
-                            const getCommandColor = (commandText) => {
-                                const chargingText = commandTranslations['charging'];
-                                const stopChargingText = commandTranslations['stopCharging'];
-                                const dischargingText = commandTranslations['discharging'];
-                                const stopDischargingText = commandTranslations['stopDischarging'];
-
-                                if (commandText === chargingText) return '#5AD8A6';
-                                if (commandText === stopChargingText) return '#FFC107';
-                                if (commandText === dischargingText) return '#1E7FFF';
-                                if (commandText === stopDischargingText) return '#FF6B6B';
-                                return '#888';
-                            };
-
-                            // Show all event groups for this hour
-                            eventsData[hour].forEach((group, groupIndex) => {
-                                if (groupIndex > 0) {
-                                    html += `<div style="margin: 8px 0; border-top: 1px solid rgba(255,255,255,0.2);"></div>`;
-                                }
-                                group.events.forEach((event, index) => {
-                                    const color = getCommandColor(event.command);
-                                    html += `<div style="margin: 4px 0; line-height: 1.6;">`;
-                                    html += `<span style="color: #fff; font-weight: bold;">${event.time}</span>`;
-                                    html += `<span style="color: #fff; margin: 0 8px;">-</span>`;
-                                    html += `<span style="color: ${color}; font-weight: bold;">${event.command}</span>`;
-                                    html += `</div>`;
-                                });
-                            });
-                        } else {
-                            // No events, just show time and SOC
-                            const timeLabel = window.i18n ? (window.i18n.currentLanguage === 'en' ? 'Time' : '时间') : '时间';
-                            html += `<div style="margin-bottom: 5px;">`;
-                            html += `<span style="color: rgba(255,255,255,0.7);">${timeLabel}：</span>`;
-                            html += `<span style="color: #fff; font-weight: bold;">${params[0].axisValue}</span>`;
-                            html += `</div>`;
-                            html += `<div>`;
-                            html += `<span style="color: rgba(255,255,255,0.7);">SOC：</span>`;
-                            html += `<span style="color: #5AD8A6; font-weight: bold;">${params[0].data}%</span>`;
-                            html += `</div>`;
-                        }
-                        html += `</div>`;
-                        return html;
-                    }
-                },
                 grid: {
                     top: 40,
                     right: 20,
@@ -3446,81 +3349,58 @@
                         color: '#5AD8A6'
                     },
                     markPoint: {
-                        data: (() => {
-                            const markPoints = [];
-                            const socData = [
-                                65, 68, 70, 75, 80, 85, 88, 90, 95, 93, 90, 87,
-                                85, 80, 75, 70, 65, 60, 55, 50, 45, 48, 52, 60
-                            ];
-
-                            // Color mapping for single events
-                            const getCommandColor = (commandText) => {
-                                const chargingText = commandTranslations['charging'];
-                                const stopChargingText = commandTranslations['stopCharging'];
-                                const dischargingText = commandTranslations['discharging'];
-                                const stopDischargingText = commandTranslations['stopDischarging'];
-
-                                if (commandText === chargingText) return '#5AD8A6';  // Green for charging
-                                if (commandText === dischargingText) return '#FFC850';  // Yellow for discharging (from image)
-                                if (commandText === stopChargingText || commandText === stopDischargingText) return '#FF6B6B';  // Red for stop
-                                return '#888';
-                            };
-
-                            // Generate mark points for each event group
-                            eventGroups.forEach(group => {
-                                const hour = parseInt(group[0].time.split(':')[0]);
-                                const socValue = socData[hour] || 50;
-                                const eventCount = group.length;
-
-                                if (eventCount > 1) {
-                                    // Multiple events within 5 minutes - show blue pin without number
-                                    markPoints.push({
-                                        coord: [hour, socValue],
-                                        symbol: 'pin',
-                                        symbolSize: 35,
-                                        itemStyle: {
-                                            color: '#6DCCF5'  // Light blue for multiple events (from image)
-                                        },
-                                        label: {
-                                            show: false
-                                        }
-                                    });
-                                } else {
-                                    // Single event - show colored circle with simplified text
-                                    const command = group[0].command;
-                                    const color = getCommandColor(commandTranslations[command]);
-
-                                    // Simplified text: 充/放/停 for Chinese, Charge/Discharge/Stop for English
-                                    let displayText;
-                                    if (command === 'charging') {
-                                        displayText = isEnglish ? 'Charge' : '充';
-                                    } else if (command === 'discharging') {
-                                        displayText = isEnglish ? 'Discharge' : '放';
-                                    } else if (command === 'stopCharging' || command === 'stopDischarging') {
-                                        displayText = isEnglish ? 'Stop' : '停';
-                                    }
-
-                                    markPoints.push({
-                                        coord: [hour, socValue],
-                                        symbol: 'circle',
-                                        symbolSize: 35,
-                                        value: displayText,
-                                        itemStyle: {
-                                            color: color
-                                        },
-                                        label: {
-                                            show: true,
-                                            color: '#fff',
-                                            fontSize: 12,
-                                            fontWeight: 'bold',
-                                            position: 'inside'
-                                        }
-                                    });
+                        symbol: 'rect',
+                        symbolSize: [60, 25],
+                        data: [
+                            {
+                                coord: [6, 88],
+                                value: window.i18n ? window.i18n.getText('family.drawer.charging') : '充电',
+                                itemStyle: {
+                                    color: '#5AD8A6'
+                                },
+                                label: {
+                                    color: '#000',
+                                    fontSize: 12,
+                                    fontWeight: 'bold'
                                 }
-                            });
-
-                            return markPoints;
-                        })()
+                            },
+                            {
+                                coord: [8, 95],
+                                value: window.i18n ? window.i18n.getText('family.drawer.stopCharging') : '停止充电',
+                                itemStyle: {
+                                    color: '#FFC107'
+                                },
+                                label: {
+                                    color: '#000',
+                                    fontSize: 12,
+                                    fontWeight: 'bold'
+                                }
+                            },
+                            {
+                                coord: [14, 75],
+                                value: window.i18n ? window.i18n.getText('family.drawer.discharging') : '放电',
+                                itemStyle: {
+                                    color: '#1E7FFF'
+                                },
+                                label: {
+                                    color: '#fff',
+                                    fontSize: 12,
+                                    fontWeight: 'bold'
+                                }
+                            },
+                            {
+                                coord: [19, 50],
+                                value: window.i18n ? window.i18n.getText('family.drawer.stopDischarging') : '停止放电',
+                                itemStyle: {
+                                    color: '#FF6B6B'
+                                },
+                                label: {
+                                    color: '#fff',
+                                    fontSize: 12,
+                                    fontWeight: 'bold'
+                                }
+                            }
+                        ]
                     }
                 }]
             };
