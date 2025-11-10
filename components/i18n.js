@@ -1773,6 +1773,14 @@ class I18n {
                         exportSuccess: "运行数据导出成功",
                         noSelection: "请至少选择一条数据进行导出"
                     },
+                    exportScope: {
+                        label: "用户：",
+                        all: "全部",
+                        page: "第",
+                        pageUsers: "页用户",
+                        selected: "已选",
+                        items: "个"
+                    },
                     table: {
                         user: "用户",
                         meterNumber: "表号",
@@ -3735,6 +3743,14 @@ class I18n {
                         selectDateError: "Please select date range",
                         exportSuccess: "Running data exported successfully",
                         noSelection: "Please select at least one row to export"
+                    },
+                    exportScope: {
+                        label: "Users: ",
+                        all: "All",
+                        page: "Page",
+                        pageUsers: "Users",
+                        selected: "Selected",
+                        items: "items"
                     },
                     table: {
                         user: "User",

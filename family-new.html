@@ -2962,15 +2962,14 @@
 
         // Update export buttons enabled/disabled state
         function updateExportButtonsState() {
-            const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+            // 确保两个导出按钮始终启用（无选中时导出全部数据）
+            const exportBtn = document.querySelector('.filter-btn.export');
             const exportDetailBtn = document.querySelector('.filter-btn.export-detail');
 
-            if (!exportDetailBtn) return;
-
-            // Only disable "Export Detail" button, "Export" button is always enabled
-            if (checkedCount === 0) {
-                exportDetailBtn.disabled = true;
-            } else {
+            if (exportBtn) {
+                exportBtn.disabled = false;
+            }
+            if (exportDetailBtn) {
                 exportDetailBtn.disabled = false;
             }
         }
@@ -3082,16 +3081,7 @@
 
         // Export detail data function
         function exportDetailData() {
-            // Check if any checkboxes are selected
-            const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-
-            if (selectedCheckboxes.length === 0) {
-                const noSelectionMsg = window.i18n ? window.i18n.getText('family.exportDetail.noSelection') : '请至少选择一条数据进行导出';
-                alert(noSelectionMsg);
-                return;
-            }
-
-            // Create and show date selection modal
+            // 直接显示日期选择弹窗（无选中时导出全部数据的明细）
             showExportDetailModal();
         }
         
@@ -3102,7 +3092,29 @@
             if (existingModal) {
                 existingModal.remove();
             }
-            
+
+            // 计算用户范围提示
+            const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const totalPageCheckboxes = document.querySelectorAll('.row-checkbox').length;
+
+            let userScopeText = '';
+            if (selectedCheckboxes.length === 0) {
+                // 没有选中，导出全部
+                userScopeText = window.i18n ? window.i18n.getText('family.exportScope.all') : '全部';
+            } else if (selectAllCheckbox && selectAllCheckbox.checked && selectedCheckboxes.length === totalPageCheckboxes) {
+                // 勾选了全选框且当前页所有checkbox都被选中
+                const pageNum = pagination ? pagination.currentPage : currentPage;
+                userScopeText = window.i18n ?
+                    `${window.i18n.getText('family.exportScope.page')} ${pageNum} ${window.i18n.getText('family.exportScope.pageUsers')}` :
+                    `第 ${pageNum} 页用户`;
+            } else {
+                // 选中了部分
+                userScopeText = window.i18n ?
+                    `${window.i18n.getText('family.exportScope.selected')} ${selectedCheckboxes.length} ${window.i18n.getText('family.exportScope.items')}` :
+                    `已选 ${selectedCheckboxes.length} 个`;
+            }
+
             // Get today's date in YYYY-MM-DD format
             const today = new Date();
             const todayStr = today.toISOString().split('T')[0];
@@ -3271,6 +3283,11 @@
                     <button class="modal-close" onclick="closeExportDetailModal()">✕</button>
                 </div>
                 <div class="modal-body">
+                    <div class="user-scope-hint" style="background: rgba(30, 127, 255, 0.1); border: 1px solid rgba(30, 127, 255, 0.3); border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 16px;">👥</span>
+                        <span style="color: var(--color-text-secondary); font-size: 14px;">${window.i18n ? window.i18n.getText('family.exportScope.label') : '用户：'}</span>
+                        <span style="color: var(--color-accent); font-weight: 600; font-size: 14px;">${userScopeText}</span>
+                    </div>
                     <div class="date-range-container">
                         <div class="date-range-item">
                             <label class="date-label">${window.i18n ? window.i18n.getText('family.exportDetail.startDate') : '开始日期'}</label>
@@ -3403,17 +3420,16 @@
             // Get selected checkboxes
             const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
 
+            let selectedData;
+
             if (selectedCheckboxes.length === 0) {
-                const noSelectionMsg = window.i18n ? window.i18n.getText('family.exportDetail.noSelection') : '请至少选择一条数据进行导出';
-                alert(noSelectionMsg);
-                return;
+                // 如果没有选中，导出所有过滤后的数据
+                selectedData = window.filteredData;
+            } else {
+                // 如果有选中，只导出选中的数据
+                const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.getAttribute('data-family-id')));
+                selectedData = window.filteredData.filter(family => selectedIds.includes(family.id));
             }
-
-            // Get selected family IDs
-            const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.getAttribute('data-family-id')));
-
-            // Filter data based on selected IDs
-            const selectedData = window.filteredData.filter(family => selectedIds.includes(family.id));
 
             // Close modal
             closeExportDetailModal();
