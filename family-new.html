@@ -3758,16 +3758,78 @@
         function initOperatingChart() {
             const chartDom = document.getElementById('operatingChart');
             if (!chartDom) return;
-            
+
             const chart = echarts.init(chartDom);
-            
+
             // Generate 24 hours for today
             const hours = [];
             for (let i = 0; i < 24; i++) {
                 hours.push(i + ':00');
             }
-            
+
+            // 定义每个时间点的操作（模拟数据，实际应从API获取）
+            const operationsByHour = {
+                6: [
+                    { type: 'charging', text: window.i18n ? window.i18n.getText('family.drawer.charging') : '开始充电', time: '6:00' }
+                ],
+                8: [
+                    { type: 'stopCharging', text: window.i18n ? window.i18n.getText('family.drawer.stopCharging') : '停止充电', time: '8:30' }
+                ],
+                10: [
+                    { type: 'charging', text: window.i18n ? window.i18n.getText('family.drawer.charging') : '开始充电', time: '10:15' },
+                    { type: 'discharging', text: window.i18n ? window.i18n.getText('family.drawer.discharging') : '开始放电', time: '10:45' }
+                ],
+                14: [
+                    { type: 'discharging', text: window.i18n ? window.i18n.getText('family.drawer.discharging') : '开始放电', time: '14:00' }
+                ],
+                19: [
+                    { type: 'stopDischarging', text: window.i18n ? window.i18n.getText('family.drawer.stopDischarging') : '停止放电', time: '19:20' }
+                ]
+            };
+
             const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 1,
+                    textStyle: {
+                        color: '#fff',
+                        fontSize: 13
+                    },
+                    formatter: function(params) {
+                        const hourIndex = params[0].dataIndex;
+                        const socValue = params[0].data;
+                        const operations = operationsByHour[hourIndex] || [];
+
+                        let html = `<div style="padding: 4px;">`;
+                        html += `<div style="font-weight: bold; margin-bottom: 8px; color: #00ff88;">${params[0].name}</div>`;
+                        html += `<div style="margin-bottom: 6px;">SOC: <span style="color: #5AD8A6; font-weight: 600;">${socValue}%</span></div>`;
+
+                        if (operations.length > 0) {
+                            html += `<div style="border-top: 1px solid rgba(255,255,255,0.2); margin-top: 8px; padding-top: 8px;">`;
+                            html += `<div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 4px;">${window.i18n ? window.i18n.getText('family.drawer.operations') : '操作记录'}:</div>`;
+                            operations.forEach(op => {
+                                let color = '#5AD8A6';
+                                if (op.type === 'charging') {
+                                    color = '#00ff88';
+                                } else if (op.type === 'stopCharging' || op.type === 'stopDischarging') {
+                                    color = '#ff4757';
+                                } else if (op.type === 'discharging') {
+                                    color = '#ffd700';
+                                }
+                                html += `<div style="margin: 4px 0; padding: 4px 8px; background: rgba(255,255,255,0.05); border-radius: 4px; border-left: 3px solid ${color};">`;
+                                html += `<span style="color: ${color}; font-weight: 500;">${op.text}</span>`;
+                                html += `<span style="color: rgba(255,255,255,0.5); font-size: 11px; margin-left: 8px;">${op.time}</span>`;
+                                html += `</div>`;
+                            });
+                            html += `</div>`;
+                        }
+
+                        html += `</div>`;
+                        return html;
+                    }
+                },
                 grid: {
                     top: 40,
                     right: 20,
@@ -3838,58 +3900,70 @@
                         color: '#5AD8A6'
                     },
                     markPoint: {
-                        symbol: 'rect',
-                        symbolSize: [60, 25],
-                        data: [
-                            {
-                                coord: [6, 88],
-                                value: window.i18n ? window.i18n.getText('family.drawer.charging') : '充电',
-                                itemStyle: {
-                                    color: '#5AD8A6'
-                                },
-                                label: {
-                                    color: '#000',
-                                    fontSize: 12,
-                                    fontWeight: 'bold'
+                        symbol: 'circle',
+                        symbolSize: 35,
+                        data: (() => {
+                            const socData = [
+                                65, 68, 70, 75, 80, 85, 88, 90, 95, 93, 90, 87,
+                                85, 80, 75, 70, 65, 60, 55, 50, 45, 48, 52, 60
+                            ];
+                            const markPoints = [];
+
+                            // 遍历 operationsByHour，生成标记点
+                            Object.keys(operationsByHour).forEach(hourIndex => {
+                                const operations = operationsByHour[hourIndex];
+                                const socValue = socData[parseInt(hourIndex)];
+
+                                // 如果同一时间点有多个操作，显示一个特殊标记
+                                if (operations.length > 1) {
+                                    markPoints.push({
+                                        coord: [parseInt(hourIndex), socValue],
+                                        value: `${operations.length}x`,
+                                        itemStyle: {
+                                            color: '#1E7FFF'  // 蓝色表示多个操作
+                                        },
+                                        label: {
+                                            color: '#fff',
+                                            fontSize: 11,
+                                            fontWeight: 'bold'
+                                        }
+                                    });
+                                } else {
+                                    // 单个操作，显示具体类型
+                                    const op = operations[0];
+                                    let color, textColor, label;
+
+                                    if (op.type === 'charging') {
+                                        color = '#00ff88';  // 绿色
+                                        textColor = '#000';
+                                        label = 'IN';
+                                    } else if (op.type === 'stopCharging' || op.type === 'stopDischarging') {
+                                        color = '#ff4757';  // 红色
+                                        textColor = '#fff';
+                                        label = 'Stop';
+                                    } else if (op.type === 'discharging') {
+                                        color = '#ffd700';  // 黄色
+                                        textColor = '#000';
+                                        label = 'OUT';
+                                    }
+
+                                    markPoints.push({
+                                        coord: [parseInt(hourIndex), socValue],
+                                        value: label,
+                                        itemStyle: {
+                                            color: color
+                                        },
+                                        label: {
+                                            color: textColor,
+                                            fontSize: 10,
+                                            fontWeight: 'bold'
+                                        }
+                                    });
                                 }
-                            },
-                            {
-                                coord: [8, 95],
-                                value: window.i18n ? window.i18n.getText('family.drawer.stopCharging') : '停止充电',
-                                itemStyle: {
-                                    color: '#FFC107'
-                                },
-                                label: {
-                                    color: '#000',
-                                    fontSize: 12,
-                                    fontWeight: 'bold'
-                                }
-                            },
-                            {
-                                coord: [14, 75],
-                                value: window.i18n ? window.i18n.getText('family.drawer.discharging') : '放电',
-                                itemStyle: {
-                                    color: '#1E7FFF'
-                                },
-                                label: {
-                                    color: '#fff',
-                                    fontSize: 12,
-                                    fontWeight: 'bold'
-                                }
-                            },
-                            {
-                                coord: [19, 50],
-                                value: window.i18n ? window.i18n.getText('family.drawer.stopDischarging') : '停止放电',
-                                itemStyle: {
-                                    color: '#FF6B6B'
-                                },
-                                label: {
-                                    color: '#fff',
-                                    fontSize: 12,
-                                    fontWeight: 'bold'
-                                }
-                            }
-                        ]
+                            });
+
+                            return markPoints;
+                        })()
                     }
                 }]
             };
