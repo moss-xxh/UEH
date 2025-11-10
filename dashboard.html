@@ -6785,6 +6785,17 @@
                     
                     // Initialize i18n system if not already initialized by HeaderNav
                     if (!window.i18n && typeof I18n !== 'undefined') {
+                        // 确保默认使用中文，清除可能存在的英文设置
+                        try {
+                            const storedLang = localStorage.getItem('app_language');
+                            if (storedLang === 'en') {
+                                console.log('Clearing English language setting, using Chinese as default');
+                                localStorage.removeItem('app_language');
+                            }
+                        } catch (e) {
+                            console.warn('Failed to check/clear language setting:', e);
+                        }
+
                         window.i18n = new I18n({
                             defaultLanguage: 'zh',
                             containerId: 'headerLanguageSelector'
