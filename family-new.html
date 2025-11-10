@@ -2553,11 +2553,11 @@
                     content.innerHTML = `
                         <div class="revenue-cards">
                             <div class="revenue-card">
-                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.todayCharge') : '今日充电量'}</div>
+                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.todayCharge') : '今日用电量'}</div>
                                 <div class="revenue-card-value">${(Math.random() * 30 + 10).toFixed(1)}kWh</div>
                             </div>
                             <div class="revenue-card">
-                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.todayDischarge') : '今日放电量'}</div>
+                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.todayDischarge') : '今日馈网量'}</div>
                                 <div class="revenue-card-value">${(Math.random() * 25 + 8).toFixed(1)}kWh</div>
                             </div>
                             <div class="revenue-card">
@@ -2565,11 +2565,11 @@
                                 <div class="revenue-card-value">$${family.todayProfit}</div>
                             </div>
                             <div class="revenue-card">
-                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.totalCharge') : '累计充电量'}</div>
+                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.totalCharge') : '累计用电量'}</div>
                                 <div class="revenue-card-value">${(Math.random() * 5000 + 2000).toFixed(0)}kWh</div>
                             </div>
                             <div class="revenue-card">
-                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.totalDischarge') : '累计放电量'}</div>
+                                <div class="revenue-card-label">${window.i18n ? window.i18n.getText('family.drawer.totalDischarge') : '累计馈网量'}</div>
                                 <div class="revenue-card-value">${(Math.random() * 4500 + 1800).toFixed(0)}kWh</div>
                             </div>
                             <div class="revenue-card">
@@ -2614,12 +2614,12 @@
                     
                     const recordsHtml = pageRecords.map(record => {
                         const typeClass = record.type === 'charge' ? 'charging' : 'discharging';
-                        const typeText = record.type === 'charge' ? 
+                        const typeText = record.type === 'charge' ?
                             (window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.charge') : '充电') :
                             (window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.discharge') : '放电');
-                        const amountPrefix = record.type === 'charge' ? '-' : '+';
+                        const amountDisplay = record.type === 'charge' ? '--' : `+$${record.amount}`;
                         const amountClass = record.type === 'charge' ? 'cost' : 'revenue';
-                        
+
                         return `
                             <tr>
                                 <td style="font-size: 13px; white-space: nowrap;">${record.timeRange}</td>
@@ -2629,7 +2629,7 @@
                                     </span>
                                 </td>
                                 <td style="white-space: nowrap;">${record.energy} kWh</td>
-                                <td class="${amountClass}" style="white-space: nowrap;">${amountPrefix}$${record.amount}</td>
+                                <td class="${amountClass}" style="white-space: nowrap;">${amountDisplay}</td>
                             </tr>
                         `;
                     }).join('');
@@ -2734,24 +2734,24 @@
                         
                         <div class="dispatch-summary">
                             <div class="dispatch-summary-card">
-                                <div class="dispatch-summary-value">${dispatchRecords.filter(r => !r.totalCharge).length}</div>
-                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalCount') : '总调度次数'}</div>
-                            </div>
-                            <div class="dispatch-summary-card">
-                                <div class="dispatch-summary-value" style="color: #ffb800;">${dispatchRecords.totalCharge} kWh</div>
-                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalCharge') : '充电量'}</div>
+                                <div class="dispatch-summary-value">${dispatchRecords.filter(r => r.type === '放电').length}</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.dischargeCount') : '放电调度次数'}</div>
                             </div>
                             <div class="dispatch-summary-card">
                                 <div class="dispatch-summary-value positive">${dispatchRecords.totalDischarge} kWh</div>
-                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalDischarge') : '放电量'}</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.dischargeAmount') : '放电量'}</div>
                             </div>
                             <div class="dispatch-summary-card">
                                 <div class="dispatch-summary-value positive">$${calculateTotalRevenue(dispatchRecords)}</div>
-                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalRevenue') : '总收益'}</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.profit') : '获利'}</div>
                             </div>
                             <div class="dispatch-summary-card">
-                                <div class="dispatch-summary-value negative">$${calculateTotalCost(dispatchRecords)}</div>
-                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.totalCost') : '总成本'}</div>
+                                <div class="dispatch-summary-value">${dispatchRecords.filter(r => r.type === '充电').length}</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.chargeCount') : '充电调度次数'}</div>
+                            </div>
+                            <div class="dispatch-summary-card">
+                                <div class="dispatch-summary-value" style="color: #ffb800;">${dispatchRecords.totalCharge} kWh</div>
+                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.chargeAmount') : '充电量'}</div>
                             </div>
                         </div>
                         
@@ -3585,13 +3585,15 @@
             
             // Generate x-axis data based on view mode
             let xAxisData = [];
+            let seriesData0 = []; // Input data
             let seriesData1 = [];
             let seriesData2 = [];
-            
+
             if (viewMode === 'day') {
                 // Day view: show 24 hours
                 for (let i = 0; i < 24; i++) {
                     xAxisData.push(`${i}:00`);
+                    seriesData0.push(Math.floor(Math.random() * 60 + 30)); // Input
                     seriesData1.push(Math.floor(Math.random() * 50 + 10));
                     seriesData2.push(Math.floor(Math.random() * 60 + 20));
                 }
@@ -3602,9 +3604,10 @@
                 const year = selectedDate.getFullYear();
                 const month = selectedDate.getMonth();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
-                
+
                 for (let i = 1; i <= daysInMonth; i++) {
                     xAxisData.push(`${i}`);
+                    seriesData0.push(Math.floor(Math.random() * 250 + 120)); // Input
                     seriesData1.push(Math.floor(Math.random() * 200 + 50));
                     seriesData2.push(Math.floor(Math.random() * 250 + 100));
                 }
@@ -3613,6 +3616,7 @@
                 const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
                 xAxisData = months;
                 for (let i = 0; i < 12; i++) {
+                    seriesData0.push(Math.floor(Math.random() * 3500 + 1800)); // Input
                     seriesData1.push(Math.floor(Math.random() * 3000 + 1000));
                     seriesData2.push(Math.floor(Math.random() * 3500 + 1500));
                 }
@@ -3621,8 +3625,9 @@
             const option = {
                 legend: {
                     data: [
-                        window.i18n ? window.i18n.getText('family.drawer.revenue') : '收益',
-                        window.i18n ? window.i18n.getText('family.drawer.discharge') : '放电量'
+                        window.i18n ? window.i18n.getText('input') : '输入',
+                        window.i18n ? window.i18n.getText('output') : '输出',
+                        window.i18n ? window.i18n.getText('profit') : '收益'
                     ],
                     top: 5,
                     textStyle: {
@@ -3694,15 +3699,25 @@
                     }
                 }],
                 series: [{
-                    name: window.i18n ? window.i18n.getText('family.drawer.revenue') : '收益',
+                    name: window.i18n ? window.i18n.getText('input') : '输入',
+                    type: 'bar',
+                    data: seriesData0,
+                    itemStyle: {
+                        color: '#00ff88',
+                        opacity: 0.8
+                    },
+                    barWidth: viewMode === 'day' ? '20%' : '30%'
+                }, {
+                    name: window.i18n ? window.i18n.getText('output') : '输出',
                     type: 'bar',
                     data: seriesData1,
                     itemStyle: {
-                        color: '#5B8FF9'
+                        color: '#ffd700',
+                        opacity: 0.8
                     },
-                    barWidth: viewMode === 'day' ? '30%' : '40%'
+                    barWidth: viewMode === 'day' ? '20%' : '30%'
                 }, {
-                    name: window.i18n ? window.i18n.getText('family.drawer.discharge') : '放电量',
+                    name: window.i18n ? window.i18n.getText('profit') : '收益',
                     type: 'line',
                     yAxisIndex: 1,
                     data: seriesData2,
@@ -3710,11 +3725,11 @@
                     symbol: 'circle',
                     symbolSize: viewMode === 'day' ? 4 : 8,
                     itemStyle: {
-                        color: '#5AD8A6'
+                        color: '#1E7FFF'
                     },
                     lineStyle: {
                         width: 3,
-                        color: '#5AD8A6'
+                        color: '#1E7FFF'
                     }
                 }]
             };

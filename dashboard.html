@@ -4857,7 +4857,7 @@
             <!-- Discharge & Profit Chart 放电与收益 -->
                 <div class="card" style="height:422px; min-height:422px; max-height:422px; margin-top:20px; display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; padding:24px;">
                     <div class="chart-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-                        <div class="chart-title" data-i18n="profit.charts.dischargeAndProfit" style="font-size:18px; font-weight:500; color:var(--color-text);">放电与获利</div>
+                        <div class="chart-title" data-i18n="profit.charts.dischargeAndProfit" style="font-size:18px; font-weight:500; color:var(--color-text);">电量与获利</div>
                         <div style="display:flex; align-items:center; gap:12px;">
                             <!-- Time Period Dropdown (on left) -->
                             <select id="discharge-period-select" class="period-dropdown" onchange="handleDischargePeriodChange()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:6px 12px; color:#fff; font-size:13px; min-width:80px; cursor:pointer; outline:none;">
@@ -4984,7 +4984,7 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                         <div>
                             <div style="color: rgba(255, 255, 255, 0.6); font-size: 13px; margin-bottom: 4px;">
-                                <span data-i18n="actualDischargeAmount">Actual Discharge Amount</span>
+                                <span data-i18n="outputAmount">Output</span>
                             </div>
                             <div style="display: flex; align-items: baseline; gap: 8px;">
                                 <span style="color: #fff; font-size: 28px; font-weight: 700;">18.50</span>
@@ -4994,12 +4994,12 @@
                         </div>
                         <div>
                             <div style="color: rgba(255, 255, 255, 0.6); font-size: 13px; margin-bottom: 4px;">
-                                <span data-i18n="actualDischargeEfficiency">Actual Discharge Efficiency</span>
+                                <span data-i18n="inputAmount">Input</span>
                             </div>
                             <div style="display: flex; align-items: baseline; gap: 8px;">
-                                <span style="color: #fff; font-size: 28px; font-weight: 700;">89.0</span>
-                                <span style="color: rgba(255, 255, 255, 0.7); font-size: 14px;">%</span>
-                                <span style="color: #00ff88; font-size: 12px; font-weight: 600;">2.0%</span>
+                                <span style="color: #fff; font-size: 28px; font-weight: 700;">20.50</span>
+                                <span style="color: rgba(255, 255, 255, 0.7); font-size: 14px;">kWh</span>
+                                <span style="color: #ff6b6b; font-size: 12px; font-weight: 600;">5.0%</span>
                             </div>
                         </div>
                     </div>
@@ -7435,7 +7435,11 @@
                     }
                 },
                 legend: {
-                    data: [window.i18n ? window.i18n.getText('actualDischarge') : '实时放电量', window.i18n ? window.i18n.getText('profit') : '获利'],
+                    data: [
+                        window.i18n ? window.i18n.getText('input') : 'Input',
+                        window.i18n ? window.i18n.getText('output') : 'Output',
+                        window.i18n ? window.i18n.getText('profit') : '获利'
+                    ],
                     textStyle: { color: 'rgba(255, 255, 255, 0.7)' },
                     top: 0
                 },
@@ -7448,9 +7452,16 @@
                 },
                 xAxis: {
                     type: 'category',
-                    data: ['0:00', '6:00', '12:00', '18:00', '24:00'],
+                    data: Array.from({length: 48}, (_, i) => {
+                        const hour = Math.floor(i / 2);
+                        const minute = (i % 2) * 30;
+                        return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    }),
                     axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
-                    axisLabel: { color: 'rgba(255, 255, 255, 0.6)' }
+                    axisLabel: {
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        interval: 5  // Show every 6th label to avoid crowding
+                    }
                 },
                 yAxis: [{
                     type: 'value',
@@ -7477,24 +7488,33 @@
                     splitLine: { show: false }
                 }],
                 series: [{
-                    name: window.i18n ? window.i18n.getText('actualDischarge') : '实时放电量',
+                    name: window.i18n ? window.i18n.getText('input') : 'Input',
                     type: 'bar',
-                    data: [100, 120, 240, 80, 110],
+                    data: Array.from({length: 48}, () => Math.floor(Math.random() * 200) + 60),
                     itemStyle: {
                         color: '#00ff88',
                         opacity: 0.8
                     },
-                    barWidth: '40%'
+                    barWidth: '30%'
+                }, {
+                    name: window.i18n ? window.i18n.getText('output') : 'Output',
+                    type: 'bar',
+                    data: Array.from({length: 48}, () => Math.floor(Math.random() * 200) + 50),
+                    itemStyle: {
+                        color: '#ffd700',
+                        opacity: 0.8
+                    },
+                    barWidth: '30%'
                 }, {
                     name: window.i18n ? window.i18n.getText('profit') : '获利',
                     type: 'line',
                     yAxisIndex: 1,
-                    data: [150, 180, 240, 120, 165],
+                    data: Array.from({length: 48}, () => Math.floor(Math.random() * 200) + 50),
                     lineStyle: {
                         width: 3,
-                        color: '#ffd700'
+                        color: '#1E7FFF'
                     },
-                    itemStyle: { color: '#ffd700' },
+                    itemStyle: { color: '#1E7FFF' },
                     symbol: 'circle',
                     symbolSize: 8,
                     smooth: true
@@ -8127,32 +8147,40 @@
                 }
             }
             
-            let xAxisData, dischargeData, profitData;
-            
+            let xAxisData, inputData, outputData, profitData;
+
             switch(period) {
                 case 'day':
-                    // Hourly data for selected day
-                    xAxisData = Array.from({length: 24}, (_, i) => i.toString());
-                    dischargeData = Array.from({length: 24}, () => Math.floor(Math.random() * 200) + 50);
-                    profitData = Array.from({length: 24}, () => Math.floor(Math.random() * 200) + 50);
+                    // Half-hourly data for selected day (48 data points)
+                    xAxisData = Array.from({length: 48}, (_, i) => {
+                        const hour = Math.floor(i / 2);
+                        const minute = (i % 2) * 30;
+                        return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    });
+                    inputData = Array.from({length: 48}, () => Math.floor(Math.random() * 200) + 60);
+                    outputData = Array.from({length: 48}, () => Math.floor(Math.random() * 200) + 50);
+                    profitData = Array.from({length: 48}, () => Math.floor(Math.random() * 200) + 50);
                     break;
                 case 'month':
                     // Daily data for selected month
                     const daysInMonth = new Date(dateValue.split('-')[0], dateValue.split('-')[1], 0).getDate();
                     xAxisData = Array.from({length: daysInMonth}, (_, i) => (i + 1).toString());
-                    dischargeData = Array.from({length: daysInMonth}, () => Math.floor(Math.random() * 200) + 50);
+                    inputData = Array.from({length: daysInMonth}, () => Math.floor(Math.random() * 200) + 60);
+                    outputData = Array.from({length: daysInMonth}, () => Math.floor(Math.random() * 200) + 50);
                     profitData = Array.from({length: daysInMonth}, () => Math.floor(Math.random() * 200) + 50);
                     break;
                 case 'year':
                     // Monthly data for selected year
                     xAxisData = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-                    dischargeData = Array.from({length: 12}, () => Math.floor(Math.random() * 2000) + 500);
+                    inputData = Array.from({length: 12}, () => Math.floor(Math.random() * 2000) + 600);
+                    outputData = Array.from({length: 12}, () => Math.floor(Math.random() * 2000) + 500);
                     profitData = Array.from({length: 12}, () => Math.floor(Math.random() * 2000) + 500);
                     break;
                 case 'cumulative':
                     // Cumulative data over time
                     xAxisData = ['2020', '2021', '2022', '2023', '2024'];
-                    dischargeData = [5000, 12000, 25000, 45000, 78000];
+                    inputData = [5500, 13000, 27000, 48000, 82000];
+                    outputData = [5000, 12000, 25000, 45000, 78000];
                     profitData = [8000, 18000, 35000, 62000, 98000];
                     break;
             }
@@ -8161,7 +8189,8 @@
             powerRevenueChart.setOption({
                 xAxis: { data: xAxisData },
                 series: [
-                    { data: dischargeData },
+                    { data: inputData },
+                    { data: outputData },
                     { data: profitData }
                 ]
             });
@@ -14195,13 +14224,15 @@
                 const option = powerChart.getOption();
                 if (option && option.legend && option.legend[0]) {
                     option.legend[0].data = [
-                        window.i18n.getText('actualDischarge'),
+                        window.i18n.getText('input'),
+                        window.i18n.getText('output'),
                         window.i18n.getText('profit')
                     ];
                 }
                 if (option && option.series) {
-                    option.series[0].name = window.i18n.getText('actualDischarge');
-                    option.series[1].name = window.i18n.getText('profit');
+                    option.series[0].name = window.i18n.getText('input');
+                    option.series[1].name = window.i18n.getText('output');
+                    option.series[2].name = window.i18n.getText('profit');
                 }
                 powerChart.setOption(option, true);
                 
@@ -15239,7 +15270,7 @@
             
             powerRevenueChart.setOption({
                 legend: {
-                    data: [window.i18n.getText('actualDischarge'), window.i18n.getText('profit')]
+                    data: [window.i18n.getText('input'), window.i18n.getText('output'), window.i18n.getText('profit')]
                 },
                 yAxis: [
                     {
@@ -15251,7 +15282,10 @@
                 ],
                 series: [
                     {
-                        name: window.i18n.getText('actualDischarge')
+                        name: window.i18n.getText('input')
+                    },
+                    {
+                        name: window.i18n.getText('output')
                     },
                     {
                         name: window.i18n.getText('profit')
