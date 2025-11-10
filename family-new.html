@@ -221,7 +221,9 @@
         /* Table Actions Header */
         .table-actions-header {
             display: flex;
+            flex-wrap: wrap;
             gap: 12px;
+            align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 1px solid var(--color-border);
@@ -633,6 +635,15 @@
 
             .filter-actions {
                 justify-content: stretch;
+            }
+
+            .table-actions-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .table-actions-header .filter-select {
+                width: 100%;
             }
 
             .filter-btn {
@@ -1347,45 +1358,11 @@
 
             <!-- Search Section -->
             <div class="search-filter-section">
-                    <!-- Region Select as First Filter -->
-                    <select class="filter-select" id="regionFilter" onchange="handleRegionFilter(this.value)">
-                        <option value="" data-i18n-key="family.placeholder.allRegions">所有地区</option>
-                        <option value="NSW">NSW - 新南威尔士州</option>
-                        <option value="VIC">VIC - 维多利亚州</option>
-                        <option value="QLD">QLD - 昆士兰州</option>
-                        <option value="SA">SA - 南澳大利亚州</option>
-                        <option value="WA">WA - 西澳大利亚州</option>
-                        <option value="TAS">TAS - 塔斯马尼亚州</option>
-                        <option value="NT">NT - 北领地</option>
-                        <option value="ACT">ACT - 首都领地</option>
-                    </select>
-
-                    <!-- Brand Filter -->
-                    <select class="filter-select" id="brandFilter" onchange="handleBrandFilter(this.value)">
-                        <option value="" data-i18n-key="family.placeholder.allBrands">所有品牌</option>
-                        <option value="FOX ESS">FOX ESS</option>
-                        <option value="ipotisedge">ipotisedge</option>
-                    </select>
-
                     <input type="text" class="search-input" id="searchInput" data-i18n-placeholder="family.placeholder.userName" placeholder="请输入用户名称..." onkeyup="handleSearch(this.value)">
-                    
+
                     <input type="text" class="search-input" id="meterInput" data-i18n-placeholder="family.placeholder.meterNumber" placeholder="请输入电表编号..." onkeyup="handleMeterSearch(this.value)">
-                    
+
                     <input type="text" class="search-input" id="deviceCodeInput" data-i18n-placeholder="family.placeholder.deviceCode" placeholder="请输入设备编码..." onkeyup="handleDeviceCodeSearch(this.value)">
-                    
-                    <!-- Device Status Filter -->
-                    <select class="filter-select" id="deviceStatusFilter" onchange="handleDeviceStatusFilter(this.value)">
-                        <option value="" data-i18n-key="family.placeholder.deviceStatus">所有设备状态</option>
-                        <optgroup label="显示状态">
-                            <option value="charging" data-i18n-key="family.deviceStates.charging">充电中</option>
-                            <option value="discharging" data-i18n-key="family.deviceStates.discharging">放电中</option>
-                            <option value="standby" data-i18n-key="family.deviceStates.standby">待机</option>
-                            <option value="offline" data-i18n-key="family.deviceStates.offline">离线</option>
-                        </optgroup>
-                        <optgroup label="━━━━━━━━━━">
-                            <option value="missingBattery" data-i18n-key="family.deviceStates.missingBattery">无电池</option>
-                        </optgroup>
-                    </select>
 
                     <div class="filter-actions">
                         <button class="filter-btn primary" onclick="applyFilters()">
@@ -1406,7 +1383,41 @@
             <div class="table-card">
                 <!-- Table Actions Header -->
                 <div class="table-actions-header">
-                    <button class="filter-btn export" onclick="exportData()">
+                    <!-- Region Filter -->
+                    <select class="filter-select" id="regionFilter" onchange="handleRegionFilter(this.value)">
+                        <option value="" data-i18n-key="family.placeholder.allRegions">所有地区</option>
+                        <option value="NSW">NSW - 新南威尔士州</option>
+                        <option value="VIC">VIC - 维多利亚州</option>
+                        <option value="QLD">QLD - 昆士兰州</option>
+                        <option value="SA">SA - 南澳大利亚州</option>
+                        <option value="WA">WA - 西澳大利亚州</option>
+                        <option value="TAS">TAS - 塔斯马尼亚州</option>
+                        <option value="NT">NT - 北领地</option>
+                        <option value="ACT">ACT - 首都领地</option>
+                    </select>
+
+                    <!-- Brand Filter -->
+                    <select class="filter-select" id="brandFilter" onchange="handleBrandFilter(this.value)">
+                        <option value="" data-i18n-key="family.placeholder.allBrands">所有品牌</option>
+                        <option value="FOX ESS">FOX ESS</option>
+                        <option value="ipotisedge">ipotisedge</option>
+                    </select>
+
+                    <!-- Device Status Filter -->
+                    <select class="filter-select" id="deviceStatusFilter" onchange="handleDeviceStatusFilter(this.value)">
+                        <option value="" data-i18n-key="family.placeholder.deviceStatus">所有设备状态</option>
+                        <optgroup label="显示状态">
+                            <option value="charging" data-i18n-key="family.deviceStates.charging">充电中</option>
+                            <option value="discharging" data-i18n-key="family.deviceStates.discharging">放电中</option>
+                            <option value="standby" data-i18n-key="family.deviceStates.standby">待机</option>
+                            <option value="offline" data-i18n-key="family.deviceStates.offline">离线</option>
+                        </optgroup>
+                        <optgroup label="━━━━━━━━━━">
+                            <option value="missingBattery" data-i18n-key="family.deviceStates.missingBattery">无电池</option>
+                        </optgroup>
+                    </select>
+
+                    <button class="filter-btn export" onclick="exportData()" style="margin-left: auto;">
                         <span>📥</span>
                         <span data-i18n-key="family.buttons.export">导出</span>
                     </button>
@@ -2875,17 +2886,17 @@
         
         function handleDeviceStatusFilter(value) {
             console.log('Device status filter:', value);
-            // This will be handled by applyFilters function
+            applyFilters(); // 直接触发过滤
         }
 
         function handleBrandFilter(value) {
             console.log('Brand filter:', value);
-            // This will be handled by applyFilters function
+            applyFilters(); // 直接触发过滤
         }
 
         function handleRegionFilter(value) {
             console.log('Region filter:', value);
-            // 可以在这里添加地区筛选的逻辑
+            applyFilters(); // 直接触发过滤
         }
 
         function applyFilters() {
