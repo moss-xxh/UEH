@@ -314,33 +314,93 @@
         
         /* Specific column widths for better layout */
         .data-table th:nth-child(1),
-        .data-table td:nth-child(1) { min-width: 100px; } /* 用户 */
+        .data-table td:nth-child(1) { min-width: 50px; } /* 复选框 */
         .data-table th:nth-child(2),
-        .data-table td:nth-child(2) { min-width: 100px; } /* 表号 */
+        .data-table td:nth-child(2) { min-width: 100px; } /* 用户 */
         .data-table th:nth-child(3),
-        .data-table td:nth-child(3) { min-width: 100px; } /* 品牌 */
+        .data-table td:nth-child(3) { min-width: 100px; } /* 表号 */
         .data-table th:nth-child(4),
-        .data-table td:nth-child(4) { min-width: 100px; } /* 型号 */
+        .data-table td:nth-child(4) { min-width: 100px; } /* 品牌 */
         .data-table th:nth-child(5),
-        .data-table td:nth-child(5) { min-width: 140px; } /* 设备编码 */
+        .data-table td:nth-child(5) { min-width: 100px; } /* 型号 */
         .data-table th:nth-child(6),
-        .data-table td:nth-child(6) {
+        .data-table td:nth-child(6) { min-width: 140px; } /* 设备编码 */
+        .data-table th:nth-child(7),
+        .data-table td:nth-child(7) {
             min-width: 200px;
             max-width: 280px;
             white-space: normal;
         } /* 版本号 - 支持多行 */
-        .data-table th:nth-child(7),
-        .data-table td:nth-child(7) { min-width: 140px; } /* 设备状态 */
         .data-table th:nth-child(8),
-        .data-table td:nth-child(8) { min-width: 120px; } /* 运行模式 */
+        .data-table td:nth-child(8) { min-width: 140px; } /* 设备状态 */
         .data-table th:nth-child(9),
-        .data-table td:nth-child(9) { min-width: 100px; } /* SOC */
+        .data-table td:nth-child(9) { min-width: 120px; } /* 运行模式 */
         .data-table th:nth-child(10),
-        .data-table td:nth-child(10) { min-width: 120px; } /* 昨日盈利 */
+        .data-table td:nth-child(10) { min-width: 100px; } /* SOC */
         .data-table th:nth-child(11),
-        .data-table td:nth-child(11) { min-width: 120px; } /* 今日盈利 */
+        .data-table td:nth-child(11) { min-width: 120px; } /* 昨日盈利 */
         .data-table th:nth-child(12),
-        .data-table td:nth-child(12) { min-width: 120px; } /* 累计盈利 */
+        .data-table td:nth-child(12) { min-width: 120px; } /* 今日盈利 */
+        .data-table th:nth-child(13),
+        .data-table td:nth-child(13) { min-width: 120px; } /* 累计盈利 */
+
+        /* Checkbox Styles */
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        input[type="checkbox"]:hover {
+            border-color: var(--color-primary);
+            background: rgba(0, 255, 136, 0.1);
+            box-shadow: 0 0 8px rgba(0, 255, 136, 0.3);
+        }
+
+        input[type="checkbox"]:checked {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        input[type="checkbox"]:checked::before {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input[type="checkbox"]:indeterminate {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        input[type="checkbox"]:indeterminate::before {
+            content: '−';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input[type="checkbox"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
         /* Page Header */
         .page-header {
@@ -504,6 +564,21 @@
             transform: translateY(-1px);
         }
 
+        /* Disabled button state */
+        .filter-btn:disabled,
+        .filter-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .filter-btn.export:disabled,
+        .filter-btn.export-detail:disabled {
+            background: rgba(30, 127, 255, 0.05);
+            border-color: rgba(30, 127, 255, 0.15);
+            color: rgba(30, 127, 255, 0.4);
+        }
+
         .filter-btn.primary:hover {
             background: #00e67a;
             border-color: #00e67a;
@@ -575,29 +650,31 @@
             
             /* Reduce column widths on mobile */
             .data-table th:nth-child(1),
-            .data-table td:nth-child(1) { min-width: 60px; }
+            .data-table td:nth-child(1) { min-width: 50px; } /* 复选框 */
             .data-table th:nth-child(2),
-            .data-table td:nth-child(2) { min-width: 80px; }
+            .data-table td:nth-child(2) { min-width: 60px; } /* 用户 */
             .data-table th:nth-child(3),
-            .data-table td:nth-child(3) { min-width: 100px; }
+            .data-table td:nth-child(3) { min-width: 80px; } /* 表号 */
             .data-table th:nth-child(4),
-            .data-table td:nth-child(4) { min-width: 100px; }
+            .data-table td:nth-child(4) { min-width: 100px; } /* 品牌 */
             .data-table th:nth-child(5),
-            .data-table td:nth-child(5) { min-width: 100px; }
+            .data-table td:nth-child(5) { min-width: 100px; } /* 型号 */
             .data-table th:nth-child(6),
-            .data-table td:nth-child(6) { min-width: 100px; }
+            .data-table td:nth-child(6) { min-width: 100px; } /* 设备编码 */
             .data-table th:nth-child(7),
-            .data-table td:nth-child(7) { min-width: 100px; }
+            .data-table td:nth-child(7) { min-width: 100px; } /* 版本号 */
             .data-table th:nth-child(8),
-            .data-table td:nth-child(8) { min-width: 80px; }
+            .data-table td:nth-child(8) { min-width: 100px; } /* 设备状态 */
             .data-table th:nth-child(9),
-            .data-table td:nth-child(9) { min-width: 60px; }
+            .data-table td:nth-child(9) { min-width: 80px; } /* 运行模式 */
             .data-table th:nth-child(10),
-            .data-table td:nth-child(10) { min-width: 100px; }
+            .data-table td:nth-child(10) { min-width: 60px; } /* SOC */
             .data-table th:nth-child(11),
-            .data-table td:nth-child(11) { min-width: 150px; }
+            .data-table td:nth-child(11) { min-width: 100px; } /* 昨日盈利 */
             .data-table th:nth-child(12),
-            .data-table td:nth-child(12) { min-width: 80px; }
+            .data-table td:nth-child(12) { min-width: 150px; } /* 今日盈利 */
+            .data-table th:nth-child(13),
+            .data-table td:nth-child(13) { min-width: 80px; } /* 累计盈利 */
             
             /* Fixed action column on mobile */
             .data-table .fixed-action-column {
@@ -1349,6 +1426,9 @@
                         <table class="data-table">
                         <thead>
                             <tr>
+                                <th style="width: 50px; text-align: center;">
+                                    <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)" style="cursor: pointer; width: 18px; height: 18px;">
+                                </th>
                                 <th data-i18n-key="family.table.user">用户</th>
                                 <th data-i18n-key="family.table.meterNumber">表号</th>
                                 <th data-i18n-key="brand">品牌</th>
@@ -1402,8 +1482,8 @@
     </div>
 
     <!-- Family Detail Drawer -->
-    <div class="drawer-overlay" id="familyDrawer">
-        <div class="drawer-container">
+    <div class="drawer-overlay" id="familyDrawer" onclick="handleFamilyDrawerOverlayClick(event)">
+        <div class="drawer-container" onclick="event.stopPropagation()">
             <div class="drawer-header">
                 <h3 class="drawer-title" data-i18n-key="family.drawer.title">详情</h3>
                 <button class="drawer-close" onclick="closeFamilyDrawer()">✕</button>
@@ -1555,12 +1635,13 @@
             const data = [];
             let offlineCount = 0;
             let standbyCount = 0;
-            
+            let chargingCount = 0;
+
             for (let i = 0; i < 50; i++) {
                 const status = statuses[Math.floor(Math.random() * statuses.length)];
                 const isActive = status === 'active';
-                
-                // Determine device status - only allow 3 offline, 2 standby, rest discharging
+
+                // Determine device status - 3 offline, 2 standby, 8 charging, rest discharging
                 let deviceStatus;
                 if (offlineCount < 3 && i < 3) {
                     deviceStatus = 'offline';
@@ -1568,6 +1649,9 @@
                 } else if (standbyCount < 2 && i < 5) {
                     deviceStatus = 'standby';
                     standbyCount++;
+                } else if (chargingCount < 8 && i < 13) {
+                    deviceStatus = 'charging';
+                    chargingCount++;
                 } else {
                     // All others are discharging
                     deviceStatus = 'discharging';
@@ -1635,13 +1719,13 @@
                 data.push(deviceData);
             }
             
-            // Sort data by device status: discharging first, then standby, then offline
+            // Sort data by device status: charging and discharging first (working states), then standby, then offline
             data.sort((a, b) => {
                 const statusOrder = {
-                    'discharging': 1,
-                    'standby': 2,
-                    'offline': 3,
-                    'charging': 4
+                    'charging': 1,
+                    'discharging': 2,
+                    'standby': 3,
+                    'offline': 4
                 };
                 return (statusOrder[a.deviceStatus] || 5) - (statusOrder[b.deviceStatus] || 5);
             });
@@ -1908,6 +1992,9 @@
             }
 
             row.innerHTML = `
+                <td style="text-align: center;">
+                    <input type="checkbox" class="row-checkbox" data-family-id="${family.id}" onchange="updateSelectAllCheckbox()" style="cursor: pointer; width: 18px; height: 18px;">
+                </td>
                 <td>${window.i18n ? window.i18n.getText(family.nameKey) : family.name}</td>
                 <td>${family.meterNumber}</td>
                 <td>${brand}</td>
@@ -2024,11 +2111,13 @@
             if (pageData.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="15" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
+                        <td colspan="16" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
                             ${window.i18n ? window.i18n.getText('noData') : '暂无数据'}
                         </td>
                     </tr>
                 `;
+                // Update export buttons state when no data
+                updateExportButtonsState();
                 return;
             }
 
@@ -2036,6 +2125,9 @@
                 const row = createFamilyTableRow(family);
                 tbody.appendChild(row);
             });
+
+            // Update export buttons state after loading data
+            updateExportButtonsState();
         }
 
         // Make loadFamilyCards available globally as renderTable
@@ -2071,6 +2163,14 @@
         // Close family drawer
         function closeFamilyDrawer() {
             document.getElementById('familyDrawer').classList.remove('show');
+        }
+
+        // Handle family drawer overlay click (close on mask click)
+        function handleFamilyDrawerOverlayClick(event) {
+            // Only close if clicked on the overlay itself, not on the drawer content
+            if (event.target === event.currentTarget) {
+                closeFamilyDrawer();
+            }
         }
 
         // Confirm family details
@@ -2817,18 +2917,169 @@
             loadFamilyCards();
         }
 
+        // Toggle select all checkboxes
+        function toggleSelectAll(selectAllCheckbox) {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+
+            // Update export buttons state
+            updateExportButtonsState();
+        }
+
+        // Update select all checkbox state based on individual checkboxes
+        function updateSelectAllCheckbox() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+
+            if (checkedCount === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCount === checkboxes.length) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+            }
+
+            // Update export buttons state
+            updateExportButtonsState();
+        }
+
+        // Update export buttons enabled/disabled state
+        function updateExportButtonsState() {
+            const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+            const exportDetailBtn = document.querySelector('.filter-btn.export-detail');
+
+            if (!exportDetailBtn) return;
+
+            // Only disable "Export Detail" button, "Export" button is always enabled
+            if (checkedCount === 0) {
+                exportDetailBtn.disabled = true;
+            } else {
+                exportDetailBtn.disabled = false;
+            }
+        }
+
         function exportData() {
-            console.log('Exporting data...');
-            const successMessage = window.i18n ? 
-                (window.i18n.getText('runningData.exportSuccess') || 
-                 window.i18n.getText('exportSuccess') || 
-                 '导出成功') : 
-                '导出成功';
-            alert(successMessage);
+            // Get selected checkboxes
+            const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+
+            let dataToExport;
+
+            if (selectedCheckboxes.length === 0) {
+                // If no selection, export all filtered data
+                dataToExport = window.filteredData;
+            } else {
+                // Get selected family IDs
+                const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.getAttribute('data-family-id')));
+                // Filter data based on selected IDs
+                dataToExport = window.filteredData.filter(family => selectedIds.includes(family.id));
+            }
+
+            // Create CSV content
+            const headers = [
+                window.i18n ? window.i18n.getText('family.table.user') : '用户',
+                window.i18n ? window.i18n.getText('family.table.meterNumber') : '表号',
+                window.i18n ? window.i18n.getText('brand') : '品牌',
+                window.i18n ? window.i18n.getText('model') : '型号',
+                window.i18n ? window.i18n.getText('family.table.deviceCode') : '设备编码',
+                window.i18n ? window.i18n.getText('version') : '版本号',
+                window.i18n ? window.i18n.getText('family.table.deviceStatus') : '设备状态',
+                window.i18n ? window.i18n.getText('family.table.operationMode') : '运行模式',
+                'SOC',
+                window.i18n ? window.i18n.getText('family.table.yesterdayProfit') : '昨日盈利 ($)',
+                window.i18n ? window.i18n.getText('family.table.todayProfit') : '今日盈利 ($)',
+                window.i18n ? window.i18n.getText('family.table.totalProfit') : '累计盈利 ($)'
+            ];
+
+            let csvContent = '\uFEFF' + headers.join(',') + '\n'; // Add BOM for UTF-8
+
+            dataToExport.forEach(family => {
+                const deviceStatusText = family.deviceStatus === 'charging' ? (window.i18n ? window.i18n.getText('family.deviceStates.charging') : '充电') :
+                                       family.deviceStatus === 'discharging' ? (window.i18n ? window.i18n.getText('family.deviceStates.discharging') : '放电') :
+                                       family.deviceStatus === 'standby' ? (window.i18n ? window.i18n.getText('family.deviceStates.standby') : '待机') :
+                                       (window.i18n ? window.i18n.getText('family.deviceStates.offline') : '离线');
+
+                const operationModeText = window.i18n ? window.i18n.getText('family.operationMode.' + family.operationMode) :
+                                        (family.operationMode === 0 ? '自用模式' :
+                                         family.operationMode === 1 ? '并网优先模式' :
+                                         family.operationMode === 2 ? '预留模式' : '备用模式');
+
+                const brand = family.brand || '-';
+                const modelDisplay = brand.toLowerCase().includes('fox') ? '--' : (family.model || '-');
+
+                // Get version display
+                let versionDisplay = '-';
+                if (brand.toLowerCase().includes('fox')) {
+                    const versions = [];
+                    if (family.managerVersion) versions.push(`Manager: ${family.managerVersion}`);
+                    if (family.slaveVersion) versions.push(`Slave: ${family.slaveVersion}`);
+                    if (family.masterVersion) versions.push(`Master: ${family.masterVersion}`);
+                    versionDisplay = versions.length > 0 ? versions.join(' | ') : '-';
+                } else if (brand.toLowerCase().includes('ipotis') || brand.toLowerCase().includes('ipo')) {
+                    const versions = [];
+                    if (family.IPOMDSPVersion) versions.push(`IPOMDSP: ${family.IPOMDSPVersion}`);
+                    if (family.CSBVersion) versions.push(`CSB: ${family.CSBVersion}`);
+                    if (family.DCDCVersion) versions.push(`DCDC: ${family.DCDCVersion}`);
+                    if (family.SDSPVersion) versions.push(`SDSP: ${family.SDSPVersion}`);
+                    versionDisplay = versions.length > 0 ? versions.join(' | ') : '-';
+                } else if (family.version) {
+                    versionDisplay = family.version;
+                }
+
+                const row = [
+                    window.i18n ? window.i18n.getText(family.nameKey) : family.name,
+                    family.meterNumber,
+                    brand,
+                    modelDisplay,
+                    family.deviceCode,
+                    versionDisplay,
+                    deviceStatusText,
+                    operationModeText,
+                    family.soc + '%',
+                    '$' + family.yesterdayProfit,
+                    '$' + family.todayProfit,
+                    '$' + (family.totalProfit || Math.floor(family.todayProfit * 30))
+                ];
+
+                csvContent += row.map(field => `"${field}"`).join(',') + '\n';
+            });
+
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `family_data_${timestamp}.csv`);
+            link.style.visibility = 'hidden';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            const successMsg = window.i18n ?
+                `${window.i18n.getText('family.exportDetail.exportSuccess')} (${dataToExport.length} ${window.i18n.currentLanguage === 'en' ? 'records' : '条数据'})` :
+                `导出成功，共 ${dataToExport.length} 条数据`;
+            alert(successMsg);
         }
 
         // Export detail data function
         function exportDetailData() {
+            // Check if any checkboxes are selected
+            const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+
+            if (selectedCheckboxes.length === 0) {
+                const noSelectionMsg = window.i18n ? window.i18n.getText('family.exportDetail.noSelection') : '请至少选择一条数据进行导出';
+                alert(noSelectionMsg);
+                return;
+            }
+
             // Create and show date selection modal
             showExportDetailModal();
         }
@@ -2919,6 +3170,17 @@
                     #exportDetailModal .date-input-group {
                         margin-bottom: 16px;
                     }
+                    #exportDetailModal .date-range-container {
+                        display: flex;
+                        gap: 12px;
+                        margin-bottom: 16px;
+                    }
+                    #exportDetailModal .date-range-item {
+                        flex: 1;
+                    }
+                    #exportDetailModal .date-range-item .date-label {
+                        margin-bottom: 8px;
+                    }
                     #exportDetailModal .date-label {
                         display: block;
                         color: var(--color-text-secondary, rgba(255, 255, 255, 0.6));
@@ -2940,6 +3202,13 @@
                         outline: none;
                         border-color: #00ff88;
                         background: rgba(0, 255, 136, 0.05);
+                    }
+                    #exportDetailModal select.date-input {
+                        cursor: pointer;
+                    }
+                    #exportDetailModal select.date-input option {
+                        background: var(--color-bg, #000);
+                        color: var(--color-text, #fff);
                     }
                     #exportDetailModal .modal-hint {
                         color: var(--color-text-secondary, rgba(255, 255, 255, 0.5));
@@ -2991,18 +3260,40 @@
                     <button class="modal-close" onclick="closeExportDetailModal()">✕</button>
                 </div>
                 <div class="modal-body">
-                    <div class="date-input-group">
-                        <label class="date-label">${window.i18n ? window.i18n.getText('family.exportDetail.selectDate') : '选择日期'}</label>
-                        <input type="date" 
-                               id="exportDate" 
-                               class="date-input" 
-                               value="${todayStr}"
-                               max="${todayStr}"
-                               required>
-                        <div class="modal-hint">
-                            <span>ℹ️</span>
-                            <span>${window.i18n ? window.i18n.getText('family.exportDetail.hint') : '只能选择单个日期的数据进行导出'}</span>
+                    <div class="date-range-container">
+                        <div class="date-range-item">
+                            <label class="date-label">${window.i18n ? window.i18n.getText('family.exportDetail.startDate') : '开始日期'}</label>
+                            <input type="date"
+                                   id="exportStartDate"
+                                   class="date-input"
+                                   value="${todayStr}"
+                                   max="${todayStr}"
+                                   onchange="validateDateRange()"
+                                   required>
                         </div>
+                        <div class="date-range-item">
+                            <label class="date-label">${window.i18n ? window.i18n.getText('family.exportDetail.endDate') : '结束日期'}</label>
+                            <input type="date"
+                                   id="exportEndDate"
+                                   class="date-input"
+                                   value="${todayStr}"
+                                   max="${todayStr}"
+                                   onchange="validateDateRange()"
+                                   required>
+                        </div>
+                    </div>
+                    <div class="modal-hint" id="dateRangeHint" style="color: var(--color-text-secondary, rgba(255, 255, 255, 0.5)); margin-bottom: 16px;">
+                        <span>ℹ️</span>
+                        <span>${window.i18n ? window.i18n.getText('family.exportDetail.rangeHint') : '日期范围最大不超过31天'}</span>
+                    </div>
+                    <div class="date-input-group">
+                        <label class="date-label">${window.i18n ? window.i18n.getText('family.exportDetail.granularity') : '数据颗粒度'}</label>
+                        <select id="exportGranularity" class="date-input" style="cursor: pointer;">
+                            <option value="5">${window.i18n ? window.i18n.getText('family.exportDetail.granularity5min') : '5分钟'}</option>
+                            <option value="15">${window.i18n ? window.i18n.getText('family.exportDetail.granularity15min') : '15分钟'}</option>
+                            <option value="30" selected>${window.i18n ? window.i18n.getText('family.exportDetail.granularity30min') : '30分钟'}</option>
+                            <option value="60">${window.i18n ? window.i18n.getText('family.exportDetail.granularity1hour') : '1小时'}</option>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-actions">
@@ -3017,11 +3308,55 @@
             
             modal.appendChild(modalContent);
             document.body.appendChild(modal);
-            
-            // Focus on date input
+
+            // Focus on start date input
             setTimeout(() => {
-                document.getElementById('exportDate').focus();
+                document.getElementById('exportStartDate').focus();
             }, 100);
+        }
+
+        // Validate date range (max 31 days)
+        function validateDateRange() {
+            const startDateInput = document.getElementById('exportStartDate');
+            const endDateInput = document.getElementById('exportEndDate');
+            const hint = document.getElementById('dateRangeHint');
+            const exportBtn = document.querySelector('#exportDetailModal .btn-export');
+
+            if (!startDateInput || !endDateInput || !hint || !exportBtn) return;
+
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+
+            // Check if end date is before start date
+            if (endDate < startDate) {
+                hint.style.color = '#ff4757';
+                const errorText = window.i18n ? window.i18n.getText('family.exportDetail.endBeforeStart') : '结束日期不能早于开始日期';
+                hint.querySelector('span:last-child').textContent = errorText;
+                exportBtn.disabled = true;
+                return false;
+            }
+
+            // Calculate days difference
+            const diffTime = Math.abs(endDate - startDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays > 31) {
+                hint.style.color = '#ff4757';
+                const exceededText = window.i18n ?
+                    `${window.i18n.getText('family.exportDetail.rangeExceeded')} (${window.i18n.currentLanguage === 'en' ? 'current' : '当前'}: ${diffDays} ${window.i18n.currentLanguage === 'en' ? 'days' : '天'})` :
+                    `日期范围超过31天（当前：${diffDays}天）`;
+                hint.querySelector('span:last-child').textContent = exceededText;
+                exportBtn.disabled = true;
+                return false;
+            } else {
+                hint.style.color = 'var(--color-text-secondary, rgba(255, 255, 255, 0.5))';
+                const rangeText = window.i18n ?
+                    `${window.i18n.getText('family.exportDetail.rangeHint')} (${window.i18n.currentLanguage === 'en' ? 'current' : '当前'}: ${diffDays} ${window.i18n.currentLanguage === 'en' ? 'days' : '天'})` :
+                    `日期范围最大不超过31天（当前：${diffDays}天）`;
+                hint.querySelector('span:last-child').textContent = rangeText;
+                exportBtn.disabled = false;
+                return true;
+            }
         }
         
         // Close export detail modal
@@ -3035,27 +3370,138 @@
         
         // Confirm and execute export
         function confirmExportDetail() {
-            const dateInput = document.getElementById('exportDate');
-            const selectedDate = dateInput.value;
-            
-            if (!selectedDate) {
-                alert(window.i18n ? window.i18n.getText('family.exportDetail.selectDateError') : '请选择日期');
+            const startDateInput = document.getElementById('exportStartDate');
+            const endDateInput = document.getElementById('exportEndDate');
+            const granularityInput = document.getElementById('exportGranularity');
+
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+            const granularity = parseInt(granularityInput.value);
+
+            if (!startDate || !endDate) {
+                const errorMsg = window.i18n ? window.i18n.getText('family.exportDetail.selectDateError') : '请选择日期范围';
+                alert(errorMsg);
                 return;
             }
-            
+
+            // Validate date range again
+            if (!validateDateRange()) {
+                return;
+            }
+
+            // Get selected checkboxes
+            const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+
+            if (selectedCheckboxes.length === 0) {
+                const noSelectionMsg = window.i18n ? window.i18n.getText('family.exportDetail.noSelection') : '请至少选择一条数据进行导出';
+                alert(noSelectionMsg);
+                return;
+            }
+
+            // Get selected family IDs
+            const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.getAttribute('data-family-id')));
+
+            // Filter data based on selected IDs
+            const selectedData = window.filteredData.filter(family => selectedIds.includes(family.id));
+
             // Close modal
             closeExportDetailModal();
-            
-            // Simulate export process
-            console.log('Exporting data for date:', selectedDate);
-            
-            // Here you would implement the actual export logic
-            // For now, we'll just show a success message
+
+            // Calculate date range
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const daysDiff = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1; // Include end date
+
+            // Generate detailed running data CSV
+            console.log('Exporting detail data from', startDate, 'to', endDate, 'Granularity:', granularity, 'min, Users:', selectedData.length);
+
+            // Create CSV content with specified granularity interval data
+            const headers = [
+                window.i18n ? window.i18n.getText('family.table.user') : '用户',
+                window.i18n ? window.i18n.getText('family.table.meterNumber') : '表号',
+                window.i18n ? window.i18n.getText('date') : '日期',
+                window.i18n ? window.i18n.getText('time') : '时间',
+                window.i18n ? window.i18n.getText('family.exportDetail.discharge') : '放电量(kWh)',
+                window.i18n ? window.i18n.getText('family.exportDetail.price') : '电价(¥/MWh)',
+                window.i18n ? window.i18n.getText('family.exportDetail.profit') : '盈利(¥)'
+            ];
+
+            let csvContent = '\uFEFF' + headers.join(',') + '\n'; // Add BOM for UTF-8
+
+            // Generate interval data for each selected user
+            selectedData.forEach(family => {
+                // Calculate intervals per day based on granularity
+                const intervalsPerDay = (24 * 60) / granularity;
+
+                // Loop through each day in the range
+                for (let day = 0; day < daysDiff; day++) {
+                    const currentDate = new Date(start);
+                    currentDate.setDate(currentDate.getDate() + day);
+                    const dateStr = currentDate.toISOString().split('T')[0];
+
+                    // Generate data for each interval in the day
+                    for (let i = 0; i < intervalsPerDay; i++) {
+                        const totalMinutes = i * granularity;
+                        const hour = Math.floor(totalMinutes / 60);
+                        const minute = totalMinutes % 60;
+                        const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+
+                        // Generate random discharge amount scaled by granularity
+                        const baseDischarge = granularity / 5; // Scale based on 5-minute baseline
+                        const discharge = (Math.random() * 5 * baseDischarge).toFixed(2);
+
+                        // Generate price based on time of day (higher during peak hours)
+                        let basePrice = 100;
+                        if (hour >= 17 && hour <= 20) basePrice = 300; // Peak hours
+                        else if (hour >= 6 && hour <= 9) basePrice = 200; // Morning peak
+                        const price = (basePrice + Math.random() * 50 - 25).toFixed(2);
+
+                        // Calculate profit
+                        const profit = (discharge * price / 1000).toFixed(2);
+
+                        const row = [
+                            window.i18n ? window.i18n.getText(family.nameKey) : family.name,
+                            family.meterNumber,
+                            dateStr,
+                            timeStr,
+                            discharge,
+                            price,
+                            profit
+                        ];
+
+                        csvContent += row.map(field => `"${field}"`).join(',') + '\n';
+                    }
+                }
+            });
+
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `family_detail_${startDate}_to_${endDate}_${granularity}min_${timestamp}.csv`);
+            link.style.visibility = 'hidden';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Show success message
             setTimeout(() => {
-                const successMessage = window.i18n ? 
-                    window.i18n.getText('family.exportDetail.exportSuccess') : 
-                    `${selectedDate} 的明细数据导出成功`;
-                alert(successMessage);
+                const granularityKey = granularity === 5 ? 'family.exportDetail.granularity5min' :
+                                      granularity === 15 ? 'family.exportDetail.granularity15min' :
+                                      granularity === 30 ? 'family.exportDetail.granularity30min' : 'family.exportDetail.granularity1hour';
+                const granularityText = window.i18n ? window.i18n.getText(granularityKey) :
+                                       (granularity === 5 ? '5分钟' :
+                                        granularity === 15 ? '15分钟' :
+                                        granularity === 30 ? '30分钟' : '1小时');
+
+                const successText = window.i18n ?
+                    `${window.i18n.getText('family.exportDetail.exportSuccess')}\n${window.i18n.currentLanguage === 'en' ? 'Date Range' : '日期范围'}: ${startDate} ${window.i18n.currentLanguage === 'en' ? 'to' : '至'} ${endDate}\n${window.i18n.getText('family.exportDetail.granularity')}: ${granularityText}\n${window.i18n.currentLanguage === 'en' ? 'Users' : '用户数量'}: ${selectedData.length}` :
+                    `明细数据导出成功\n日期范围：${startDate} 至 ${endDate}\n数据颗粒度：${granularityText}\n用户数量：${selectedData.length}`;
+                alert(successText);
             }, 500);
         }
 
@@ -3110,6 +3556,7 @@
         window.exportDetailData = exportDetailData;
         window.showExportDetailModal = showExportDetailModal;
         window.closeExportDetailModal = closeExportDetailModal;
+        window.validateDateRange = validateDateRange;
         window.confirmExportDetail = confirmExportDetail;
         window.refreshData = refreshData;
         window.loadFamilyCards = loadFamilyCards;

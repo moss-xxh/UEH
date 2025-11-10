@@ -59,7 +59,8 @@
             white-space: nowrap;
         }
         
-        .query-item input {
+        .query-item input,
+        .query-item select {
             background: var(--color-bg);
             border: 1px solid var(--color-border);
             color: var(--color-text);
@@ -67,6 +68,15 @@
             border-radius: 6px;
             font-size: 14px;
             min-width: 150px;
+        }
+
+        .query-item select {
+            cursor: pointer;
+        }
+
+        .query-item select option {
+            background: var(--color-bg);
+            color: var(--color-text);
         }
         
         .date-range-note {
@@ -194,12 +204,14 @@
             background: var(--color-bg-hover);
         }
         
-        .price-positive {
-            color: var(--color-success);
+        .data-table td.price-positive {
+            color: #00ff88 !important;
+            font-weight: 600;
         }
-        
-        .price-negative {
-            color: var(--color-danger);
+
+        .data-table td.price-negative {
+            color: #ff4757 !important;
+            font-weight: 600;
         }
         
         /* Back button container and styles */
@@ -316,7 +328,13 @@
                     <input type="date" id="endDate">
                 </div>
                 <div class="query-item">
-                    <span class="date-range-note" data-i18n-key="runningData.dateRangeNote">* 最多可选择3个月范围</span>
+                    <label data-i18n-key="runningData.granularity">数据颗粒度:</label>
+                    <select id="dataGranularity">
+                        <option value="5" data-i18n-key="runningData.granularity5min">5分钟</option>
+                        <option value="15" data-i18n-key="runningData.granularity15min">15分钟</option>
+                        <option value="30" selected data-i18n-key="runningData.granularity30min">30分钟</option>
+                        <option value="60" data-i18n-key="runningData.granularity1hour">1小时</option>
+                    </select>
                 </div>
                 <div class="query-buttons">
                     <button class="btn btn-primary" onclick="queryData()">
@@ -348,8 +366,8 @@
                 <thead>
                     <tr>
                         <th data-i18n-key="runningData.table.meterNumber">电表</th>
-                        <th data-i18n-key="runningData.table.family">家庭</th>
                         <th data-i18n-key="runningData.table.time">时间</th>
+                        <th data-i18n-key="runningData.table.interval">Interval</th>
                         <th data-i18n-key="runningData.table.gridUsage">电网用电量 (kWh)</th>
                         <th data-i18n-key="runningData.table.feedIn">馈网量 (kWh)</th>
                         <th data-i18n-key="runningData.table.price">价格 ($/kWh)</th>
@@ -442,6 +460,7 @@
         function queryData() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
+            const granularity = parseInt(document.getElementById('dataGranularity').value);
             const meterNumber = window.meterNumber;
 
             if (!startDate || !endDate) {
@@ -453,43 +472,56 @@
             const start = new Date(startDate);
             const end = new Date(endDate);
             const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-            
+
             if (diffDays > 90) {
                 alert(window.i18n ? window.i18n.getText('runningData.dateRangeError') : '日期范围不能超过3个月');
                 return;
             }
 
-            // Generate mock data (5-minute intervals)
-            generateTableData(start, end, meterNumber);
+            // Generate mock data with selected granularity
+            generateTableData(start, end, meterNumber, granularity);
             loadTableData();
         }
 
-        function generateTableData(startDate, endDate, meterNumber) {
+        function generateTableData(startDate, endDate, meterNumber, granularity = 30) {
             tableData = [];
             const currentTime = new Date(startDate);
+            currentTime.setHours(0, 0, 0, 0); // Start from 00:00:00
             const endTime = new Date(endDate);
             endTime.setHours(23, 59, 59);
-            
-            // Use the family name from URL parameter
-            const familyName = window.familyName;
+
+            let currentDate = formatDate(currentTime);
+            let intervalCounter = 1;
 
             while (currentTime <= endTime) {
-                // Generate data every 30 minutes
-                const gridUsage = (Math.random() * 10 + 5).toFixed(2);
-                const feedIn = (Math.random() * 8).toFixed(2);
+                // Check if we've moved to a new day
+                const currentDateStr = formatDate(currentTime);
+                if (currentDateStr !== currentDate) {
+                    currentDate = currentDateStr;
+                    intervalCounter = 1; // Reset to 1 for new day
+                }
+
+                // Generate data based on selected granularity
+                // Scale the random values based on granularity to keep data realistic
+                const scaleFactor = granularity / 30; // Scale relative to 30-minute baseline
+                const gridUsage = (Math.random() * 10 * scaleFactor + 5 * scaleFactor).toFixed(2);
+                const feedIn = (Math.random() * 8 * scaleFactor).toFixed(2);
                 const price = (Math.random() * 0.3 + 0.1).toFixed(3);
 
                 tableData.push({
                     meterNumber: meterNumber || 'METER-001',
                     time: formatDateTime(new Date(currentTime)),
+                    interval: intervalCounter,
                     gridUsage: parseFloat(gridUsage),
                     feedIn: parseFloat(feedIn),
-                    price: parseFloat(price),
-                    family: familyName
+                    price: parseFloat(price)
                 });
 
-                // Add 30 minutes
-                currentTime.setMinutes(currentTime.getMinutes() + 30);
+                // Increment interval counter
+                intervalCounter++;
+
+                // Add time based on selected granularity
+                currentTime.setMinutes(currentTime.getMinutes() + granularity);
             }
 
             totalRecords = tableData.length;
@@ -517,13 +549,14 @@
 
             pageData.forEach(row => {
                 const tr = document.createElement('tr');
+
                 tr.innerHTML = `
                     <td>${row.meterNumber}</td>
-                    <td>${row.family}</td>
                     <td>${row.time}</td>
+                    <td>${row.interval}</td>
                     <td>${row.gridUsage}</td>
                     <td>${row.feedIn}</td>
-                    <td class="${row.price > 0.2 ? 'price-negative' : 'price-positive'}">$${row.price}</td>
+                    <td>$${row.price}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -570,30 +603,54 @@
 
         function exportToCSV(startDate, endDate) {
             const meterNumber = window.meterNumber;
-            const familyName = window.familyName;
-            
+            const granularity = parseInt(document.getElementById('dataGranularity').value);
+
             // Generate export data
             const exportData = [];
             const currentTime = new Date(startDate);
+            currentTime.setHours(0, 0, 0, 0); // Start from 00:00:00
             const endTime = new Date(endDate);
             endTime.setHours(23, 59, 59);
 
-            // CSV headers - 电表，时间，电网用电量，馈网量，价格，地区，家庭
-            const headers = window.i18n && window.i18n.getCurrentLanguage() === 'en' 
-                ? 'NMI,Time,Grid Usage (kWh),To Grid (kWh),Price ($/kWh),Region,Family\n'
-                : '电表,时间,电网用电量 (kWh),馈网量 (kWh),价格 ($/kWh),地区,家庭\n';
-            
+            // CSV headers - 电表，时间，Interval，电网用电量，馈网量，价格
+            const headers = window.i18n && window.i18n.getCurrentLanguage() === 'en'
+                ? 'NMI,Time,Interval,Grid Usage (kWh),To Grid (kWh),Price ($/kWh)\n'
+                : '电表,时间,Interval,电网用电量 (kWh),馈网量 (kWh),价格 ($/kWh)\n';
+
             let csv = '\ufeff' + headers; // Add BOM for Excel UTF-8 support
 
+            // Scale the random values based on granularity
+            const scaleFactor = granularity / 30;
+
+            let currentDate = formatDate(currentTime);
+            let intervalCounter = 1;
+
             while (currentTime <= endTime) {
-                const gridUsage = (Math.random() * 10 + 5).toFixed(2);
-                const feedIn = (Math.random() * 8).toFixed(2);
+                // Check if we've moved to a new day
+                const currentDateStr = formatDate(currentTime);
+                if (currentDateStr !== currentDate) {
+                    currentDate = currentDateStr;
+                    intervalCounter = 1; // Reset to 1 for new day
+                }
+
+                const gridUsage = (Math.random() * 10 * scaleFactor + 5 * scaleFactor).toFixed(2);
+                const feedIn = (Math.random() * 8 * scaleFactor).toFixed(2);
                 const price = (Math.random() * 0.3 + 0.1).toFixed(3);
-                const region = window.i18n && window.i18n.getCurrentLanguage() === 'en' ? 'Sydney' : '悉尼';
-                
-                csv += `${meterNumber},${formatDateTime(currentTime)},${gridUsage},${feedIn},${price},${region},${familyName}\n`;
-                
-                currentTime.setMinutes(currentTime.getMinutes() + 30);
+
+                csv += `${meterNumber},${formatDateTime(currentTime)},${intervalCounter},${gridUsage},${feedIn},${price}\n`;
+
+                intervalCounter++;
+                currentTime.setMinutes(currentTime.getMinutes() + granularity);
+            }
+
+            // Get granularity label for filename
+            let granularityLabel;
+            switch(granularity) {
+                case 5: granularityLabel = '5min'; break;
+                case 15: granularityLabel = '15min'; break;
+                case 30: granularityLabel = '30min'; break;
+                case 60: granularityLabel = '1hour'; break;
+                default: granularityLabel = granularity + 'min';
             }
 
             // Download as Excel-compatible CSV
@@ -601,7 +658,7 @@
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
-            link.setAttribute('download', `running_data_${formatDate(startDate)}_to_${formatDate(endDate)}.csv`);
+            link.setAttribute('download', `running_data_${formatDate(startDate)}_to_${formatDate(endDate)}_${granularityLabel}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();

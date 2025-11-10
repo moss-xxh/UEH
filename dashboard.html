@@ -3211,6 +3211,272 @@
             right: 0;
         }
 
+        /* Device Status Drawer Styles */
+        .device-status-drawer {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 99999 !important;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        .device-status-drawer.show {
+            pointer-events: all !important;
+            visibility: visible !important;
+            z-index: 999999 !important;
+        }
+
+        .drawer-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: rgba(0, 0, 0, 0.5) !important;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 999998 !important;
+        }
+
+        .device-status-drawer.show .drawer-overlay {
+            opacity: 1 !important;
+            pointer-events: all !important;
+        }
+
+        .drawer-content {
+            position: fixed !important;
+            top: 0 !important;
+            right: 0 !important;
+            width: 600px !important;
+            height: 100% !important;
+            background: var(--color-bg-card) !important;
+            backdrop-filter: blur(30px);
+            border-left: 1px solid var(--color-border);
+            box-shadow: -8px 0 32px rgba(0, 0, 0, 0.3);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            z-index: 999999 !important;
+        }
+
+        .device-status-drawer.show .drawer-content {
+            transform: translateX(0) !important;
+        }
+
+        .drawer-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .drawer-header h3 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        .drawer-close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 24px;
+            transition: all 0.3s;
+        }
+
+        .drawer-close-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--color-text);
+        }
+
+        /* Drawer Tabs */
+        .drawer-tabs {
+            display: flex;
+            gap: 6px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .drawer-tab {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 12px;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--color-text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .drawer-tab:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--color-primary);
+        }
+
+        .drawer-tab.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #000;
+            font-weight: 600;
+        }
+
+        .drawer-tab-count {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .drawer-tab.active .drawer-tab-count {
+            color: #000;
+        }
+
+        .drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 32px;
+        }
+
+        .drawer-stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .drawer-stat-item {
+            flex: 1;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .drawer-stat-label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .drawer-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        .drawer-table-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .drawer-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .drawer-table th {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--color-text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .drawer-table th:nth-child(1) {
+            width: 40%;
+        }
+
+        .drawer-table th:nth-child(2) {
+            width: 20%;
+        }
+
+        .drawer-table th:nth-child(3) {
+            width: 40%;
+        }
+
+        .drawer-table td {
+            padding: 14px 16px;
+            color: var(--color-text);
+            font-size: 14px;
+            border-bottom: 1px solid var(--color-border);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .drawer-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .drawer-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.failed {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+
+        .status-badge.success {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .status-badge.executing {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .status-badge.warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .status-badge.info {
+            background: rgba(30, 127, 255, 0.2);
+            color: #1E7FFF;
+        }
+
+        .status-badge.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
         /* Operation Details Tabs Styles */
         .operation-details-tabs {
             background: rgba(255, 255, 255, 0.03);
@@ -4479,17 +4745,17 @@
                                             <span class="map-stat-label" data-i18n="totalDevices">总设备数</span>
                                             <span class="map-stat-value" id="totalDevices">500</span>
                                         </div>
-                                        <div class="map-stat">
-                                            <span class="map-stat-label" data-i18n="activated">已下发</span>
-                                            <span class="map-stat-value" id="activeDevices">0</span>
+                                        <div class="map-stat" onclick="openDeviceStatusDrawer('success')" style="cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='rgba(0, 255, 136, 0.1)'" onmouseout="this.style.background='transparent'">
+                                            <span class="map-stat-label" data-i18n="success">下发成功</span>
+                                            <span class="map-stat-value" id="successfulDevices">0</span>
                                         </div>
-                                        <div class="map-stat">
-                                            <span class="map-stat-label" data-i18n="progress">执行进度</span>
-                                            <span class="map-stat-value" id="progressPercent">0%</span>
+                                        <div class="map-stat" onclick="openDeviceStatusDrawer('executing')" style="cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='rgba(255, 193, 7, 0.1)'" onmouseout="this.style.background='transparent'">
+                                            <span class="map-stat-label" data-i18n="executing">执行中</span>
+                                            <span class="map-stat-value" id="executingDevices">0</span>
                                         </div>
-                                        <div class="map-stat">
-                                            <span class="map-stat-label" data-i18n="currentOperation">当前操作</span>
-                                            <span class="map-stat-value" id="currentOperationText" data-i18n="none">无</span>
+                                        <div class="map-stat" onclick="openDeviceStatusDrawer('failed')" style="cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='rgba(255, 107, 107, 0.1)'" onmouseout="this.style.background='transparent'">
+                                            <span class="map-stat-label" data-i18n="failed">下发失败</span>
+                                            <span class="map-stat-value" id="failedDevices">0</span>
                                         </div>
                                     </div>
                                 </div>
@@ -4566,7 +4832,7 @@
                     <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                         <div style="font-size: 20px; margin-bottom: 6px;">🔋</div>
                         <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 4px;" data-i18n="installedCapacity">装机量</div>
-                        <div style="font-size: 18px; font-weight: 700; color: #fff;">235MW</div>
+                        <div style="font-size: 18px; font-weight: 700; color: #fff;">235,000KW</div>
                     </div>
                     
                     <!-- 累计放电上网量 -->
@@ -4690,7 +4956,7 @@
                 <div class="stat-overview-card">
                     <div class="stat-overview-icon">🔋</div>
                     <div class="stat-overview-label" data-i18n="installedCapacity">装机量</div>
-                    <div class="stat-overview-value" id="installedCapacity">235KW</div>
+                    <div class="stat-overview-value" id="installedCapacity">235,000KW</div>
                 </div>
 
                 <div class="stat-overview-card">
@@ -5050,6 +5316,51 @@
                         <div class="status-number" id="detailsDispatched">500</div>
                         <div class="status-label" data-i18n="devicesDispatched">Commands Sent</div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Status Modal -->
+    <div class="device-status-drawer" id="deviceStatusDrawer">
+        <div class="drawer-overlay" onclick="closeDeviceStatusDrawer()"></div>
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h3 style="margin: 0; color: #fff; font-size: 20px;" data-i18n="deviceResponseStatistics">设备响应统计</h3>
+                <button class="drawer-close-btn" onclick="closeDeviceStatusDrawer()">×</button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="drawer-tabs">
+                <button class="drawer-tab active" data-tab="success" onclick="switchDeviceTab('success')">
+                    <span data-i18n="success">下发成功</span>
+                    <span class="drawer-tab-count" id="tabCountSuccess">0</span>
+                </button>
+                <button class="drawer-tab" data-tab="executing" onclick="switchDeviceTab('executing')">
+                    <span data-i18n="executing">执行中</span>
+                    <span class="drawer-tab-count" id="tabCountExecuting">0</span>
+                </button>
+                <button class="drawer-tab" data-tab="failed" onclick="switchDeviceTab('failed')">
+                    <span data-i18n="failed">下发失败</span>
+                    <span class="drawer-tab-count" id="tabCountFailed">0</span>
+                </button>
+            </div>
+
+            <div class="drawer-body">
+                <!-- Device Table -->
+                <div class="drawer-table-container">
+                    <table class="drawer-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="nmi">NMI</th>
+                                <th data-i18n="failureCount">失败次数</th>
+                                <th data-i18n="status">状态</th>
+                            </tr>
+                        </thead>
+                        <tbody id="drawerTableBody">
+                            <!-- Device rows will be inserted here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -6262,13 +6573,83 @@
         let regionConditions = {}; // 存储各地区的条件设置
         
         // 全局地区数据对象
+        console.log('%c ========== SCRIPT LOADING: Region Data Section ==========', 'color: yellow; font-size: 16px; font-weight: bold;');
+
+        // 生成随机设备统计数据的辅助函数（默认配置：有失败设备）
+        function generateRandomDeviceStats() {
+            const totalDevices = 500;
+            const successCount = 450; // 固定下发成功450个
+            const executingCount = 0; // 执行中为0
+            const failedCount = 50; // 固定下发失败50个
+
+            const stats = {
+                total: totalDevices,
+                success: successCount,
+                executing: executingCount,
+                failed: failedCount
+            };
+
+            console.log('📊 Generated device stats:', stats);
+            return stats;
+        }
+
+        // 生成等待执行中状态的设备统计（还未下发指令）
+        function generateWaitingDeviceStats() {
+            const stats = {
+                total: 500,
+                success: 0, // 等待执行中，还未下发，成功数为0
+                executing: 0, // 执行中为0
+                failed: 0 // 失败数为0
+            };
+
+            console.log('⏳ Generated waiting stats:', stats);
+            return stats;
+        }
+
+        // 初始化地区数据
+        console.log('🌏 ========== STARTING REGION DATA INITIALIZATION ==========');
+
+        // 测试函数是否可用
+        console.log('Testing generateWaitingDeviceStats...');
+        try {
+            const testWaiting = generateWaitingDeviceStats();
+            console.log('✅ generateWaitingDeviceStats works:', testWaiting);
+        } catch(e) {
+            console.error('❌ generateWaitingDeviceStats error:', e);
+        }
+
+        console.log('Testing generateRandomDeviceStats...');
+        try {
+            const testRandom = generateRandomDeviceStats();
+            console.log('✅ generateRandomDeviceStats works:', testRandom);
+        } catch(e) {
+            console.error('❌ generateRandomDeviceStats error:', e);
+        }
+
         let regionData = {
-            'NSW': { status: 'waitingExecution' },
-            'QLD': { status: 'autoCharge' },
-            'VIC': { status: 'manualCharge' },
-            'SA': { status: 'autoDischarge' },
-            'TAS': { status: 'manualDischarge' }
+            'NSW': {
+                status: 'waitingExecution',
+                deviceStats: generateWaitingDeviceStats() || { total: 500, success: 0, executing: 0, failed: 0 }
+            },
+            'QLD': {
+                status: 'autoCharge',
+                deviceStats: generateRandomDeviceStats() || { total: 500, success: 450, executing: 0, failed: 50 }
+            },
+            'VIC': {
+                status: 'manualCharge',
+                deviceStats: generateRandomDeviceStats() || { total: 500, success: 450, executing: 0, failed: 50 }
+            },
+            'SA': {
+                status: 'autoDischarge',
+                deviceStats: generateRandomDeviceStats() || { total: 500, success: 450, executing: 0, failed: 50 }
+            },
+            'TAS': {
+                status: 'manualDischarge',
+                deviceStats: generateRandomDeviceStats() || { total: 500, success: 450, executing: 0, failed: 50 }
+            }
         };
+        console.log('✅ ========== REGION DATA INITIALIZED ==========');
+        console.log('Full regionData:', JSON.stringify(regionData, null, 2));
         let chartType = 'both';
         let autoSwitchInterval;
         let mapAnimationInterval;
@@ -6311,7 +6692,30 @@
         // Initialize all charts when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded - Starting initialization...');
-            
+
+            // ========== 强制修复 regionData ==========
+            console.log('%c ========== FIXING REGION DATA ==========', 'color: red; font-size: 16px; font-weight: bold;');
+            console.log('Before fix - regionData:', regionData);
+
+            // 检查并修复每个地区的 deviceStats
+            const regions = ['NSW', 'QLD', 'VIC', 'SA', 'TAS'];
+            regions.forEach(region => {
+                if (!regionData[region]) {
+                    regionData[region] = { status: 'none' };
+                }
+                if (!regionData[region].deviceStats) {
+                    console.warn(`⚠️ Missing deviceStats for ${region}, creating now...`);
+                    if (region === 'NSW') {
+                        regionData[region].deviceStats = { total: 500, success: 0, executing: 0, failed: 0 };
+                    } else {
+                        regionData[region].deviceStats = { total: 500, success: 450, executing: 0, failed: 50 };
+                    }
+                }
+            });
+
+            console.log('After fix - regionData:', regionData);
+            console.log('%c ========== REGION DATA FIXED ==========', 'color: green; font-size: 16px; font-weight: bold;');
+
             // 同步UI状态
             const autoToggleKnob = document.getElementById('autoToggleKnob');
             const toggleSwitch = document.querySelector('.auto-toggle-switch');
@@ -6554,22 +6958,94 @@
                     }
                 });
             }
-            
+
+            // ========== 再次确认并强制更新 NSW 显示 ==========
+            console.log('%c ========== FORCING NSW DISPLAY UPDATE ==========', 'color: orange; font-size: 14px; font-weight: bold;');
+            if (regionData['NSW'] && regionData['NSW'].deviceStats) {
+                const stats = regionData['NSW'].deviceStats;
+                console.log('NSW stats found:', stats);
+                if (document.getElementById('totalDevices')) {
+                    document.getElementById('totalDevices').textContent = stats.total;
+                    document.getElementById('successfulDevices').textContent = stats.success;
+                    document.getElementById('executingDevices').textContent = stats.executing;
+                    document.getElementById('failedDevices').textContent = stats.failed;
+                    console.log('✅ NSW display updated successfully');
+                }
+            } else {
+                console.error('❌ NSW deviceStats still missing after fix!');
+            }
+
             try {
                 // Generate fixed device locations once (exactly 500 devices)
                 deviceLocations = generateDeviceLocations();
-                
+
+                // 立即显示NSW地区的设备统计数据（在任何其他操作之前）
+                console.log('=== Immediately showing device stats on page load ===');
+                console.log('NSW device stats:', regionData['NSW'].deviceStats);
+                const nswStats = regionData['NSW'].deviceStats;
+                document.getElementById('totalDevices').textContent = nswStats.total;
+                document.getElementById('successfulDevices').textContent = nswStats.success;
+                document.getElementById('executingDevices').textContent = nswStats.executing;
+                document.getElementById('failedDevices').textContent = nswStats.failed;
+
+                // 立即初始化抽屉的设备数据，确保点击时有数据可显示
+                updateDeviceStatusCounts(nswStats.success, nswStats.executing, nswStats.failed, nswStats);
+                console.log('✅ Initial device stats displayed and drawer data initialized');
+                console.log('Drawer data initialized:', {
+                    success: deviceStatusData.success.length,
+                    executing: deviceStatusData.executing.length,
+                    failed: deviceStatusData.failed.length
+                });
+
                 // 初始化地区状态指示器
                 updateRegionStatusIndicators();
-                
+
+                // 创建全局测试函数用于调试抽屉
+                window.testDrawer = function() {
+                    console.log('===== Testing Drawer =====');
+                    const drawer = document.getElementById('deviceStatusDrawer');
+                    if (!drawer) {
+                        console.error('❌ Drawer element not found!');
+                        return;
+                    }
+                    console.log('✅ Drawer element found');
+
+                    const overlay = drawer.querySelector('.drawer-overlay');
+                    const content = drawer.querySelector('.drawer-content');
+
+                    console.log('Overlay element found:', !!overlay);
+                    console.log('Content element found:', !!content);
+
+                    if (overlay) {
+                        const overlayStyles = window.getComputedStyle(overlay);
+                        console.log('Overlay computed styles:', {
+                            display: overlayStyles.display,
+                            opacity: overlayStyles.opacity,
+                            zIndex: overlayStyles.zIndex,
+                            background: overlayStyles.background,
+                            width: overlayStyles.width,
+                            height: overlayStyles.height,
+                            position: overlayStyles.position,
+                            pointerEvents: overlayStyles.pointerEvents
+                        });
+                    }
+
+                    console.log('===== Opening drawer with failed type =====');
+                    window.openDeviceStatusDrawer('failed');
+                };
+                console.log('✅ Test function created. Run window.testDrawer() to test.');
+
                 // 设置默认选中NSW地区
                 const defaultRegion = document.querySelector('.region-select-tab[data-region="NSW"]');
                 if (defaultRegion) {
                     selectMainRegion('NSW', defaultRegion);
                 }
-                
-                // 确保NSW状态正确显示
+
+                // 强制立即显示NSW地区的设备统计数据（确保页面加载时就能看到）
                 setTimeout(() => {
+                    console.log('=== Force updating NSW device statistics on page load ===');
+                    updateRegionDeviceStats('NSW');
+
                     const nswStatusBadge = document.querySelector('[data-region="NSW"] .region-status-badge');
                     if (nswStatusBadge) {
                         nswStatusBadge.setAttribute('data-status', 'waitingExecution');
@@ -6588,18 +7064,14 @@
                 
                 // 定期更新地区状态（模拟实时数据）
                 setInterval(updateRegionStatusIndicators, 30000); // 每30秒更新一次
-                
-                // Initialize UI with correct device count
-                const totalDevicesEl = document.getElementById('totalDevices');
-                const activeDevicesEl = document.getElementById('activeDevices');
-                const progressPercentEl = document.getElementById('progressPercent');
-                const currentOperationTextEl = document.getElementById('currentOperationText');
-                
-                if (totalDevicesEl) totalDevicesEl.textContent = '500';
-                if (activeDevicesEl) activeDevicesEl.textContent = '0';
-                if (progressPercentEl) progressPercentEl.textContent = '0%';
-                if (currentOperationTextEl) currentOperationTextEl.textContent = '无';
-                
+
+                // 设备统计数据由 selectMainRegion -> updateRegionDeviceStats 自动更新
+                // 额外保险：延迟300ms再强制更新一次，确保页面加载完成后数据一定显示
+                setTimeout(() => {
+                    console.log('=== Final force update of device statistics ===');
+                    updateRegionDeviceStats('NSW');
+                }, 300);
+
                 console.log('Starting chart initialization...');
                 console.log('ECharts available:', typeof echarts !== 'undefined');
                 
@@ -7112,6 +7584,9 @@
             // 更新电站管理状态
             updatePowerStationStatus(region, regionStatus);
             
+            // 先立即更新该地区的设备统计显示（在切换面板之前）
+            updateRegionDeviceStats(region);
+
             // 根据状态切换面板和按钮
             if (regionStatus === 'autoCharge' || regionStatus === 'manualCharge' || regionStatus === 'autoDischarge' || regionStatus === 'manualDischarge') {
                 // 有充放电标记的地区，显示地图，按钮变成停止
@@ -7119,29 +7594,87 @@
                 switchPanel('map');
                 updateActionButtonsToStop();
             } else {
-                // 无标记的地区（status === 'none'），显示行情，只显示充放电按钮
+                // 无标记的地区（status === 'none' 或 'waitingExecution'），显示地图面板以显示设备统计
                 currentOperation = null;
-                switchPanel('market');
+                switchPanel('map'); // 改为显示地图面板，这样才能看到设备统计
                 updateActionButtonsToChargeDis();
             }
-            
+
             // 更新页面数据
             updatePageDataByRegion(region);
-            
+
             // 总是更新地区显示，以确保切换时样式正确
             updateRegionDisplay();
-            
+
             // 强制更新地区状态显示，确保状态文字正确显示
             setTimeout(() => {
                 updateRegionStatusDisplay();
             }, 50);
-            
+
             // 调整间距
             setTimeout(() => {
                 adjustSpacingForRegionSelector();
             }, 100);
+
+            // 再次更新设备统计（保险）
+            setTimeout(() => {
+                updateRegionDeviceStats(region);
+            }, 150);
         }
         
+        // 更新地区设备统计显示
+        function updateRegionDeviceStats(region) {
+            console.log(`📍 updateRegionDeviceStats called for region: ${region}`);
+            console.log('   Full regionData:', regionData);
+            console.log('   Region object:', regionData[region]);
+
+            // 获取该地区的设备统计数据
+            const stats = regionData[region]?.deviceStats;
+
+            if (!stats) {
+                console.error(`❌ No device stats found for region: ${region}`);
+                console.log('   Available regionData:', regionData);
+                console.log('   Region object detail:', JSON.stringify(regionData[region], null, 2));
+                return;
+            }
+
+            console.log(`🔄 Updating device stats for region ${region}:`, stats);
+
+            // 更新页面显示
+            const totalEl = document.getElementById('totalDevices');
+            const successEl = document.getElementById('successfulDevices');
+            const executingEl = document.getElementById('executingDevices');
+            const failedEl = document.getElementById('failedDevices');
+
+            console.log('Found elements:', {
+                totalEl: !!totalEl,
+                successEl: !!successEl,
+                executingEl: !!executingEl,
+                failedEl: !!failedEl
+            });
+
+            if (!totalEl || !successEl || !executingEl || !failedEl) {
+                console.error('❌ One or more device stat elements not found!');
+                return;
+            }
+
+            // 强制更新文本内容
+            totalEl.textContent = stats.total;
+            successEl.textContent = stats.success;
+            executingEl.textContent = stats.executing;
+            failedEl.textContent = stats.failed;
+
+            // 验证更新是否成功
+            console.log('✅ Device stats UI updated successfully:');
+            console.log(`   Total: ${totalEl.textContent}`);
+            console.log(`   Success: ${successEl.textContent}`);
+            console.log(`   Executing: ${executingEl.textContent}`);
+            console.log(`   Failed: ${failedEl.textContent}`);
+
+            // 同步更新抽屉的设备数据（传入详细统计数据）
+            updateDeviceStatusCounts(stats.success, stats.executing, stats.failed, stats);
+        }
+
         // 更新电站管理状态
         function updatePowerStationStatus(region, status) {
             const statusText = document.getElementById('regionStatusText');
@@ -8805,7 +9338,9 @@
 
         // 新的操作启动函数
         function startOperation(operationType) {
+            console.log('========== startOperation ==========');
             console.log('Starting operation:', operationType);
+            console.log('Current operation before:', currentOperation);
             
             // 重置弹窗关闭标志
             window.deviceResponseModalClosed = false;
@@ -8868,14 +9403,13 @@
             
             // 更新按钮状态
             updateButtonsForOperation(operationType);
-            
+
             // 切换到地图视图
             switchPanel('map');
-            
-            // 启动设备动画
-            setTimeout(() => {
-                startDeviceAnimation();
-            }, 300);
+
+            // 立即启动设备动画(不需要延迟,让startDeviceAnimation统一处理初始化)
+            console.log('Starting device animation...');
+            startDeviceAnimation();
             
             // 添加备用定时器，确保统计弹窗显示（如果动画未正常完成）
             // 设置为10秒后显示，正常情况下动画会在约13秒内完成
@@ -8883,8 +9417,8 @@
                 const fallbackTimer = setTimeout(() => {
                     // 检查是否已经显示了统计弹窗，并且操作没有被手动停止
                     const modal = document.getElementById('deviceResponseModal');
-                    const progressText = document.getElementById('progressPercent')?.textContent || '0%';
-                    const currentProgress = parseInt(progressText.replace('%', '')) || 0;
+                    const executingCount = parseInt(document.getElementById('executingDevices')?.textContent || '0');
+                    const currentProgress = executingCount === 0 ? 100 : Math.floor((activatedDevices / totalDevices) * 100);
                     
                     // 只有当操作仍在进行中、弹窗未显示、且进度达到100%时才显示
                     if (modal && modal.style.display === 'none' && currentOperation && currentOperation === operationType && currentProgress >= 100) {
@@ -9263,19 +9797,21 @@
         // Execute confirmed operation
         function executeConfirmedOperation() {
             if (!pendingOperation) return;
-            
+
             const operationType = pendingOperation;
             closeConfirmationModal();
-            
+
+            console.log('========== executeConfirmedOperation ==========');
             console.log('Executing confirmed operation:', operationType);
+            console.log('Pending operation:', pendingOperation);
             
             if (operationType === 'stop' || operationType.startsWith('stop_')) {
                 // Execute stop operation
                 executeStopOperation();
             } else {
-                // Show progress dialog first
-                showProgressDialog(operationType);
-                
+                // Show progress dialog first (隐藏充电进度弹窗)
+                // showProgressDialog(operationType);
+
                 // Execute start operation
                 startOperation(operationType);
                 
@@ -9860,27 +10396,66 @@
         
         // Enhanced device animation with wave effect
         function startDeviceAnimation() {
-            console.log('startDeviceAnimation called'); // Debug log
-            console.log('mapChart exists:', !!mapChart); // Debug log
-            console.log('deviceLocations length:', deviceLocations.length); // Debug log
-            
+            console.log('========== startDeviceAnimation called ==========');
+            console.log('mapChart exists:', !!mapChart);
+            console.log('deviceLocations length:', deviceLocations.length);
+            console.log('currentOperation:', currentOperation);
+
             activatedDevices = 0;
             const totalDevices = 500;
-            
+
             // Clear previous animation
             if (mapAnimationInterval) {
                 clearInterval(mapAnimationInterval);
-                console.log('Cleared previous animation interval'); // Debug log
+                console.log('Cleared previous animation interval');
             }
-            
-            // Update UI
-            document.getElementById('totalDevices').textContent = totalDevices;
-            document.getElementById('activeDevices').textContent = activatedDevices;
-            document.getElementById('progressPercent').textContent = '0%';
-            document.getElementById('currentOperationText').textContent = 
-                currentOperation === 'charge' ? 
-                (window.i18n ? window.i18n.getText('charging') : '充电中') : 
-                (window.i18n ? window.i18n.getText('discharging') : '放电中');
+
+            // Update UI - 从当前地区的数据开始动画,不重新生成随机数据
+            console.log('Updating device statistics in startDeviceAnimation...');
+            const totalEl = document.getElementById('totalDevices');
+            const successEl = document.getElementById('successfulDevices');
+            const executingEl = document.getElementById('executingDevices');
+            const failedEl = document.getElementById('failedDevices');
+
+            console.log('Found elements:', {
+                totalEl: !!totalEl,
+                successEl: !!successEl,
+                executingEl: !!executingEl,
+                failedEl: !!failedEl
+            });
+
+            // 使用当前地区已有的设备统计数据作为动画起点
+            const currentRegionStats = regionData[selectedMainRegion]?.deviceStats;
+
+            let initialSuccessCount, initialExecutingCount, initialFailedCount;
+
+            if (currentRegionStats) {
+                // 使用地区已有的数据
+                initialSuccessCount = currentRegionStats.success;
+                initialExecutingCount = currentRegionStats.executing;
+                initialFailedCount = currentRegionStats.failed;
+                console.log(`Using existing region data for ${selectedMainRegion}:`, currentRegionStats);
+            } else {
+                // 如果没有数据(不应该发生),则生成新的随机数据
+                initialFailedCount = Math.floor(Math.random() * 46) + 5;
+                initialSuccessCount = Math.floor(Math.random() * 101) + 100;
+                initialExecutingCount = totalDevices - initialFailedCount - initialSuccessCount;
+                console.warn(`No existing data for region ${selectedMainRegion}, generating new random data`);
+            }
+
+            // 设置初始激活数为已成功的数量
+            activatedDevices = initialSuccessCount;
+
+            if (totalEl) totalEl.textContent = totalDevices;
+            if (successEl) successEl.textContent = initialSuccessCount;
+            if (executingEl) executingEl.textContent = initialExecutingCount;
+            if (failedEl) failedEl.textContent = initialFailedCount;
+
+            // 更新设备状态数据
+            updateDeviceStatusCounts(initialSuccessCount, initialExecutingCount, initialFailedCount);
+
+            console.log(`Device animation starting from: Total=500, Success=${initialSuccessCount}, Executing=${initialExecutingCount}, Failed=${initialFailedCount}`);
+            console.log('Starting animation interval...');
             
             let animationStep = 0;
             const maxSteps = totalDevices / 3; // Complete animation in ~167 steps
@@ -9895,11 +10470,26 @@
                     
                     activatedDevices = Math.min(activatedDevices + actualActivation, totalDevices);
                     animationStep++;
-                    
+
                     // Update UI with smooth progress
-                    document.getElementById('activeDevices').textContent = activatedDevices;
-                    document.getElementById('progressPercent').textContent = 
-                        Math.floor((activatedDevices / totalDevices) * 100) + '%';
+                    // 已处理的设备数逐渐增加
+                    const processedDevices = activatedDevices;
+                    const successCount = Math.floor(processedDevices * 0.95); // 95% success rate
+                    const failCount = Math.floor(processedDevices * 0.05); // 5% failure rate
+                    const executingCount = totalDevices - successCount - failCount; // 剩余未处理的设备
+
+                    // 更新显示：成功 + 失败 + 执行中 = 设备总数（500）
+                    document.getElementById('successfulDevices').textContent = successCount;
+                    document.getElementById('executingDevices').textContent = executingCount;
+                    document.getElementById('failedDevices').textContent = failCount;
+
+                    // 每10步打印一次进度日志
+                    if (animationStep % 10 === 0) {
+                        console.log(`Animation progress: Step ${animationStep}/${maxSteps}, Success=${successCount}, Executing=${executingCount}, Failed=${failCount}`);
+                    }
+
+                    // Update device status data
+                    updateDeviceStatusCounts(successCount, executingCount, failCount);
                     
                     // Update map with animation - this will sync the statistics
                     try {
@@ -9917,13 +10507,33 @@
                     // Animation complete
                     clearInterval(mapAnimationInterval);
                     
-                    // 确保所有设备都已激活
+                    // 确保所有设备都已处理完成
                     activatedDevices = totalDevices;
-                    document.getElementById('activeDevices').textContent = activatedDevices;
-                    
+                    const finalSuccessCount = Math.floor(totalDevices * 0.95); // 95% success (475)
+                    const finalFailCount = Math.floor(totalDevices * 0.05); // 5% failure (25)
+                    const finalExecutingCount = totalDevices - finalSuccessCount - finalFailCount; // 剩余 (0)
+
+                    // 更新显示：成功 + 失败 + 执行中 = 设备总数（500）
+                    document.getElementById('successfulDevices').textContent = finalSuccessCount;
+                    document.getElementById('executingDevices').textContent = finalExecutingCount;
+                    document.getElementById('failedDevices').textContent = finalFailCount;
+
+                    // Update device status data
+                    updateDeviceStatusCounts(finalSuccessCount, finalExecutingCount, finalFailCount);
+
+                    // 保存最终数据回地区数据,以便下次切换回来时显示
+                    if (regionData[selectedMainRegion]) {
+                        regionData[selectedMainRegion].deviceStats = {
+                            total: totalDevices,
+                            success: finalSuccessCount,
+                            executing: finalExecutingCount,
+                            failed: finalFailCount
+                        };
+                        console.log(`Saved final device stats for region ${selectedMainRegion}:`, regionData[selectedMainRegion].deviceStats);
+                    }
+
                     // 计算实际进度
                     const actualProgress = Math.round((activatedDevices / totalDevices) * 100);
-                    document.getElementById('progressPercent').textContent = actualProgress + '%';
                     
                     // 只有真正达到100%时才显示统计弹窗
                     if (actualProgress >= 100) {
@@ -11288,55 +11898,49 @@
             const dischargeBtn = document.getElementById('dischargeBtn');
             const priceDisplay = document.getElementById('priceDisplay');
             const stopDisplay = document.getElementById('stopDisplay');
-            
+
             if (!chargeBtn || !dischargeBtn) return;
-            
-            // 获取当前选中地区的状态
-            const regionStatus = getRegionOperationStatus(selectedMainRegion);
-            
-            // 在充电或放电操作时的按钮处理
-            const shouldHideButtons = regionStatus === 'charging' || regionStatus === 'discharging';
+
+            // 使用 regionData 获取更准确的状态
+            const regionStatus = regionData[selectedMainRegion] ? regionData[selectedMainRegion].status : 'none';
+            console.log('updateActionButtonsVisibility - region:', selectedMainRegion, 'status:', regionStatus, 'mode:', currentOperationMode);
+
+            // 检查是否有操作正在进行
+            const shouldHideButtons = regionStatus === 'autoCharge' || regionStatus === 'manualCharge' ||
+                                     regionStatus === 'autoDischarge' || regionStatus === 'manualDischarge';
             
             if (shouldHideButtons) {
-                // 在自动模式下，隐藏按钮
-                if (currentOperationMode === 'auto') {
-                    chargeBtn.style.display = 'none';
-                    dischargeBtn.style.display = 'none';
-                    console.log('Action buttons hidden - auto mode operation in progress');
-                } else {
-                    // 在手动模式下，隐藏按钮
-                    chargeBtn.style.display = 'none';
-                    dischargeBtn.style.display = 'none';
-                    console.log('Action buttons hidden - manual mode operation in progress');
-                }
-                
-                // 不更改显示，保持价格显示
+                // 操作进行中，隐藏充放电按钮
+                chargeBtn.style.display = 'none';
+                dischargeBtn.style.display = 'none';
+                console.log('Action buttons hidden - operation in progress:', regionStatus);
             } else {
-                chargeBtn.style.display = 'flex';
-                dischargeBtn.style.display = 'flex';
-                
-                // 根据当前模式设置按钮状态
+                // 没有操作进行中，根据模式显示按钮
                 if (currentOperationMode === 'auto') {
+                    // 自动模式下隐藏按钮
                     chargeBtn.style.display = 'none';
                     dischargeBtn.style.display = 'none';
+                    console.log('Action buttons hidden - auto mode');
                 } else {
+                    // 手动模式下显示按钮
+                    chargeBtn.style.display = 'flex';
+                    dischargeBtn.style.display = 'flex';
                     chargeBtn.disabled = false;
                     dischargeBtn.disabled = false;
                     chargeBtn.style.opacity = '1';
                     dischargeBtn.style.opacity = '1';
                     chargeBtn.style.cursor = 'pointer';
                     dischargeBtn.style.cursor = 'pointer';
+                    console.log('Action buttons visible - manual mode, no operation');
                 }
-                
-                console.log('Action buttons visible - no operation in progress');
-                
+
                 // 显示价格文字
                 if (priceDisplay) priceDisplay.style.display = 'block';
                 if (stopDisplay) {
                     stopDisplay.style.display = 'none';
                     stopDisplay.style.opacity = '0';
                 }
-                
+
                 // 更新大圆显示状态
                 updateCircleStatusDisplay();
             }
@@ -11459,9 +12063,9 @@
             startDeviceResetAnimation();
             
             // Update UI to initial state
-            document.getElementById('activeDevices').textContent = '0';
-            document.getElementById('progressPercent').textContent = '0%';
-            document.getElementById('currentOperationText').textContent = '无';
+            document.getElementById('successfulDevices').textContent = '0';
+            document.getElementById('executingDevices').textContent = '0';
+            document.getElementById('failedDevices').textContent = '0';
             document.getElementById('totalDevices').textContent = '500';
             
             // Reset buttons to original state
@@ -11869,17 +12473,18 @@
                 targetDevicesDisplay.textContent = '500' + unit;
             }
             
-            // 设置统计数据
-            const stats = {
-                received: Math.floor(Math.random() * 8) + 492, // 492-499
-                activated: Math.floor(Math.random() * 35) + 465, // 465-499
-            };
-            stats.successRate = Math.floor((stats.activated / 500) * 100);
-            
-            // 更新统计显示
-            const successRateStat = document.getElementById('successRateStat');
-            
-            if (successRateStat) successRateStat.textContent = stats.successRate + '%';
+            // 获取当前地区的设备统计数据
+            const currentRegionData = regionData[selectedMainRegion] || regionData['NSW'];
+            const deviceStats = currentRegionData.deviceStats;
+
+            // 更新弹窗中的统计数字
+            const modalSuccessCount = document.getElementById('modalSuccessCount');
+            const modalExecutingCount = document.getElementById('modalExecutingCount');
+            const modalFailedCount = document.getElementById('modalFailedCount');
+
+            if (modalSuccessCount) modalSuccessCount.textContent = deviceStats.success || 450;
+            if (modalExecutingCount) modalExecutingCount.textContent = deviceStats.executing || 0;
+            if (modalFailedCount) modalFailedCount.textContent = deviceStats.failed || 50;
             
             // 显示模态框 - 使用flex居中
             modal.style.display = 'flex';
@@ -12198,28 +12803,34 @@
             
             forceTopZIndex() {
                 setTimeout(() => {
+                    // 容器本身就是 drawer-overlay
                     const drawer = document.querySelector(`#${this.containerId}`);
                     if (drawer) {
-                        drawer.style.zIndex = '2147483647';
-                        drawer.style.position = 'fixed';
-                    }
-                    const overlay = document.querySelector('.drawer-overlay');
-                    if (overlay) {
-                        overlay.style.zIndex = '2147483646';
+                        drawer.style.setProperty('z-index', '2147483647', 'important');
+                        drawer.style.setProperty('position', 'fixed', 'important');
+
+                        // 设置内部容器
+                        const container = drawer.querySelector('.drawer-container');
+                        if (container) {
+                            container.style.setProperty('z-index', '2147483647', 'important');
+                            container.style.setProperty('position', 'fixed', 'important');
+                        }
                     }
                 }, 10);
             }
-            
+
             open(operation) {
                 super.open(operation);
                 this.forceTopZIndex();
             }
-            
+
             generateContent(operation, tabKey) {
-                if (!operation) return `<div>${window.i18n ? window.i18n.getText('dataLoading') : 'Loading data...'}</div>`;
-                
+                if (!operation) {
+                    return `<div>${window.i18n ? window.i18n.getText('dataLoading') : 'Loading data...'}</div>`;
+                }
+
                 const commandInfo = this.getCommandInfo(operation.command || 'charge');
-                
+
                 switch(tabKey) {
                     case 'basic':
                         return this.generateBasicInfo(operation, commandInfo);
@@ -12556,6 +13167,298 @@
                 detailsPanel.style.display = 'none';
             }, 300);
         }
+
+        // Device Status Drawer Functions
+        let deviceStatusData = {
+            failed: [],
+            success: [],
+            executing: []
+        };
+
+        // Update device status counts based on animation progress
+        function updateDeviceStatusCounts(successCount, executingCount, failCount, detailedStats) {
+            // Update success devices - all with 'success' status (下发成功)
+            deviceStatusData.success = [];
+            let nmiIndex = 2000;
+
+            // 所有下发成功的设备统一状态为'success'
+            for (let i = 0; i < successCount; i++) {
+                deviceStatusData.success.push({
+                    nmi: `NMI${String(nmiIndex++).padStart(6, '0')}`,
+                    failureCount: 0,
+                    status: 'success'
+                });
+            }
+
+            // Update executing devices
+            deviceStatusData.executing = [];
+            for (let i = 0; i < executingCount; i++) {
+                deviceStatusData.executing.push({
+                    nmi: `NMI${String(3000 + i).padStart(6, '0')}`,
+                    failureCount: 0,
+                    status: 'executing'
+                });
+            }
+
+            // Update failed devices
+            deviceStatusData.failed = [];
+            for (let i = 0; i < failCount; i++) {
+                deviceStatusData.failed.push({
+                    nmi: `NMI${String(1000 + i).padStart(6, '0')}`,
+                    failureCount: Math.floor(Math.random() * 5) + 1,
+                    status: 'failed'
+                });
+            }
+
+            console.log(`Device status data updated: Success=${successCount}, Executing=${executingCount}, Failed=${failCount}`);
+        }
+
+        // Generate mock device data
+        function generateDeviceData() {
+            const totalDevices = 500;
+            const failedCount = Math.floor(totalDevices * 0.05); // 5% failed
+            const successCount = Math.floor(totalDevices * 0.95); // 95% success
+
+            // Generate failed devices
+            deviceStatusData.failed = [];
+            for (let i = 0; i < failedCount; i++) {
+                deviceStatusData.failed.push({
+                    nmi: `NMI${String(1000 + i).padStart(6, '0')}`,
+                    failureCount: Math.floor(Math.random() * 5) + 1,
+                    status: 'failed'
+                });
+            }
+
+            // Generate success devices
+            deviceStatusData.success = [];
+            for (let i = 0; i < successCount; i++) {
+                deviceStatusData.success.push({
+                    nmi: `NMI${String(2000 + i).padStart(6, '0')}`,
+                    failureCount: 0,
+                    status: 'success'
+                });
+            }
+
+            // Generate executing devices (initially 0, will be populated during operation)
+            deviceStatusData.executing = [];
+        }
+
+        // 当前活动的tab类型
+        let currentActiveTab = 'success';
+
+        // Open device status drawer - 暴露到全局作用域
+        window.openDeviceStatusDrawer = function(type) {
+            console.log('openDeviceStatusDrawer called with type:', type);
+
+            const drawer = document.getElementById('deviceStatusDrawer');
+            const drawerTableBody = document.getElementById('drawerTableBody');
+
+            console.log('Drawer element:', drawer);
+
+            // 安全检查：确保所有必要的元素都存在
+            if (!drawer || !drawerTableBody) {
+                console.error('❌ Drawer elements not found!', {
+                    drawer: !!drawer,
+                    drawerTableBody: !!drawerTableBody
+                });
+                return;
+            }
+
+            // If no data exists yet (first time opening), use current displayed counts
+            if (deviceStatusData.failed.length === 0 && deviceStatusData.success.length === 0 && deviceStatusData.executing.length === 0) {
+                const currentSuccess = parseInt(document.getElementById('successfulDevices')?.textContent || '0');
+                const currentExecuting = parseInt(document.getElementById('executingDevices')?.textContent || '0');
+                const currentFailed = parseInt(document.getElementById('failedDevices')?.textContent || '0');
+
+                console.log('Initializing device data:', { currentSuccess, currentExecuting, currentFailed });
+
+                // 获取当前地区的详细统计数据
+                const currentRegionStats = regionData[selectedMainRegion]?.deviceStats;
+                updateDeviceStatusCounts(currentSuccess, currentExecuting, currentFailed, currentRegionStats);
+            }
+
+            // 更新tab计数
+            document.getElementById('tabCountSuccess').textContent = deviceStatusData.success.length;
+            document.getElementById('tabCountExecuting').textContent = deviceStatusData.executing.length;
+            document.getElementById('tabCountFailed').textContent = deviceStatusData.failed.length;
+
+            // 设置当前活动tab并显示对应数据
+            currentActiveTab = type || 'success';
+            switchDeviceTab(currentActiveTab);
+
+            // Show drawer - 添加 show 类来显示抽屉
+            console.log('Opening drawer modal');
+
+            // 获取遮罩层和内容
+            const overlay = drawer.querySelector('.drawer-overlay');
+            const content = drawer.querySelector('.drawer-content');
+
+            // 添加 show 类触发CSS动画
+            drawer.classList.add('show');
+
+            // 同时使用内联样式强制显示（确保一定能显示）
+            drawer.style.visibility = 'visible';
+            drawer.style.pointerEvents = 'all';
+            drawer.style.zIndex = '999999';
+
+            // 强制显示遮罩层 - 使用所有可能的样式属性
+            if (overlay) {
+                overlay.style.cssText = `
+                    position: fixed !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    background: rgba(0, 0, 0, 0.6) !important;
+                    opacity: 1 !important;
+                    display: block !important;
+                    visibility: visible !important;
+                    pointer-events: all !important;
+                    z-index: 999998 !important;
+                    backdrop-filter: blur(4px);
+                `;
+                console.log('✅ Overlay forced visible with inline styles');
+            } else {
+                console.error('❌ Overlay element not found!');
+            }
+
+            // 确保内容在最上层
+            if (content) {
+                content.style.zIndex = '999999';
+                content.style.position = 'fixed';
+            }
+
+            // 强制浏览器重排以确保样式生效
+            drawer.offsetHeight;
+
+            console.log('✅ Modal shown with overlay');
+        };
+
+        // Close device status drawer - 暴露到全局作用域
+        window.closeDeviceStatusDrawer = function() {
+            console.log('closeDeviceStatusDrawer called');
+            const drawer = document.getElementById('deviceStatusDrawer');
+            const overlay = drawer.querySelector('.drawer-overlay');
+
+            // 移除 show 类触发关闭动画
+            drawer.classList.remove('show');
+
+            // 立即禁用遮罩层的点击事件，防止阻挡页面点击
+            if (overlay) {
+                overlay.style.pointerEvents = 'none';
+                overlay.style.opacity = '0';
+            }
+
+            // 立即禁用drawer的点击事件
+            drawer.style.pointerEvents = 'none';
+
+            // 延迟后完全隐藏并清理所有样式
+            setTimeout(() => {
+                drawer.style.visibility = 'hidden';
+
+                // 完全隐藏遮罩层
+                if (overlay) {
+                    overlay.style.display = 'none';
+                    overlay.style.visibility = 'hidden';
+                }
+
+                console.log('✅ Drawer closed and cleaned up');
+            }, 300);
+        };
+
+        // Switch device tab - 暴露到全局作用域
+        window.switchDeviceTab = function(type) {
+            console.log('switchDeviceTab called with type:', type);
+
+            // 更新tab激活状态
+            document.querySelectorAll('.drawer-tab').forEach(tab => {
+                if (tab.getAttribute('data-tab') === type) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            // 获取对应类型的数据
+            let data = [];
+            if (type === 'failed') {
+                data = deviceStatusData.failed;
+            } else if (type === 'success') {
+                data = deviceStatusData.success;
+            } else if (type === 'executing') {
+                data = deviceStatusData.executing;
+            }
+
+            // 更新表格数据
+            const drawerTableBody = document.getElementById('drawerTableBody');
+            if (!drawerTableBody) {
+                console.error('❌ drawerTableBody not found');
+                return;
+            }
+
+            // 状态文字翻译映射
+            const statusI18nKeys = {
+                'success': 'success',
+                'failed': 'failed',
+                'charging': 'charging',
+                'discharging': 'discharging',
+                'standby': 'standby',
+                'offline': 'offline',
+                'executing': 'executing'
+            };
+
+            drawerTableBody.innerHTML = '';
+            data.forEach(device => {
+                const row = document.createElement('tr');
+
+                // 根据设备状态生成对应的徽章
+                let statusBadge = '';
+                let badgeClass = '';
+
+                // 使用i18n翻译状态文字
+                const i18nKey = statusI18nKeys[device.status] || device.status;
+                let statusText = window.i18n ? window.i18n.getText(i18nKey) : device.status;
+
+                // 根据不同状态设置样式类
+                switch(device.status) {
+                    case 'success':
+                        badgeClass = 'success'; // 下发成功用绿色
+                        break;
+                    case 'failed':
+                        badgeClass = 'failed';
+                        break;
+                    case 'charging':
+                        badgeClass = 'success'; // 充电中用绿色
+                        break;
+                    case 'discharging':
+                        badgeClass = 'warning'; // 放电中用黄色
+                        break;
+                    case 'standby':
+                        badgeClass = 'info'; // 待机用蓝色
+                        break;
+                    case 'offline':
+                        badgeClass = 'secondary'; // 离线用灰色
+                        break;
+                    case 'executing':
+                        badgeClass = 'executing';
+                        break;
+                    default:
+                        badgeClass = 'default';
+                }
+
+                statusBadge = `<span class="status-badge ${badgeClass}">${statusText}</span>`;
+
+                row.innerHTML = `
+                    <td>${device.nmi}</td>
+                    <td>${device.failureCount}</td>
+                    <td>${statusBadge}</td>
+                `;
+
+                drawerTableBody.appendChild(row);
+            });
+
+            console.log(`✅ Switched to ${type} tab, showing ${data.length} devices`);
+        };
 
         function populateOperationDrawerData() {
             console.log('populateOperationDrawerData called with currentOperation:', currentOperation);
@@ -13143,14 +14046,7 @@
                     }
                 }
                 
-                // 更新当前操作文本
-                const currentOpText = document.getElementById('currentOperationText');
-                if (currentOpText && currentOpText.textContent === '无') {
-                    const noneText = window.i18n.getText('none');
-                    if (noneText !== 'none') {
-                        currentOpText.textContent = noneText;
-                    }
-                }
+                // No need to update current operation text anymore as it's removed
                 
                 // 更新图表标题和图例
                 updateChartTitles(language);
@@ -13416,9 +14312,10 @@
             </div>
             
             <div class="modal-body" style="padding: 32px;">
-                <p class="modal-message" style="color: rgba(255, 255, 255, 0.7); margin: 0 0 24px 0; font-size: 15px; font-weight: 400; line-height: 1.5; text-align: left;" id="operationCompleteMessage">操作完成，以下是设备响应统计报告：</p>
-                
-                <div class="modal-info-grid" style="display: flex; flex-direction: column; gap: 0; margin-bottom: 28px;">
+                <p class="modal-message" style="color: rgba(255, 255, 255, 0.7); margin: 0 0 12px 0; font-size: 15px; font-weight: 400; line-height: 1.5; text-align: left;" id="operationCompleteMessage">操作完成，以下是设备响应统计报告：</p>
+
+                <!-- 操作类型和影响设备信息 -->
+                <div class="modal-info-grid" style="display: flex; flex-direction: column; gap: 0; margin-bottom: 20px;">
                     <div style="display: flex; gap: 16px;">
                         <div class="modal-info-item" style="flex: 1; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 16px 20px; transition: all 0.3s;">
                             <div class="modal-info-label" style="color: rgba(255, 255, 255, 0.6); font-size: 13px; margin-bottom: 6px; font-weight: 400;" data-i18n="operationType">操作类型</div>
@@ -13430,24 +14327,35 @@
                         </div>
                     </div>
                 </div>
-                
+
+                <p style="color: rgba(255, 255, 255, 0.5); margin: 0 0 20px 0; font-size: 13px; font-weight: 400; line-height: 1.4; text-align: left;">💡 点击下方数字查看设备详情</p>
+
+                <!-- 设备状态统计 - 可点击 -->
                 <div class="status-summary" style="background: linear-gradient(145deg, rgba(0, 255, 136, 0.08), rgba(0, 255, 136, 0.04)); border: 1px solid rgba(0, 255, 136, 0.15); border-radius: 12px; padding: 20px; backdrop-filter: blur(20px) saturate(1.5);">
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-                        <div style="text-align: center;">
-                            <div style="font-size: 28px; font-weight: 700; color: #00ff88; line-height: 1;">500</div>
-                            <div style="color: rgba(255, 255, 255, 0.6); font-size: 13px; margin-top: 6px;" data-i18n="commandsIssued">下发设备</div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                        <!-- 下发成功 -->
+                        <div onclick="openDeviceStatusDrawerFromModal('success')" style="text-align: center; cursor: pointer; padding: 12px; border-radius: 8px; transition: all 0.3s; background: rgba(255, 255, 255, 0.03);" onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.transform='translateY(0)'">
+                            <div id="modalSuccessCount" style="font-size: 36px; font-weight: 700; color: #00ff88; line-height: 1;">450</div>
+                            <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px; margin-top: 8px; font-weight: 500;" data-i18n="success">下发成功</div>
                         </div>
-                        <div style="text-align: center;">
-                            <div id="successRateStat" style="font-size: 28px; font-weight: 700; color: #00ff88; line-height: 1;">97%</div>
-                            <div style="color: rgba(255, 255, 255, 0.6); font-size: 13px; margin-top: 6px;" data-i18n="successRate">成功率</div>
+
+                        <!-- 执行中 -->
+                        <div onclick="openDeviceStatusDrawerFromModal('executing')" style="text-align: center; cursor: pointer; padding: 12px; border-radius: 8px; transition: all 0.3s; background: rgba(255, 255, 255, 0.03);" onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.transform='translateY(0)'">
+                            <div id="modalExecutingCount" style="font-size: 36px; font-weight: 700; color: #1e7fff; line-height: 1;">0</div>
+                            <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px; margin-top: 8px; font-weight: 500;" data-i18n="executing">执行中</div>
+                        </div>
+
+                        <!-- 下发失败 -->
+                        <div onclick="openDeviceStatusDrawerFromModal('failed')" style="text-align: center; cursor: pointer; padding: 12px; border-radius: 8px; transition: all 0.3s; background: rgba(255, 255, 255, 0.03);" onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.transform='translateY(0)'">
+                            <div id="modalFailedCount" style="font-size: 36px; font-weight: 700; color: #ff6b6b; line-height: 1;">50</div>
+                            <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px; margin-top: 8px; font-weight: 500;" data-i18n="failed">下发失败</div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="modal-footer" style="padding: 20px 28px 28px; display: flex; gap: 12px;">
-                <button class="modal-btn modal-cancel-btn" onclick="closeDeviceResponseModal()" style="background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.9); border: 1px solid rgba(255, 255, 255, 0.12); padding: 10px 20px; border-radius: 999px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s; min-width: 80px;" onmouseover="this.style.background='rgba(255, 255, 255, 0.12)'; this.style.borderColor='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.12)'" data-i18n="close">关闭</button>
-                <button class="modal-btn modal-confirm-btn" onclick="viewDeviceResponseDetails()" style="background: linear-gradient(135deg, #00ff88, #00dd77); color: #000; padding: 10px 20px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; border: none; box-shadow: 0 2px 8px rgba(0, 255, 136, 0.3); min-width: 100px;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(0, 255, 136, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 255, 136, 0.3)'" data-i18n="viewDetails">查看详情</button>
+            <div class="modal-footer" style="padding: 20px 28px 28px; display: flex; justify-content: center;">
+                <button class="modal-btn modal-cancel-btn" onclick="closeDeviceResponseModal()" style="background: linear-gradient(135deg, #00ff88, #00dd77); color: #000; border: none; padding: 12px 32px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; min-width: 120px; box-shadow: 0 2px 8px rgba(0, 255, 136, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(0, 255, 136, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 255, 136, 0.3)'" data-i18n="close">关闭</button>
             </div>
         </div>
     </div>
@@ -14002,13 +14910,19 @@
             window.deviceResponseModalClosed = true;
             console.log('Device response modal closed by user');
         }
+
+        // 从设备响应弹窗点击统计数字打开设备状态抽屉
+        window.openDeviceStatusDrawerFromModal = function(type) {
+            // 不关闭设备响应统计弹窗，直接打开设备状态抽屉
+            openDeviceStatusDrawer(type);
+        };
         
         function viewDeviceResponseDetails() {
             // 使用新的抽屉组件
             if (!window.deviceResponseDrawer) {
                 window.deviceResponseDrawer = new DeviceResponseDrawer();
             }
-            
+
             // 创建与操作记录页面相同格式的数据
             const operation = {
                 id: Date.now(),
@@ -14020,7 +14934,7 @@
                 success: 230,
                 failed: 5
             };
-            
+
             // 打开抽屉 - 不关闭设备响应统计弹窗
             window.deviceResponseDrawer.open(operation);
         }
@@ -14456,7 +15370,10 @@
         /* 最终强制覆盖 - 确保抽屉在绝对最顶层 */
         #homeOperationDrawer,
         #homeOperationDrawer .drawer-overlay,
-        #homeOperationDrawer .drawer-container {
+        #homeOperationDrawer .drawer-container,
+        #deviceResponseDrawerComponent,
+        #deviceResponseDrawerComponent .drawer-overlay,
+        #deviceResponseDrawerComponent .drawer-container {
             z-index: 2147483647 !important;
             position: fixed !important;
         }
@@ -20174,9 +21091,10 @@
                 // Step 2: Modify device settings (starts only when step 1 is completed)
                 // Sync with map page execution progress
                 if (step1Complete && !step2Complete) {
-                    // Get map execution progress
-                    const mapProgressText = document.getElementById('progressPercent')?.textContent || '0%';
-                    const mapProgressValue = parseInt(mapProgressText.replace('%', ''));
+                    // Get map execution progress from executing devices
+                    const executingCount = parseInt(document.getElementById('executingDevices')?.textContent || '0');
+                    const totalCount = parseInt(document.getElementById('totalDevices')?.textContent || '500');
+                    const mapProgressValue = executingCount === 0 ? 100 : Math.floor(((totalCount - executingCount) / totalCount) * 100);
                     
                     // Sync step2 progress with map progress
                     currentProgressData.step2.progress = mapProgressValue;

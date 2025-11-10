@@ -85,20 +85,20 @@ class DrawerComponent {
     open(data = null) {
         const overlay = document.getElementById(this.containerId);
         if (!overlay) return;
-        
+
         this.isOpen = true;
         overlay.style.display = 'block';
-        
+
         // 强制重排，然后添加show类实现动画
         overlay.offsetHeight;
         overlay.classList.add('show');
-        
+
         // 如果有数据，设置初始标签页
         if (data && this.tabs.length > 0) {
             this.activeTab = this.tabs[0].key;
             this.setContent(data);
         }
-        
+
         // 阻止body滚动
         document.body.style.overflow = 'hidden';
     }
@@ -137,9 +137,9 @@ class DrawerComponent {
         this.currentData = data;
         const contentContainer = document.getElementById('drawerContent');
         if (!contentContainer) return;
-        
+
         const targetTab = tabKey || this.activeTab || (this.tabs.length > 0 ? this.tabs[0].key : 'default');
-        
+
         // 根据标签页生成内容
         const content = this.generateContent(data, targetTab);
         contentContainer.innerHTML = content;

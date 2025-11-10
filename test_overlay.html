@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.test-drawer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999999; visibility: hidden; }
+.test-drawer.show { visibility: visible; }
+.test-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.5); z-index: 999998; }
+.test-content { position: fixed; top: 0; right: 0; width: 400px; height: 100%; background: white; z-index: 999999; }
+</style>
+</head>
+<body>
+<button onclick="document.getElementById('testDrawer').classList.add('show')">Open</button>
+<div id="testDrawer" class="test-drawer">
+    <div class="test-overlay" onclick="document.getElementById('testDrawer').classList.remove('show')"></div>
+    <div class="test-content">Test Content</div>
+</div>
+</body>
+</html>
