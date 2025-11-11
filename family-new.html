@@ -2709,17 +2709,28 @@
 
                         return `
                             <tr>
-                                <td style="font-size: 13px; white-space: nowrap;">${record.timeRange}</td>
                                 <td>
                                     <span class="dispatch-type-badge ${typeClass}">
                                         ${typeText}
                                     </span>
                                 </td>
-                                <td>
-                                    <span class="status-text ${statusClass}">
-                                        <span class="status-dot" style="background-color: ${statusColor};"></span>
-                                        ${statusText}
-                                    </span>
+                                <td style="font-size: 13px; white-space: nowrap;">
+                                    <div>${record.startTime}</div>
+                                    <div style="margin-top: 4px;">
+                                        <span class="status-text ${statusClass}">
+                                            <span class="status-dot" style="background-color: ${statusColor};"></span>
+                                            ${statusText}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td style="font-size: 13px; white-space: nowrap;">
+                                    <div>${record.endTime}</div>
+                                    <div style="margin-top: 4px;">
+                                        <span class="status-text ${statusClass}">
+                                            <span class="status-dot" style="background-color: ${statusColor};"></span>
+                                            ${statusText}
+                                        </span>
+                                    </div>
                                 </td>
                             </tr>
                         `;
@@ -2744,13 +2755,13 @@
                                 white-space: nowrap;
                             }
                             .dispatch-records-table th:first-child {
-                                width: 50%;
+                                width: 20%;
                             }
                             .dispatch-records-table th:nth-child(2) {
-                                width: 25%;
+                                width: 40%;
                             }
                             .dispatch-records-table th:nth-child(3) {
-                                width: 25%;
+                                width: 40%;
                             }
                             .dispatch-records-table td {
                                 padding: 12px 16px;
@@ -2905,9 +2916,9 @@
                         <table class="dispatch-records-table">
                             <thead>
                                 <tr>
-                                    <th>${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.time') : '时间'}</th>
                                     <th>${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.type') : '类型'}</th>
-                                    <th>${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.status') : '状态'}</th>
+                                    <th>${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.startTime') : '开始时间'}（${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.status') : '状态'}）</th>
+                                    <th>${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.endTime') : '结束时间'}（${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.status') : '状态'}）</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2975,9 +2986,11 @@
                     const dateStr = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                     const startTime = `${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`;
                     const endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
-                    
+
                     records.push({
                         timeRange: `${dateStr} ${startTime}~${endTime}`,
+                        startTime: `${dateStr} ${startTime}`,
+                        endTime: `${dateStr} ${endTime}`,
                         type: type,
                         energy: energy,
                         amount: amount
