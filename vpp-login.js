@@ -184,45 +184,25 @@ function switchForm(formName) {
 // Handle login
 async function handleLogin(e) {
     e.preventDefault();
-    
+
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
-    
-    // Basic validation
-    if (!email || !password) {
-        showMessage('Please fill in all fields', 'error');
-        return;
-    }
-    
-    // Validate captcha
-    if (!validateCaptcha('login')) {
-        showMessage(translations[currentLang].invalidCaptcha, 'error');
-        refreshCaptcha('login');
-        return;
-    }
-    
-    // Check test account
-    const testEmail = 'admin@xuheng.com';
-    const testPassword = 'xuheng123';
-    
-    if (email === testEmail && password === testPassword) {
-        // Simulate API call
-        try {
-            await simulateApiCall();
-            showMessage(translations[currentLang].loginSuccess, 'success');
-            
-            // Store user information
-            localStorage.setItem('userName', 'Admin User');
-            localStorage.setItem('userEmail', email);
-            localStorage.setItem('isLoggedIn', 'true');
-            
-            // Redirect to main dashboard page immediately
-            window.location.href = 'dashboard.html';
-        } catch (error) {
-            showMessage('Login failed. Please try again.', 'error');
-        }
-    } else {
-        showMessage(currentLang === 'en' ? 'Invalid email or password' : '邮箱或密码错误', 'error');
+
+    // No validation - directly login
+    // Simulate API call
+    try {
+        await simulateApiCall();
+        showMessage(translations[currentLang].loginSuccess, 'success');
+
+        // Store user information
+        localStorage.setItem('userName', 'Admin User');
+        localStorage.setItem('userEmail', email || 'admin@xuheng.com');
+        localStorage.setItem('isLoggedIn', 'true');
+
+        // Redirect to main dashboard page immediately
+        window.location.href = 'dashboard.html';
+    } catch (error) {
+        showMessage('Login failed. Please try again.', 'error');
     }
 }
 
