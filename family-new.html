@@ -2895,9 +2895,9 @@
 
                         ${filterStatus ? `
                         <div class="filter-detail-info">
-                            <span class="filter-detail-item charge">${chargeCountInFilter}次充电</span>
+                            <span class="filter-detail-item charge">${chargeCountInFilter}${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.timesCharge') : '次充电'}</span>
                             <span class="filter-detail-separator">|</span>
-                            <span class="filter-detail-item discharge">${dischargeCountInFilter}次放电</span>
+                            <span class="filter-detail-item discharge">${dischargeCountInFilter}${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.timesDischarge') : '次放电'}</span>
                         </div>
                         ` : ''}
 

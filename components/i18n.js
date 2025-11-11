@@ -1199,7 +1199,9 @@ class I18n {
                             executing: "执行中",
                             successCount: "成功次数",
                             failedCountLabel: "失败次数",
-                            executingCount: "执行中次数"
+                            executingCount: "执行中次数",
+                            timesCharge: "次充电",
+                            timesDischarge: "次放电"
                         }
                     },
                     userName1: "张明",
@@ -1886,7 +1888,9 @@ class I18n {
                             executing: "执行中",
                             successCount: "成功次数",
                             failedCountLabel: "失败次数",
-                            executingCount: "执行中次数"
+                            executingCount: "执行中次数",
+                            timesCharge: "次充电",
+                            timesDischarge: "次放电"
                         }
                     },
                     userName1: "张明",
@@ -3199,7 +3203,9 @@ class I18n {
                             executing: "Executing",
                             successCount: "Success Count",
                             failedCountLabel: "Failed Count",
-                            executingCount: "Executing Count"
+                            executingCount: "Executing Count",
+                            timesCharge: " charges",
+                            timesDischarge: " discharges"
                         }
                     },
                     userName1: "John Smith",
@@ -3870,7 +3876,9 @@ class I18n {
                             executing: "Executing",
                             successCount: "Success Count",
                             failedCountLabel: "Failed Count",
-                            executingCount: "Executing Count"
+                            executingCount: "Executing Count",
+                            timesCharge: " charges",
+                            timesDischarge: " discharges"
                         }
                     },
                     userName1: "John Smith",
