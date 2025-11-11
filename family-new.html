@@ -2715,22 +2715,10 @@
                                     </span>
                                 </td>
                                 <td style="font-size: 13px; white-space: nowrap;">
-                                    <div>${record.startTime}</div>
-                                    <div style="margin-top: 4px;">
-                                        <span class="status-text ${statusClass}">
-                                            <span class="status-dot" style="background-color: ${statusColor};"></span>
-                                            ${statusText}
-                                        </span>
-                                    </div>
+                                    ${record.startTime} (<span class="status-text ${statusClass}"><span class="status-dot" style="background-color: ${statusColor};"></span>${statusText}</span>)
                                 </td>
                                 <td style="font-size: 13px; white-space: nowrap;">
-                                    <div>${record.endTime}</div>
-                                    <div style="margin-top: 4px;">
-                                        <span class="status-text ${statusClass}">
-                                            <span class="status-dot" style="background-color: ${statusColor};"></span>
-                                            ${statusText}
-                                        </span>
-                                    </div>
+                                    ${record.endTime} (<span class="status-text ${statusClass}"><span class="status-dot" style="background-color: ${statusColor};"></span>${statusText}</span>)
                                 </td>
                             </tr>
                         `;
