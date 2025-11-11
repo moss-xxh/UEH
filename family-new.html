@@ -2194,8 +2194,6 @@
         // Close family drawer
         function closeFamilyDrawer() {
             document.getElementById('familyDrawer').classList.remove('show');
-            // Reset dispatch filter when closing drawer
-            window.dispatchStatusFilter = null;
             dispatchCurrentPage = 1;
         }
 
@@ -2404,8 +2402,6 @@
             // Reset dispatch page when switching tabs
             if (tab === 'dispatchRecords') {
                 dispatchCurrentPage = 1;
-                // Reset status filter when switching to dispatch records tab
-                window.dispatchStatusFilter = null;
             }
 
             // Get the current family from the drawer (stored during viewFamilyDetails)
@@ -2425,28 +2421,6 @@
             if (!family) return;
 
             // Reload the dispatch records tab with new page
-            loadDrawerContent('dispatchRecords', family);
-        }
-
-        // Filter dispatch records by status
-        function filterDispatchByStatus(status) {
-            // Toggle filter: if clicking the same status, clear filter
-            if (window.dispatchStatusFilter === status) {
-                window.dispatchStatusFilter = null;
-            } else {
-                window.dispatchStatusFilter = status;
-            }
-
-            // Reset to page 1
-            dispatchCurrentPage = 1;
-
-            // Get the current family data
-            const drawerId = document.querySelector('.drawer-container').getAttribute('data-family-id');
-            const family = drawerId ? familyData.find(f => f.id == drawerId) : familyData[0];
-
-            if (!family) return;
-
-            // Reload the dispatch records tab
             loadDrawerContent('dispatchRecords', family);
         }
 
@@ -2665,26 +2639,13 @@
                         return { ...record, status };
                     });
 
-                    // Count status
-                    const successCount = allRecords.filter(r => r.status === 'success').length;
-                    const failedCount = allRecords.filter(r => r.status === 'failed').length;
-                    const executingCount = allRecords.filter(r => r.status === 'executing').length;
-
-                    // Apply filter if exists
-                    const filterStatus = window.dispatchStatusFilter || null;
-                    const filteredRecords = filterStatus ? allRecords.filter(r => r.status === filterStatus) : allRecords;
-
-                    // Count charge and discharge in filtered records
-                    const chargeCountInFilter = filteredRecords.filter(r => r.type === 'charge').length;
-                    const dischargeCountInFilter = filteredRecords.filter(r => r.type === 'discharge').length;
-
                     // Pagination settings
                     const recordsPerPage = 10;
                     const currentPage = dispatchCurrentPage;
-                    const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+                    const totalPages = Math.ceil(allRecords.length / recordsPerPage);
                     const startIndex = (currentPage - 1) * recordsPerPage;
                     const endIndex = startIndex + recordsPerPage;
-                    const pageRecords = filteredRecords.slice(startIndex, endIndex);
+                    const pageRecords = allRecords.slice(startIndex, endIndex);
 
                     const recordsHtml = pageRecords.map(record => {
                         const typeClass = record.type === 'charge' ? 'charging' : 'discharging';
@@ -2803,102 +2764,7 @@
                                 border-radius: 50%;
                                 flex-shrink: 0;
                             }
-                            .dispatch-summary {
-                                display: grid;
-                                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                                gap: 16px;
-                                margin-bottom: 24px;
-                            }
-                            .dispatch-summary-card {
-                                background: var(--color-bg);
-                                border: 1px solid var(--color-border);
-                                border-radius: 8px;
-                                padding: 16px;
-                                text-align: center;
-                                transition: all 0.3s ease;
-                            }
-                            .dispatch-summary-card:hover {
-                                border-color: rgba(0, 255, 136, 0.5);
-                                box-shadow: 0 4px 12px rgba(0, 255, 136, 0.15);
-                                transform: translateY(-2px);
-                            }
-                            .dispatch-summary-card.active {
-                                background: rgba(0, 255, 136, 0.1);
-                                border: 2px solid #00ff88;
-                                box-shadow: 0 4px 16px rgba(0, 255, 136, 0.25);
-                            }
-                            .dispatch-summary-value {
-                                font-size: 24px;
-                                font-weight: 700;
-                                margin-bottom: 8px;
-                            }
-                            .dispatch-summary-label {
-                                font-size: 12px;
-                                color: var(--color-text-secondary);
-                            }
-                            .dispatch-summary-value.positive {
-                                color: #00ff88;
-                            }
-                            .dispatch-summary-value.negative {
-                                color: #ff6b6b;
-                            }
-                            .filter-detail-info {
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                gap: 16px;
-                                padding: 12px 0;
-                                margin: 12px 0;
-                                font-size: 14px;
-                                animation: slideDown 0.3s ease;
-                            }
-                            .filter-detail-item {
-                                font-weight: 500;
-                            }
-                            .filter-detail-item.charge {
-                                color: #ffb800;
-                            }
-                            .filter-detail-item.discharge {
-                                color: #00ff88;
-                            }
-                            .filter-detail-separator {
-                                color: rgba(255, 255, 255, 0.3);
-                                font-size: 14px;
-                            }
-                            @keyframes slideDown {
-                                from {
-                                    opacity: 0;
-                                    transform: translateY(-10px);
-                                }
-                                to {
-                                    opacity: 1;
-                                    transform: translateY(0);
-                                }
-                            }
                         </style>
-                        
-                        <div class="dispatch-summary">
-                            <div class="dispatch-summary-card ${filterStatus === 'success' ? 'active' : ''}" onclick="filterDispatchByStatus('success')" data-status="success" style="cursor: pointer;">
-                                <div class="dispatch-summary-value positive">${successCount}</div>
-                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.successCount') : '成功次数'}</div>
-                            </div>
-                            <div class="dispatch-summary-card ${filterStatus === 'failed' ? 'active' : ''}" onclick="filterDispatchByStatus('failed')" data-status="failed" style="cursor: pointer;">
-                                <div class="dispatch-summary-value negative">${failedCount}</div>
-                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.failedCountLabel') : '失败次数'}</div>
-                            </div>
-                            <div class="dispatch-summary-card ${filterStatus === 'executing' ? 'active' : ''}" onclick="filterDispatchByStatus('executing')" data-status="executing" style="cursor: pointer;">
-                                <div class="dispatch-summary-value" style="color: #1E7FFF;">${executingCount}</div>
-                                <div class="dispatch-summary-label">${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.executingCount') : '执行中次数'}</div>
-                            </div>
-                        </div>
-
-                        ${filterStatus ? `
-                        <div class="filter-detail-info">
-                            <span class="filter-detail-item charge">${chargeCountInFilter}${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.timesCharge') : '次充电'}</span>
-                            <span class="filter-detail-separator">|</span>
-                            <span class="filter-detail-item discharge">${dischargeCountInFilter}${window.i18n ? window.i18n.getText('family.drawer.dispatchRecords.timesDischarge') : '次放电'}</span>
-                        </div>
-                        ` : ''}
 
                         <div style="overflow-x: auto; width: 100%;">
                         <table class="dispatch-records-table">
