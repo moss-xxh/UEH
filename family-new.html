@@ -1789,7 +1789,7 @@
             // Initialize i18n
             window.i18n = new I18n({
                 containerId: 'languageSelector',
-                defaultLanguage: localStorage.getItem('app_language') || 'zh'
+                defaultLanguage: localStorage.getItem('app_language') || 'en'
             });
             
             // Update page title
@@ -1932,7 +1932,7 @@
         // Get flow direction based on device status and actual data
         function getFlowDirection(family) {
             try {
-                const lang = window.i18n ? (window.i18n.currentLanguage || 'zh') : 'zh';
+                const lang = window.i18n ? (window.i18n.currentLanguage || 'en') : 'en';
                 const isEnglish = lang === 'en';
             
             if (family.deviceStatus === 'discharging') {
@@ -2258,7 +2258,7 @@
             console.log('Current language:', window.i18n ? window.i18n.currentLanguage : 'no i18n');
             
             // Get current language
-            const currentLang = window.i18n ? window.i18n.currentLanguage : 'zh';
+            const currentLang = window.i18n ? window.i18n.currentLanguage : 'en';
             
             // Get specific date based on period
             const today = new Date();
