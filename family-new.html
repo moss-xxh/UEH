@@ -2343,7 +2343,7 @@
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 24px;">
                     <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; padding: 20px; text-align: center;">
                         <div style="font-size: 14px; color: var(--color-text-secondary); margin-bottom: 10px;">
-                            ${window.i18n && window.i18n.currentLanguage === 'en' ? 'Total Discharge' : '总放电量'}
+                            ${window.i18n && window.i18n.currentLanguage === 'en' ? 'Total Feed-in' : '馈网量'}
                         </div>
                         <div style="font-size: 22px; font-weight: 600; color: var(--color-primary);">${totalDischarge} kWh</div>
                     </div>
@@ -2365,13 +2365,13 @@
                                         ${window.i18n && window.i18n.currentLanguage === 'en' ? 'Time' : '时间'}
                                     </th>
                                     <th style="padding: 12px; text-align: right; border-bottom: 1px solid var(--color-border); font-size: 12px; color: var(--color-text-secondary); background: rgba(20, 20, 30, 0.95); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 10;">
-                                        ${window.i18n && window.i18n.currentLanguage === 'en' ? 'Discharge' : '放电量'} (kWh)
+                                        ${window.i18n && window.i18n.currentLanguage === 'en' ? 'Feed-in' : '馈网量'} (kWh)
                                     </th>
                                     <th style="padding: 12px; text-align: right; border-bottom: 1px solid var(--color-border); font-size: 12px; color: var(--color-text-secondary); background: rgba(20, 20, 30, 0.95); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 10;">
                                         ${window.i18n && window.i18n.currentLanguage === 'en' ? 'Price' : '价格'} ($/MWh)
                                     </th>
                                     <th style="padding: 12px; text-align: right; border-bottom: 1px solid var(--color-border); font-size: 12px; color: var(--color-text-secondary); background: rgba(20, 20, 30, 0.95); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 10;">
-                                        ${window.i18n && window.i18n.currentLanguage === 'en' ? 'Profit' : '收益'} ($)
+                                        ${window.i18n && window.i18n.currentLanguage === 'en' ? 'Profit' : '获利'} ($)
                                     </th>
                                 </tr>
                             </thead>
@@ -3460,9 +3460,9 @@
                 window.i18n ? window.i18n.getText('family.table.meterNumber') : '表号',
                 window.i18n ? window.i18n.getText('date') : '日期',
                 window.i18n ? window.i18n.getText('time') : '时间',
-                window.i18n ? window.i18n.getText('family.exportDetail.discharge') : '放电量(kWh)',
+                window.i18n ? window.i18n.getText('family.exportDetail.discharge') : '馈网量(kWh)',
                 window.i18n ? window.i18n.getText('family.exportDetail.price') : '电价(¥/MWh)',
-                window.i18n ? window.i18n.getText('family.exportDetail.profit') : '盈利(¥)'
+                window.i18n ? window.i18n.getText('family.exportDetail.profit') : '获利(¥)'
             ];
 
             let csvContent = '\uFEFF' + headers.join(',') + '\n'; // Add BOM for UTF-8
