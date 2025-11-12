@@ -2479,18 +2479,6 @@
                                     <div class="drawer-info-value">${family.location}</div>
                                 </div>
                                 <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.deviceCode') : '设备编码'}</div>
-                                    <div class="drawer-info-value">${family.deviceCode}</div>
-                                </div>
-                                <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.manufacturer') : '厂商'}</div>
-                                    <div class="drawer-info-value">${brand}</div>
-                                </div>
-                                <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.version') : '版本号'}</div>
-                                    <div class="drawer-info-value" style="font-size: 11px; line-height: 1.6;">${versionInfo}</div>
-                                </div>
-                                <div class="drawer-info-item">
                                     <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.operatingDays') : '运行天数'}</div>
                                     <div class="drawer-info-value">${family.usageDays || Math.floor(Math.random() * 300 + 200)}${window.i18n ? window.i18n.getText('family.drawer.day') : '天'}</div>
                                 </div>
@@ -2505,62 +2493,36 @@
                             </div>
                         </div>
 
-                        <!-- 电网信息 -->
-                        <div class="drawer-category-section">
-                            <h4 class="drawer-category-title">🗼 ${window.i18n ? window.i18n.getText('family.drawer.gridInfo') : '电网'}</h4>
-                            <div class="drawer-info-grid">
-                                <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.gridPower') : '电网功率'}</div>
-                                    <div class="drawer-info-value">${(Math.random() * 3 + 0.5).toFixed(2)}kW</div>
-                                </div>
-                                <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.gridVoltage') : '电网电压'}</div>
-                                    <div class="drawer-info-value">${(Math.random() * 10 + 230).toFixed(1)}V</div>
-                                </div>
-                                <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.gridFrequency') : '电网频率'}</div>
-                                    <div class="drawer-info-value">${(Math.random() * 0.2 + 49.9).toFixed(2)}Hz</div>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- 逆变器信息 -->
                         <div class="drawer-category-section">
                             <h4 class="drawer-category-title">⚙️ ${window.i18n ? window.i18n.getText('family.drawer.inverterInfo') : '逆变器'}</h4>
                             <div class="drawer-info-grid">
                                 <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.inverterPower') : '逆变器功率'}</div>
-                                    <div class="drawer-info-value">${(Math.random() * 5 + 1).toFixed(2)}kW</div>
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.inverterManufacturer') : '厂商'}</div>
+                                    <div class="drawer-info-value">${brand}</div>
                                 </div>
                                 <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.inverterEfficiency') : '逆变器效率'}</div>
-                                    <div class="drawer-info-value">${(Math.random() * 3 + 95).toFixed(1)}%</div>
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.inverterDeviceCode') : '设备编码'}</div>
+                                    <div class="drawer-info-value">${family.deviceCode}</div>
                                 </div>
                                 <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.inverterTemperature') : '逆变器温度'}</div>
-                                    <div class="drawer-info-value">${(Math.random() * 15 + 35).toFixed(1)}°C</div>
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.inverterVersion') : '版本号'}</div>
+                                    <div class="drawer-info-value" style="font-size: 11px; line-height: 1.6;">${versionInfo}</div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 电池信息 -->
+                        <!-- 电网信息 -->
                         <div class="drawer-category-section">
-                            <h4 class="drawer-category-title">🔋 ${window.i18n ? window.i18n.getText('family.drawer.batteryInfo') : '电池'}</h4>
+                            <h4 class="drawer-category-title">🗼 ${window.i18n ? window.i18n.getText('family.drawer.gridInfo') : '电网'}</h4>
                             <div class="drawer-info-grid">
                                 <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.batteryCapacity') : '电池容量'}</div>
-                                    <div class="drawer-info-value">13.5kWh</div>
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.todayGridPurchase') : '今日用电量'}</div>
+                                    <div class="drawer-info-value">${(Math.random() * 20 + 10).toFixed(1)}kWh</div>
                                 </div>
                                 <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.soc') : 'SOC'}</div>
-                                    <div class="drawer-info-value">${family.soc}%</div>
-                                </div>
-                                <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.status') : '状态'}（${window.i18n ? window.i18n.getText('family.drawer.realtimePower') : '实时功率'}）</div>
-                                    <div class="drawer-info-value">
-                                        ${window.i18n ? window.i18n.getText('family.deviceStates.' + family.deviceStatus) : family.deviceStatus} (${(Math.random() * 5 + 1).toFixed(1)}kW)
-                                        ${family.batteryMissing ? `<span style="color: #ff4757; margin-left: 8px; font-size: 12px; font-weight: 600;">⚠ ${window.i18n ? window.i18n.getText('family.drawer.batteryMissing') : '缺少电池'}</span>` : ''}
-                                    </div>
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.todayGridFeedIn') : '今日馈网量'}</div>
+                                    <div class="drawer-info-value">${(Math.random() * 15 + 5).toFixed(1)}kWh</div>
                                 </div>
                             </div>
                         </div>
@@ -2570,16 +2532,42 @@
                             <h4 class="drawer-category-title">☀️ ${window.i18n ? window.i18n.getText('family.drawer.pvInfo') : '光伏'}</h4>
                             <div class="drawer-info-grid">
                                 <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.pvPower') : 'PV发电功率'}</div>
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.todayPvGeneration') : '今日发电量'}${window.i18n ? window.i18n.getText('family.drawer.forReferenceOnly') : '（仅供参考）'}</div>
+                                    <div class="drawer-info-value">${(Math.random() * 30 + 10).toFixed(1)}kWh</div>
+                                </div>
+                                <div class="drawer-info-item">
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.pvGenerationPower') : '发电功率'}${window.i18n ? window.i18n.getText('family.drawer.forReferenceOnly') : '（仅供参考）'}</div>
                                     <div class="drawer-info-value">${(Math.random() * 6 + 2).toFixed(1)}kW</div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- 电池信息 -->
+                        <div class="drawer-category-section">
+                            <h4 class="drawer-category-title">🔋 ${window.i18n ? window.i18n.getText('family.drawer.batteryInfo') : '电池'}</h4>
+                            <div class="drawer-info-grid">
                                 <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.outputPower') : '输出功率'}</div>
-                                    <div class="drawer-info-value">${(Math.random() * 4 + 1).toFixed(1)}kW</div>
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.todayCharge') : '今日充电量'}</div>
+                                    <div class="drawer-info-value">${(Math.random() * 12 + 3).toFixed(1)}kWh</div>
                                 </div>
                                 <div class="drawer-info-item">
-                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.todayPvDirectLoad') : '今日PV直供负载量'}</div>
-                                    <div class="drawer-info-value">${(Math.random() * 20 + 5).toFixed(1)}kWh</div>
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.todayDischarge') : '今日放电量'}</div>
+                                    <div class="drawer-info-value">${(Math.random() * 10 + 2).toFixed(1)}kWh</div>
+                                </div>
+                                <div class="drawer-info-item">
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.status') : '状态'}（${window.i18n ? window.i18n.getText('family.drawer.realtimePower') : '实时功率'}）</div>
+                                    <div class="drawer-info-value">
+                                        ${window.i18n ? window.i18n.getText('family.deviceStates.' + family.deviceStatus) : family.deviceStatus} (${(Math.random() * 5 + 1).toFixed(1)}kW)
+                                        ${family.batteryMissing ? `<span style="color: #ff4757; margin-left: 8px; font-size: 12px; font-weight: 600;">⚠ ${window.i18n ? window.i18n.getText('family.drawer.batteryMissing') : '缺少电池'}</span>` : ''}
+                                    </div>
+                                </div>
+                                <div class="drawer-info-item">
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.soc') : 'SOC'}</div>
+                                    <div class="drawer-info-value">${family.soc}%</div>
+                                </div>
+                                <div class="drawer-info-item">
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.batteryCapacity') : '电池容量'}</div>
+                                    <div class="drawer-info-value">13.5kWh</div>
                                 </div>
                             </div>
                         </div>

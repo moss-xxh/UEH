@@ -4857,7 +4857,10 @@
             <!-- Discharge & Profit Chart 放电与收益 -->
                 <div class="card" style="height:422px; min-height:422px; max-height:422px; margin-top:20px; display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; padding:24px;">
                     <div class="chart-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-                        <div class="chart-title" data-i18n="profit.charts.dischargeAndProfit" style="font-size:18px; font-weight:500; color:var(--color-text);">电量与获利</div>
+                        <div class="chart-title" style="font-size:18px; font-weight:500; color:var(--color-text);">
+                            <span data-i18n="profit.charts.dischargeAndProfit">电量与获利</span>
+                            <span style="font-size:12px; font-weight:400; color:rgba(255,255,255,0.6); margin-left:8px;" data-i18n="profit.charts.profitFormula">（获利=馈网量*价格）</span>
+                        </div>
                         <div style="display:flex; align-items:center; gap:12px;">
                             <!-- Time Period Dropdown (on left) -->
                             <select id="discharge-period-select" class="period-dropdown" onchange="handleDischargePeriodChange()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:6px 12px; color:#fff; font-size:13px; min-width:80px; cursor:pointer; outline:none;">
