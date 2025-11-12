@@ -5327,7 +5327,13 @@
         <div class="drawer-content">
             <div class="drawer-header">
                 <h3 style="margin: 0; color: #fff; font-size: 20px;" data-i18n="deviceResponseStatistics">设备响应统计</h3>
-                <button class="drawer-close-btn" onclick="closeDeviceStatusDrawer()">×</button>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <button class="drawer-export-btn" onclick="exportDrawerData()" style="background: linear-gradient(135deg, #1e7fff, #0d5dd8); color: #fff; border: none; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(30, 127, 255, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        <span>📥</span>
+                        <span data-i18n="export">导出</span>
+                    </button>
+                    <button class="drawer-close-btn" onclick="closeDeviceStatusDrawer()">×</button>
+                </div>
             </div>
 
             <!-- Tab Navigation -->
@@ -13733,9 +13739,96 @@
             }, 300);
         };
 
+        // Export drawer data - 暴露到全局作用域
+        window.exportDrawerData = function() {
+            console.log('exportDrawerData called');
+
+            // Get current active tab data
+            let data = [];
+            let tabName = '';
+
+            if (currentActiveTab === 'failed') {
+                data = deviceStatusData.failed;
+                tabName = window.i18n ? window.i18n.getText('failed') : '下发失败';
+            } else if (currentActiveTab === 'success') {
+                data = deviceStatusData.success;
+                tabName = window.i18n ? window.i18n.getText('success') : '下发成功';
+            } else if (currentActiveTab === 'executing') {
+                data = deviceStatusData.executing;
+                tabName = window.i18n ? window.i18n.getText('executing') : '执行中';
+            }
+
+            if (data.length === 0) {
+                const message = window.i18n && window.i18n.getCurrentLanguage() === 'en' ?
+                    'No data to export' : '没有数据可以导出';
+                alert(message);
+                return;
+            }
+
+            // Get current language
+            const currentLang = window.i18n ? window.i18n.getCurrentLanguage() : 'zh';
+
+            // Create CSV headers based on language
+            const headers = currentLang === 'en' ?
+                ['NMI', 'Failure Count', 'Status'] :
+                ['NMI', '失败次数', '状态'];
+
+            // Status translation mapping
+            const statusI18nKeys = {
+                'success': 'success',
+                'failed': 'failed',
+                'charging': 'charging',
+                'discharging': 'discharging',
+                'standby': 'standby',
+                'offline': 'offline',
+                'executing': 'executing'
+            };
+
+            // Create CSV content
+            let csvContent = '\uFEFF' + headers.join(',') + '\n'; // Add BOM for UTF-8
+
+            // Add data rows
+            data.forEach(device => {
+                const i18nKey = statusI18nKeys[device.status] || device.status;
+                const statusText = window.i18n ? window.i18n.getText(i18nKey) : device.status;
+
+                const row = [
+                    device.nmi || '-',
+                    device.failureCount || 0,
+                    statusText
+                ];
+                csvContent += row.join(',') + '\n';
+            });
+
+            // Create blob and download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+
+            const now = new Date();
+            const timestamp = now.getTime();
+            const filename = `device_response_${currentActiveTab}_${timestamp}.csv`;
+
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Show success message
+            const message = currentLang === 'en' ?
+                `Export successful! (${data.length} records)` :
+                `导出成功！共 ${data.length} 条数据`;
+            alert(message);
+        };
+
         // Switch device tab - 暴露到全局作用域
         window.switchDeviceTab = function(type) {
             console.log('switchDeviceTab called with type:', type);
+
+            // 更新当前活动标签
+            currentActiveTab = type;
 
             // 更新tab激活状态
             document.querySelectorAll('.drawer-tab').forEach(tab => {
