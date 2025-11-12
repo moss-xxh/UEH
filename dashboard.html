@@ -7481,9 +7481,9 @@
                         feedIn = Math.random() * 0.1; // Minimal
                     }
 
-                    // Calculate profit: feed-in revenue - grid purchase cost
+                    // Calculate profit: feed-in revenue only
                     // Convert kW to kWh for 30-min interval (kW * 0.5h)
-                    const profit = (feedIn * 0.5 * feedInRate) - (gridPurchase * 0.5 * gridRate);
+                    const profit = feedIn * 0.5 * feedInRate;
 
                     inputData.push(parseFloat(gridPurchase.toFixed(2)));
                     outputData.push(parseFloat(feedIn.toFixed(2)));
@@ -7554,9 +7554,9 @@
                     type: 'value',
                     name: window.i18n ? window.i18n.getText('profit') : '获利',
                     nameTextStyle: { color: 'rgba(255, 255, 255, 0.6)' },
-                    min: -0.2,
-                    max: 0.4,
-                    interval: 0.1,
+                    min: 0,
+                    max: 0.3,
+                    interval: 0.05,
                     axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
                     axisLabel: {
                         color: 'rgba(255, 255, 255, 0.6)',
