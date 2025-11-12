@@ -7489,35 +7489,38 @@
                 }],
                 series: [{
                     name: window.i18n ? window.i18n.getText('input') : 'Input',
-                    type: 'bar',
+                    type: 'line',
                     data: Array.from({length: 48}, () => Math.floor(Math.random() * 200) + 60),
-                    itemStyle: {
-                        color: '#00ff88',
-                        opacity: 0.8
+                    lineStyle: {
+                        width: 3,
+                        color: '#00ff88'
                     },
-                    barWidth: '30%'
+                    itemStyle: { color: '#00ff88' },
+                    symbol: 'circle',
+                    symbolSize: 6,
+                    smooth: true
                 }, {
                     name: window.i18n ? window.i18n.getText('output') : 'Output',
-                    type: 'bar',
-                    data: Array.from({length: 48}, () => Math.floor(Math.random() * 200) + 50),
-                    itemStyle: {
-                        color: '#ffd700',
-                        opacity: 0.8
-                    },
-                    barWidth: '30%'
-                }, {
-                    name: window.i18n ? window.i18n.getText('profit') : '获利',
                     type: 'line',
-                    yAxisIndex: 1,
                     data: Array.from({length: 48}, () => Math.floor(Math.random() * 200) + 50),
                     lineStyle: {
                         width: 3,
-                        color: '#1E7FFF'
+                        color: '#ffd700'
                     },
-                    itemStyle: { color: '#1E7FFF' },
+                    itemStyle: { color: '#ffd700' },
                     symbol: 'circle',
-                    symbolSize: 8,
+                    symbolSize: 6,
                     smooth: true
+                }, {
+                    name: window.i18n ? window.i18n.getText('profit') : '获利',
+                    type: 'bar',
+                    yAxisIndex: 1,
+                    data: Array.from({length: 48}, () => Math.floor(Math.random() * 200) + 50),
+                    itemStyle: {
+                        color: '#1E7FFF',
+                        opacity: 0.8
+                    },
+                    barWidth: '30%'
                 }]
             };
             
