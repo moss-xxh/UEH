@@ -8398,16 +8398,8 @@
 
                 case 'year':
                     // Monthly data for selected year - Energy in kWh per month
-                    // Start from current Australian month
-                    const currentMonthIndex = new Date().getMonth(); // 0-11
-                    const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-
-                    // Generate month labels starting from current month
-                    xAxisData = [];
-                    for (let i = 0; i < 12; i++) {
-                        const monthIndex = (currentMonthIndex + i) % 12;
-                        xAxisData.push(monthNames[monthIndex]);
-                    }
+                    // Fixed order: Jan to Dec
+                    xAxisData = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
 
                     inputData = [];
                     outputData = [];
@@ -8429,10 +8421,9 @@
                         { grid: 270, feedIn: 860 }   // Dec (summer)
                     ];
 
-                    // Generate data starting from current month
+                    // Generate data in order from Jan to Dec
                     for (let i = 0; i < 12; i++) {
-                        const patternIndex = (currentMonthIndex + i) % 12;
-                        const pattern = monthlyPatterns[patternIndex];
+                        const pattern = monthlyPatterns[i];
                         const gridPurchase = pattern.grid + (Math.random() - 0.5) * 50;
                         const feedIn = pattern.feedIn + (Math.random() - 0.5) * 100;
                         const profit = feedIn * feedInRate;
