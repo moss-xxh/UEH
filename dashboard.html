@@ -7420,7 +7420,81 @@
         // powerRevenueChart is already declared globally above
         function initPowerRevenueChart() {
             powerRevenueChart = echarts.init(document.getElementById('powerRevenueChart'));
-            
+
+            // Generate realistic Australian household energy data for 24 hours (48 data points, 30-min intervals)
+            function generateRealisticEnergyData() {
+                const inputData = [];  // Grid purchase (kW)
+                const outputData = []; // Solar + Battery feed-in (kW)
+                const profitData = [];  // Profit ($)
+
+                // Grid purchase rate: ~$0.30/kWh, Feed-in rate: ~$0.08/kWh (Australian typical rates)
+                const gridRate = 0.30;
+                const feedInRate = 0.08;
+
+                for (let i = 0; i < 48; i++) {
+                    const hour = Math.floor(i / 2);
+                    const minute = (i % 2) * 30;
+
+                    let gridPurchase = 0;  // From grid
+                    let feedIn = 0;        // To grid
+
+                    // Night period (0:00-6:00): Low grid purchase, minimal feed-in
+                    if (hour >= 0 && hour < 6) {
+                        gridPurchase = 0.3 + Math.random() * 0.4; // 0.3-0.7 kW (appliances on standby)
+                        feedIn = Math.random() * 0.1; // Minimal battery discharge
+                    }
+                    // Morning peak (6:00-9:00): Increasing grid purchase, solar starts
+                    else if (hour >= 6 && hour < 9) {
+                        gridPurchase = 1.5 + (hour - 6) * 0.8 + Math.random() * 0.5; // 1.5-4 kW
+                        feedIn = Math.max(0, (hour - 6) * 0.8 + Math.random() * 0.5); // 0-2 kW (solar starting)
+                    }
+                    // Mid-morning to afternoon (9:00-17:00): Solar peak, low grid purchase
+                    else if (hour >= 9 && hour < 17) {
+                        // Grid purchase minimal during solar hours
+                        gridPurchase = 0.2 + Math.random() * 0.3; // 0.2-0.5 kW
+
+                        // Solar peak around midday (12:00-15:00)
+                        if (hour >= 12 && hour < 15) {
+                            feedIn = 4.5 + Math.random() * 1.5; // 4.5-6 kW (peak solar + battery)
+                        } else if (hour >= 10 && hour < 12) {
+                            feedIn = 3.0 + Math.random() * 1.0; // 3-4 kW (morning solar)
+                        } else if (hour >= 15 && hour < 17) {
+                            feedIn = 2.5 + Math.random() * 1.0; // 2.5-3.5 kW (afternoon solar)
+                        } else {
+                            feedIn = 2.0 + Math.random() * 0.8; // 2-2.8 kW
+                        }
+                    }
+                    // Evening peak (17:00-22:00): High grid purchase, declining solar
+                    else if (hour >= 17 && hour < 22) {
+                        gridPurchase = 2.5 + (hour - 17) * 0.3 + Math.random() * 0.8; // 2.5-5 kW
+
+                        // Solar declining, some battery discharge
+                        if (hour < 19) {
+                            feedIn = Math.max(0, 1.5 - (hour - 17) * 0.5 + Math.random() * 0.3); // 0.5-1.8 kW
+                        } else {
+                            feedIn = Math.random() * 0.3; // Minimal battery discharge
+                        }
+                    }
+                    // Late night (22:00-24:00): Decreasing grid purchase
+                    else {
+                        gridPurchase = 1.2 - (hour - 22) * 0.4 + Math.random() * 0.3; // 1.2-0.5 kW
+                        feedIn = Math.random() * 0.1; // Minimal
+                    }
+
+                    // Calculate profit: feed-in revenue - grid purchase cost
+                    // Convert kW to kWh for 30-min interval (kW * 0.5h)
+                    const profit = (feedIn * 0.5 * feedInRate) - (gridPurchase * 0.5 * gridRate);
+
+                    inputData.push(parseFloat(gridPurchase.toFixed(2)));
+                    outputData.push(parseFloat(feedIn.toFixed(2)));
+                    profitData.push(parseFloat(profit.toFixed(2)));
+                }
+
+                return { inputData, outputData, profitData };
+            }
+
+            const { inputData, outputData, profitData } = generateRealisticEnergyData();
+
             const options = {
                 tooltip: {
                     trigger: 'axis',
@@ -7465,23 +7539,26 @@
                 },
                 yAxis: [{
                     type: 'value',
-                    name: window.i18n ? window.i18n.getText('discharge') : '放电量',
+                    name: 'kW',
                     nameTextStyle: { color: 'rgba(255, 255, 255, 0.6)' },
                     min: 0,
-                    max: 250,
-                    interval: 50,
+                    max: 8,
+                    interval: 1,
                     axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
-                    axisLabel: { color: 'rgba(255, 255, 255, 0.6)' },
+                    axisLabel: {
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        formatter: '{value}'
+                    },
                     splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }
                 }, {
                     type: 'value',
                     name: window.i18n ? window.i18n.getText('profit') : '获利',
                     nameTextStyle: { color: 'rgba(255, 255, 255, 0.6)' },
-                    min: 0,
-                    max: 250,
-                    interval: 50,
+                    min: -0.2,
+                    max: 0.4,
+                    interval: 0.1,
                     axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
-                    axisLabel: { 
+                    axisLabel: {
                         color: 'rgba(255, 255, 255, 0.6)',
                         formatter: '${value}'
                     },
@@ -7490,7 +7567,7 @@
                 series: [{
                     name: window.i18n ? window.i18n.getText('input') : 'Input',
                     type: 'line',
-                    data: Array.from({length: 48}, () => Math.floor(Math.random() * 200) + 60),
+                    data: inputData,
                     lineStyle: {
                         width: 3,
                         color: '#00ff88'
@@ -7502,7 +7579,7 @@
                 }, {
                     name: window.i18n ? window.i18n.getText('output') : 'Output',
                     type: 'line',
-                    data: Array.from({length: 48}, () => Math.floor(Math.random() * 200) + 50),
+                    data: outputData,
                     lineStyle: {
                         width: 3,
                         color: '#ffd700'
@@ -7515,7 +7592,7 @@
                     name: window.i18n ? window.i18n.getText('profit') : '获利',
                     type: 'bar',
                     yAxisIndex: 1,
-                    data: Array.from({length: 48}, () => Math.floor(Math.random() * 200) + 50),
+                    data: profitData,
                     itemStyle: {
                         color: '#1E7FFF',
                         opacity: 0.8
