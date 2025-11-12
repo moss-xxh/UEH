@@ -1752,7 +1752,7 @@ class I18n {
                     buttons: {
                         search: "查询",
                         reset: "重置",
-                        export: "导出",
+                        export: "导出家庭数据",
                         exportDetail: "导出运行数据",
                         refresh: "刷新",
                         viewDetails: "查看详情",
@@ -3742,7 +3742,7 @@ class I18n {
                     buttons: {
                         search: "Search",
                         reset: "Reset",
-                        export: "Export",
+                        export: "Export Family Data",
                         exportDetail: "Export Running Data",
                         refresh: "Refresh",
                         expand: "Expand",
