@@ -1439,7 +1439,7 @@
 
                     <button class="filter-btn export" onclick="exportData()" style="margin-left: auto;">
                         <span>📥</span>
-                        <span data-i18n-key="family.buttons.export">导出</span>
+                        <span data-i18n-key="family.buttons.export">导出家庭数据</span>
                     </button>
                     <button class="filter-btn export-detail" onclick="exportDetailData()" style="background: rgba(30, 127, 255, 0.1); border-color: rgba(30, 127, 255, 0.3);">
                         <span>📊</span>
@@ -2501,6 +2501,44 @@
                                 <div class="drawer-info-item">
                                     <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.avgProfit') : '日均获利'}</div>
                                     <div class="drawer-info-value">$${family.avgProfit || Math.floor(family.todayProfit * 0.8)}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 电网信息 -->
+                        <div class="drawer-category-section">
+                            <h4 class="drawer-category-title">🔌 ${window.i18n ? window.i18n.getText('family.drawer.gridInfo') : '电网'}</h4>
+                            <div class="drawer-info-grid">
+                                <div class="drawer-info-item">
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.gridPower') : '电网功率'}</div>
+                                    <div class="drawer-info-value">${(Math.random() * 3 + 0.5).toFixed(2)}kW</div>
+                                </div>
+                                <div class="drawer-info-item">
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.gridVoltage') : '电网电压'}</div>
+                                    <div class="drawer-info-value">${(Math.random() * 10 + 230).toFixed(1)}V</div>
+                                </div>
+                                <div class="drawer-info-item">
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.gridFrequency') : '电网频率'}</div>
+                                    <div class="drawer-info-value">${(Math.random() * 0.2 + 49.9).toFixed(2)}Hz</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 逆变器信息 -->
+                        <div class="drawer-category-section">
+                            <h4 class="drawer-category-title">⚙️ ${window.i18n ? window.i18n.getText('family.drawer.inverterInfo') : '逆变器'}</h4>
+                            <div class="drawer-info-grid">
+                                <div class="drawer-info-item">
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.inverterPower') : '逆变器功率'}</div>
+                                    <div class="drawer-info-value">${(Math.random() * 5 + 1).toFixed(2)}kW</div>
+                                </div>
+                                <div class="drawer-info-item">
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.inverterEfficiency') : '逆变器效率'}</div>
+                                    <div class="drawer-info-value">${(Math.random() * 3 + 95).toFixed(1)}%</div>
+                                </div>
+                                <div class="drawer-info-item">
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.inverterTemperature') : '逆变器温度'}</div>
+                                    <div class="drawer-info-value">${(Math.random() * 15 + 35).toFixed(1)}°C</div>
                                 </div>
                             </div>
                         </div>
