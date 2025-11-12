@@ -14723,7 +14723,11 @@
                 </div>
             </div>
             
-            <div class="modal-footer" style="padding: 20px 28px 28px; display: flex; justify-content: center;">
+            <div class="modal-footer" style="padding: 20px 28px 28px; display: flex; justify-content: center; gap: 16px;">
+                <button class="modal-btn modal-export-btn" onclick="exportDeviceResponseStatistics()" style="background: linear-gradient(135deg, #1e7fff, #0d5dd8); color: #fff; border: none; padding: 12px 32px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; min-width: 120px; box-shadow: 0 2px 8px rgba(30, 127, 255, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(30, 127, 255, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(30, 127, 255, 0.3)'">
+                    <span>📥</span>
+                    <span data-i18n="export">导出</span>
+                </button>
                 <button class="modal-btn modal-cancel-btn" onclick="closeDeviceResponseModal()" style="background: linear-gradient(135deg, #00ff88, #00dd77); color: #000; border: none; padding: 12px 32px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; min-width: 120px; box-shadow: 0 2px 8px rgba(0, 255, 136, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(0, 255, 136, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 255, 136, 0.3)'" data-i18n="close">关闭</button>
             </div>
         </div>
@@ -15273,6 +15277,70 @@
             loadDeviceResponseData();
         }
         
+        // Export device response statistics
+        function exportDeviceResponseStatistics() {
+            // Get current data from modal
+            const operationType = document.getElementById('operationTypeDisplay').textContent;
+            const targetDevices = document.getElementById('targetDevicesDisplay').textContent;
+            const successCount = document.getElementById('modalSuccessCount').textContent;
+            const executingCount = document.getElementById('modalExecutingCount').textContent;
+            const failedCount = document.getElementById('modalFailedCount').textContent;
+
+            // Get current language
+            const currentLang = window.i18n ? window.i18n.getCurrentLanguage() : 'zh';
+
+            // Create CSV headers based on language
+            const headers = currentLang === 'en' ?
+                ['Export Time', 'Operation Type', 'Target Devices', 'Success', 'Executing', 'Failed', 'Success Rate'] :
+                ['导出时间', '操作类型', '影响设备', '下发成功', '执行中', '下发失败', '成功率'];
+
+            // Calculate success rate
+            const total = parseInt(successCount) + parseInt(executingCount) + parseInt(failedCount);
+            const successRate = total > 0 ? ((parseInt(successCount) / total) * 100).toFixed(1) + '%' : '0%';
+
+            // Get current timestamp
+            const now = new Date();
+            const timestamp = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            // Create CSV content
+            let csvContent = '\uFEFF' + headers.join(',') + '\n'; // Add BOM for UTF-8
+
+            // Add data row
+            const row = [
+                timestamp,
+                operationType,
+                targetDevices,
+                successCount,
+                executingCount,
+                failedCount,
+                successRate
+            ];
+            csvContent += row.join(',') + '\n';
+
+            // Create blob and download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+
+            link.setAttribute('href', url);
+            link.setAttribute('download', `device_response_statistics_${now.getTime()}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Show success message
+            const message = currentLang === 'en' ? 'Export successful!' : '导出成功！';
+            alert(message);
+        }
+
         function closeDeviceResponseModal() {
             document.getElementById('deviceResponseModal').style.display = 'none';
             // 设置标志，防止自动重新显示
