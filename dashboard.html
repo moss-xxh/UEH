@@ -12796,56 +12796,56 @@
             if (!deviceLocations || !mapChart) return;
 
             console.log('=== DEBUG: updateMapStatistics called ===');
-            console.log('Total deviceLocations:', deviceLocations.length);
             console.log('Selected region:', selectedMainRegion);
 
-            // Always count actual device statuses regardless of command progress
+            // 获取当前地区的数据
+            const currentRegion = regionData[selectedMainRegion] || regionData['NSW'];
+            const regionStatus = currentRegion.status;
+            const successCount = currentRegion.deviceStats.success;
+
+            console.log('Region status:', regionStatus);
+            console.log('Success count:', successCount);
+
+            // 初始化计数
             let counts = {
                 charging: 0,
                 discharging: 0,
-                processing: 0, // Devices that received command but not executing yet
+                processing: 0,
                 inactive: 0,
                 offline: 0
             };
 
-            // 只统计当前选中地区的设备状态（过滤掉hidden状态）
-            deviceLocations.forEach(device => {
-                // 只统计当前选中地区的设备
-                if (device.region !== selectedMainRegion) {
-                    return;
-                }
-
-                switch (device.status) {
-                    case 'charging':
-                        counts.charging++;
-                        break;
-                    case 'discharging':
-                        counts.discharging++;
-                        break;
-                    case 'active': // Command received, processing
-                        counts.processing++;
-                        break;
-                    case 'offline':
-                        counts.offline++;
-                        break;
-                    case 'inactive':
-                        counts.inactive++;
-                        break;
-                    case 'hidden':
-                        // hidden状态的设备不计入任何类别
-                        break;
-                    default:
-                        counts.inactive++;
-                        break;
-                }
-            });
+            // 根据地区状态和下发成功数量计算显示数字
+            if (regionStatus === 'waitingExecution' || regionStatus === 'none') {
+                // NSW等待执行中：全部为0
+                counts = {
+                    charging: 0,
+                    discharging: 0,
+                    processing: 0,
+                    inactive: 0,
+                    offline: 0
+                };
+            } else if (regionStatus === 'autoCharge' || regionStatus === 'manualCharge') {
+                // 充电地区：充电中 + 待机 + 离线 = 下发成功数量，放电中 = 0
+                const total = successCount;
+                counts.charging = Math.floor(total * 0.2);      // 20% 充电中
+                counts.inactive = Math.floor(total * 0.7);      // 70% 待机
+                counts.offline = total - counts.charging - counts.inactive; // 剩余为离线
+                counts.discharging = 0; // 充电地区无放电设备
+            } else if (regionStatus === 'autoDischarge' || regionStatus === 'manualDischarge') {
+                // 放电地区：放电中 + 待机 + 离线 = 下发成功数量，充电中 = 0
+                const total = successCount;
+                counts.discharging = Math.floor(total * 0.2);   // 20% 放电中
+                counts.inactive = Math.floor(total * 0.7);      // 70% 待机
+                counts.offline = total - counts.discharging - counts.inactive; // 剩余为离线
+                counts.charging = 0; // 放电地区无充电设备
+            }
 
             console.log('=== DEBUG: Final counts ===');
             console.log('Charging:', counts.charging);
             console.log('Discharging:', counts.discharging);
             console.log('Inactive:', counts.inactive);
             console.log('Offline:', counts.offline);
-            console.log('Processing:', counts.processing);
 
             // Update statistics display without background box
             const statisticsGraphic = [
