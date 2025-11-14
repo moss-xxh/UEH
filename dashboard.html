@@ -12808,8 +12808,13 @@
                 offline: 0
             };
 
-            // Count actual device statuses (过滤掉hidden状态)
+            // 只统计当前选中地区的设备状态（过滤掉hidden状态）
             deviceLocations.forEach(device => {
+                // 只统计当前选中地区的设备
+                if (device.region !== selectedMainRegion) {
+                    return;
+                }
+
                 switch (device.status) {
                     case 'charging':
                         counts.charging++;
