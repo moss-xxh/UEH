@@ -1057,6 +1057,7 @@ class I18n {
                         user: "用户",
                         userName: "用户名称",
                         location: "地址",
+                        address: "地址",
                         activity: "活跃度",
                         meterNumber: "表号",
                         brand: "品牌",
@@ -1795,6 +1796,7 @@ class I18n {
                     table: {
                         user: "用户",
                         meterNumber: "表号",
+                        address: "地址",
                         activity: "活跃度",
                         yesterdayProfit: "昨日获利 ($)",
                         todayProfit: "今日获利 ($)",
@@ -3078,6 +3080,7 @@ class I18n {
                         user: "User",
                         userName: "User Name",
                         location: "Location",
+                        address: "Address",
                         activity: "Activity",
                         meterNumber: "Meter Number",
                         brand: "Brand",
@@ -3799,6 +3802,8 @@ class I18n {
                     },
                     table: {
                         user: "User",
+                        meterNumber: "Meter No.",
+                        address: "Address",
                         activity: "Activity",
                         yesterdayProfit: "Yesterday's Profit ($)",
                         todayProfit: "Today's Profit ($)",
@@ -3811,7 +3816,6 @@ class I18n {
                         soc: "SOC",
                         socValue: "Battery Value",
                         batteryCost: "Cost per kWh",
-                        meterNumber: "Meter No.",
                         location: "Location",
                         usageDays: "Usage Days",
                         action: "Action"

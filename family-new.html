@@ -322,29 +322,31 @@
         .data-table th:nth-child(3),
         .data-table td:nth-child(3) { min-width: 100px; } /* 表号 */
         .data-table th:nth-child(4),
-        .data-table td:nth-child(4) { min-width: 100px; } /* 品牌 */
+        .data-table td:nth-child(4) { min-width: 80px; } /* 地址 (地区缩写) */
         .data-table th:nth-child(5),
-        .data-table td:nth-child(5) { min-width: 100px; } /* 型号 */
+        .data-table td:nth-child(5) { min-width: 100px; } /* 品牌 */
         .data-table th:nth-child(6),
-        .data-table td:nth-child(6) { min-width: 140px; } /* 设备编码 */
+        .data-table td:nth-child(6) { min-width: 100px; } /* 型号 */
         .data-table th:nth-child(7),
-        .data-table td:nth-child(7) {
+        .data-table td:nth-child(7) { min-width: 140px; } /* 设备编码 */
+        .data-table th:nth-child(8),
+        .data-table td:nth-child(8) {
             min-width: 200px;
             max-width: 280px;
             white-space: normal;
         } /* 版本号 - 支持多行 */
-        .data-table th:nth-child(8),
-        .data-table td:nth-child(8) { min-width: 140px; } /* 设备状态 */
         .data-table th:nth-child(9),
-        .data-table td:nth-child(9) { min-width: 120px; } /* 运行模式 */
+        .data-table td:nth-child(9) { min-width: 140px; } /* 设备状态 */
         .data-table th:nth-child(10),
-        .data-table td:nth-child(10) { min-width: 100px; } /* SOC */
+        .data-table td:nth-child(10) { min-width: 120px; } /* 运行模式 */
         .data-table th:nth-child(11),
-        .data-table td:nth-child(11) { min-width: 120px; } /* 昨日盈利 */
+        .data-table td:nth-child(11) { min-width: 100px; } /* SOC */
         .data-table th:nth-child(12),
-        .data-table td:nth-child(12) { min-width: 120px; } /* 今日盈利 */
+        .data-table td:nth-child(12) { min-width: 120px; } /* 昨日盈利 */
         .data-table th:nth-child(13),
-        .data-table td:nth-child(13) { min-width: 120px; } /* 累计盈利 */
+        .data-table td:nth-child(13) { min-width: 120px; } /* 今日盈利 */
+        .data-table th:nth-child(14),
+        .data-table td:nth-child(14) { min-width: 120px; } /* 累计盈利 */
 
         /* Checkbox Styles */
         input[type="checkbox"] {
@@ -504,6 +506,127 @@
             background: #1a1a1a;
             color: #fff;
             padding: 8px;
+        }
+
+        /* 自定义下拉菜单样式 */
+        .custom-dropdown {
+            position: relative;
+            width: 180px;
+        }
+
+        .custom-dropdown .dropdown-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-align: left;
+        }
+
+        .custom-dropdown .dropdown-btn:hover,
+        .custom-dropdown .dropdown-btn:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 255, 136, 0.5);
+            outline: none;
+        }
+
+        .custom-dropdown .dropdown-arrow {
+            font-size: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .custom-dropdown.active .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .custom-dropdown .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            min-width: 180px;
+            background: rgba(26, 26, 26, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 8px 0;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .custom-dropdown.active .dropdown-menu {
+            display: block;
+        }
+
+        .custom-dropdown .dropdown-item {
+            padding: 10px 16px;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .custom-dropdown .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 1);
+        }
+
+        .custom-dropdown .dropdown-item.has-submenu {
+            padding-right: 30px;
+        }
+
+        .custom-dropdown .submenu-arrow {
+            font-size: 10px;
+            margin-left: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        /* 子菜单样式 */
+        .custom-dropdown .dropdown-submenu {
+            position: absolute;
+            left: 100%;
+            top: -8px;
+            min-width: 180px;
+            background: rgba(26, 26, 26, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 8px 0;
+            display: none;
+            margin-left: -1px; /* 重叠1px，确保无间隙 */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 为父菜单项添加伪元素作为桥接区域，防止鼠标移动时子菜单消失 */
+        .custom-dropdown .dropdown-item.has-submenu::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            top: 0;
+            width: 10px;
+            height: 100%;
+            background: transparent;
+        }
+
+        .custom-dropdown .dropdown-item.has-submenu:hover .dropdown-submenu {
+            display: block;
+        }
+
+        .custom-dropdown .dropdown-submenu .dropdown-item {
+            padding: 10px 16px;
+        }
+
+        .custom-dropdown .dropdown-submenu .dropdown-item:hover {
+            background: rgba(0, 255, 136, 0.1);
+            color: rgba(0, 255, 136, 1);
         }
 
         .filter-btn {
@@ -667,25 +790,27 @@
             .data-table th:nth-child(3),
             .data-table td:nth-child(3) { min-width: 80px; } /* 表号 */
             .data-table th:nth-child(4),
-            .data-table td:nth-child(4) { min-width: 100px; } /* 品牌 */
+            .data-table td:nth-child(4) { min-width: 60px; } /* 地址 (地区缩写) */
             .data-table th:nth-child(5),
-            .data-table td:nth-child(5) { min-width: 100px; } /* 型号 */
+            .data-table td:nth-child(5) { min-width: 100px; } /* 品牌 */
             .data-table th:nth-child(6),
-            .data-table td:nth-child(6) { min-width: 100px; } /* 设备编码 */
+            .data-table td:nth-child(6) { min-width: 100px; } /* 型号 */
             .data-table th:nth-child(7),
-            .data-table td:nth-child(7) { min-width: 100px; } /* 版本号 */
+            .data-table td:nth-child(7) { min-width: 100px; } /* 设备编码 */
             .data-table th:nth-child(8),
-            .data-table td:nth-child(8) { min-width: 100px; } /* 设备状态 */
+            .data-table td:nth-child(8) { min-width: 100px; } /* 版本号 */
             .data-table th:nth-child(9),
-            .data-table td:nth-child(9) { min-width: 80px; } /* 运行模式 */
+            .data-table td:nth-child(9) { min-width: 100px; } /* 设备状态 */
             .data-table th:nth-child(10),
-            .data-table td:nth-child(10) { min-width: 60px; } /* SOC */
+            .data-table td:nth-child(10) { min-width: 80px; } /* 运行模式 */
             .data-table th:nth-child(11),
-            .data-table td:nth-child(11) { min-width: 100px; } /* 昨日盈利 */
+            .data-table td:nth-child(11) { min-width: 60px; } /* SOC */
             .data-table th:nth-child(12),
-            .data-table td:nth-child(12) { min-width: 150px; } /* 今日盈利 */
+            .data-table td:nth-child(12) { min-width: 100px; } /* 昨日盈利 */
             .data-table th:nth-child(13),
-            .data-table td:nth-child(13) { min-width: 80px; } /* 累计盈利 */
+            .data-table td:nth-child(13) { min-width: 150px; } /* 今日盈利 */
+            .data-table th:nth-child(14),
+            .data-table td:nth-child(14) { min-width: 80px; } /* 累计盈利 */
             
             /* Fixed action column on mobile */
             .data-table .fixed-action-column {
@@ -1416,12 +1541,43 @@
                         <option value="ACT">ACT - 首都领地</option>
                     </select>
 
-                    <!-- Brand Filter -->
-                    <select class="filter-select" id="brandFilter" onchange="handleBrandFilter(this.value)">
-                        <option value="" data-i18n-key="family.placeholder.allBrands">所有品牌</option>
-                        <option value="FOX ESS">FOX ESS</option>
-                        <option value="ipotisedge">ipotisedge</option>
-                    </select>
+                    <!-- Brand & Model Filter (品牌+型号层级菜单) -->
+                    <div class="custom-dropdown" id="brandModelDropdown">
+                        <button class="dropdown-btn" onclick="toggleBrandDropdown()">
+                            <span id="brandDropdownText" data-i18n-key="family.placeholder.allBrands">所有品牌</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="dropdown-menu" id="brandDropdownMenu">
+                            <!-- 所有品牌选项 -->
+                            <div class="dropdown-item" onclick="selectBrandModel('', 'family.placeholder.allBrands')">
+                                <span data-i18n-key="family.placeholder.allBrands">所有品牌</span>
+                            </div>
+
+                            <!-- FOX ESS 品牌 (无型号) -->
+                            <div class="dropdown-item" onclick="selectBrandModel('brand:FOX ESS', null)">
+                                <span>FOX ESS</span>
+                            </div>
+
+                            <!-- ipotisedge 品牌 (有子菜单) -->
+                            <div class="dropdown-item has-submenu">
+                                <span onclick="selectBrandModel('brand:ipotisedge', null)">ipotisedge</span>
+                                <span class="submenu-arrow">▶</span>
+
+                                <!-- 型号子菜单 -->
+                                <div class="dropdown-submenu">
+                                    <div class="dropdown-item" onclick="selectBrandModel('model:IPS-6K-L120-S', null); event.stopPropagation();">
+                                        <span>IPS-6K-L120-S</span>
+                                    </div>
+                                    <div class="dropdown-item" onclick="selectBrandModel('model:IPS-8K-L150-S', null); event.stopPropagation();">
+                                        <span>IPS-8K-L150-S</span>
+                                    </div>
+                                    <div class="dropdown-item" onclick="selectBrandModel('model:IPS-10K-L200-S', null); event.stopPropagation();">
+                                        <span>IPS-10K-L200-S</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Device Status Filter -->
                     <select class="filter-select" id="deviceStatusFilter" onchange="handleDeviceStatusFilter(this.value)">
@@ -1462,6 +1618,7 @@
                                 </th>
                                 <th data-i18n-key="family.table.user">用户</th>
                                 <th data-i18n-key="family.table.meterNumber">表号</th>
+                                <th data-i18n-key="family.table.address">地址</th>
                                 <th data-i18n-key="brand">品牌</th>
                                 <th data-i18n-key="model">型号</th>
                                 <th data-i18n-key="family.table.deviceCode">设备编码</th>
@@ -1658,6 +1815,7 @@
         function generateFamilyData() {
             const names = ['张明', '李华', '王芳', '赵强', '陈晓', '刘静', '周涛', '吴敏', '郑伟', '林丽'];
             const locations = ['NSW', 'NSW', 'NSW', 'Perth WA', 'Adelaide SA', 'Gold Coast QLD', 'Canberra ACT', 'Newcastle NSW', 'Hobart TAS', 'Darwin NT'];
+            const addresses = ['NSW', 'VIC', 'QLD', 'SA', 'WA', 'TAS', 'NT', 'ACT'];
             const statuses = ['active', 'inactive'];
             const deviceStatuses = ['charging', 'discharging', 'standby', 'offline'];
             const brands = ['FOX ESS', 'ipotisedge'];
@@ -1714,6 +1872,7 @@
                     nameKey: `family.userName${(i % 10) + 1}`,
                     meterNumber: `M${String(i + 1).padStart(6, '0')}`,
                     location: deviceStatus === 'offline' ? 'NSW' : locations[i % locations.length],
+                    address: addresses[i % addresses.length],
                     status: status,
                     soc: isActive ? Math.floor(Math.random() * 40 + 60) : Math.floor(Math.random() * 50),
                     todayDischarge: isActive ? (Math.random() * 50 + 10).toFixed(1) : 0,
@@ -1824,6 +1983,16 @@
             window.i18n.addObserver(() => {
                 updateTitle();
                 updateI18nElements();
+
+                // 更新自定义品牌筛选器的显示文本（如果当前选择的是"所有品牌"）
+                if (!currentBrandModelFilter || currentBrandModelFilter === '') {
+                    const allBrandsText = window.i18n.getText('family.placeholder.allBrands');
+                    const brandDropdownText = document.getElementById('brandDropdownText');
+                    if (brandDropdownText) {
+                        brandDropdownText.textContent = allBrandsText;
+                    }
+                }
+
                 // Reload data to update dynamic content
                 loadFamilyCards(1);
             });
@@ -1927,6 +2096,14 @@
                     console.log('今日获利列的HTML:', thElements[2].innerHTML);
                 }
             }, 1000);
+
+            // 全局点击事件：点击外部区域关闭自定义下拉菜单
+            document.addEventListener('click', function(event) {
+                const dropdown = document.getElementById('brandModelDropdown');
+                if (dropdown && !dropdown.contains(event.target)) {
+                    dropdown.classList.remove('active');
+                }
+            });
         });
 
         // Get flow direction based on device status and actual data
@@ -2028,6 +2205,7 @@
                 </td>
                 <td>${window.i18n ? window.i18n.getText(family.nameKey) : family.name}</td>
                 <td>${family.meterNumber}</td>
+                <td>${family.address || '-'}</td>
                 <td>${brand}</td>
                 <td>${modelDisplay}</td>
                 <td>${family.deviceCode}</td>
@@ -2120,10 +2298,18 @@
                 }
             }
 
-            // Apply brand filter
-            const brandValue = document.getElementById('brandFilter').value;
-            if (brandValue) {
-                window.filteredData = window.filteredData.filter(family => family.brand === brandValue);
+            // Apply brand/model filter (品牌+型号筛选)
+            if (currentBrandModelFilter) {
+                // 解析筛选值格式: "brand:品牌名" 或 "model:型号名"
+                const [filterType, filterValue] = currentBrandModelFilter.split(':');
+
+                if (filterType === 'brand') {
+                    // 按品牌筛选
+                    window.filteredData = window.filteredData.filter(family => family.brand === filterValue);
+                } else if (filterType === 'model') {
+                    // 按型号筛选（型号筛选时已隐含品牌信息）
+                    window.filteredData = window.filteredData.filter(family => family.model === filterValue);
+                }
             }
 
             // Update pagination
@@ -2927,9 +3113,46 @@
             applyFilters(); // 直接触发过滤
         }
 
+        // 存储当前选择的品牌/型号值
+        let currentBrandModelFilter = '';
+
+        // 切换下拉菜单显示/隐藏
+        function toggleBrandDropdown() {
+            const dropdown = document.getElementById('brandModelDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // 选择品牌或型号
+        function selectBrandModel(value, i18nKey) {
+            // 获取显示文本
+            let displayText;
+            if (i18nKey) {
+                // 使用国际化系统获取翻译文本
+                displayText = window.i18n ? window.i18n.getText(i18nKey) : '所有品牌';
+            } else {
+                // 从value中提取品牌/型号名称（格式: "brand:xxx" 或 "model:xxx"）
+                const parts = value.split(':');
+                displayText = parts.length > 1 ? parts[1] : '所有品牌';
+            }
+
+            // 更新显示文本
+            document.getElementById('brandDropdownText').textContent = displayText;
+
+            // 保存筛选值
+            currentBrandModelFilter = value;
+
+            // 关闭下拉菜单
+            document.getElementById('brandModelDropdown').classList.remove('active');
+
+            // 触发筛选
+            console.log('Brand/Model filter:', value);
+            applyFilters();
+        }
+
+        // 兼容旧的 handleBrandFilter 函数（如果有其他地方调用）
         function handleBrandFilter(value) {
-            console.log('Brand filter:', value);
-            applyFilters(); // 直接触发过滤
+            console.log('Brand/Model filter:', value);
+            applyFilters();
         }
 
         function handleRegionFilter(value) {
@@ -2960,7 +3183,12 @@
             document.getElementById('meterInput').value = '';
             document.getElementById('deviceCodeInput').value = '';
             document.getElementById('deviceStatusFilter').value = '';
-            document.getElementById('brandFilter').value = '';
+
+            // 重置自定义品牌/型号筛选器
+            currentBrandModelFilter = '';
+            const allBrandsText = window.i18n ? window.i18n.getText('family.placeholder.allBrands') : '所有品牌';
+            document.getElementById('brandDropdownText').textContent = allBrandsText;
+            document.getElementById('brandModelDropdown').classList.remove('active');
 
             currentPage = 1;
             loadFamilyCards();
@@ -3032,6 +3260,7 @@
             const headers = [
                 window.i18n ? window.i18n.getText('family.table.user') : '用户',
                 window.i18n ? window.i18n.getText('family.table.meterNumber') : '表号',
+                window.i18n ? window.i18n.getText('family.table.address') : '地址',
                 window.i18n ? window.i18n.getText('brand') : '品牌',
                 window.i18n ? window.i18n.getText('model') : '型号',
                 window.i18n ? window.i18n.getText('family.table.deviceCode') : '设备编码',
@@ -3082,6 +3311,7 @@
                 const row = [
                     window.i18n ? window.i18n.getText(family.nameKey) : family.name,
                     family.meterNumber,
+                    family.address || '-',
                     brand,
                     modelDisplay,
                     family.deviceCode,
@@ -3615,6 +3845,8 @@
         window.handleRegionFilter = handleRegionFilter;
         window.handleDeviceStatusFilter = handleDeviceStatusFilter;
         window.handleBrandFilter = handleBrandFilter;
+        window.toggleBrandDropdown = toggleBrandDropdown;
+        window.selectBrandModel = selectBrandModel;
         window.applyFilters = applyFilters;
         window.resetFilters = resetFilters;
         window.exportData = exportData;
