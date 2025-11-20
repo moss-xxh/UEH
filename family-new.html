@@ -918,8 +918,8 @@
         }
 
         .status-badge.standby {
-            background: rgba(30, 127, 255, 0.1);
-            color: #1e7fff;
+            background: rgba(128, 128, 128, 0.1);
+            color: #808080;
         }
 
         .status-badge.offline {
@@ -1810,7 +1810,22 @@
                 console.error('renderTable function not found');
             }
         };
-        
+
+        // 格式化离线时间显示
+        function formatOfflineTime(lastSeenTime) {
+            if (!lastSeenTime) return '';
+
+            const lastSeen = new Date(lastSeenTime);
+            const year = lastSeen.getFullYear();
+            const month = String(lastSeen.getMonth() + 1).padStart(2, '0');
+            const day = String(lastSeen.getDate()).padStart(2, '0');
+            const hours = String(lastSeen.getHours()).padStart(2, '0');
+            const minutes = String(lastSeen.getMinutes()).padStart(2, '0');
+            const seconds = String(lastSeen.getSeconds()).padStart(2, '0');
+
+            return `${year}-${month}-${day}, ${hours}:${minutes}:${seconds}`;
+        }
+
         // Generate family data immediately
         function generateFamilyData() {
             const names = ['张明', '李华', '王芳', '赵强', '陈晓', '刘静', '周涛', '吴敏', '郑伟', '林丽'];
@@ -1887,7 +1902,9 @@
                     dischargingDestination: dischargingDestination,
                     usageDays: Math.floor(Math.random() * 300 + 30),
                     batteryMissing: batteryMissing,
-                    brand: brand
+                    brand: brand,
+                    // 为离线设备添加最后在线时间
+                    lastSeenTime: deviceStatus === 'offline' ? new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)) : null
                 };
 
                 // 根据品牌添加型号和版本信息
@@ -2139,13 +2156,11 @@
                     `${solarIndicator}光伏→电池<br>${gridIndicator}电网→电池`;
                     
             } else if (family.deviceStatus === 'standby') {
-                return isEnglish ? 
-                    '<span class="flow-indicator inactive">●</span>Standby' : 
-                    '<span class="flow-indicator inactive">●</span>待机';
+                // 待机状态不显示文字，只在左侧显示状态badge
+                return '';
             } else {
-                return isEnglish ? 
-                    '<span class="flow-indicator offline">●</span>Offline' : 
-                    '<span class="flow-indicator offline">●</span>离线';
+                // 离线状态不显示文字，只显示离线时间（在下方单独显示）
+                return '';
             }
             } catch (error) {
                 console.error('Error in getFlowDirection:', error);
@@ -2221,6 +2236,7 @@
                         <div class="flow-direction">
                             ${getFlowDirection(family)}
                         </div>
+                        ${family.deviceStatus === 'offline' && family.lastSeenTime ? `<div style="color: var(--color-text-secondary); font-size: 11px; margin-top: 2px;">${formatOfflineTime(family.lastSeenTime)}</div>` : ''}
                         ${family.batteryMissing ? `<div style="color: #ff4757; font-size: 11px; font-weight: 600; margin-top: 2px;">⚠ ${window.i18n ? window.i18n.getText('family.drawer.batteryMissing') : '缺少电池'}</div>` : ''}
                     </div>
                 </td>
@@ -3276,10 +3292,17 @@
             let csvContent = '\uFEFF' + headers.join(',') + '\n'; // Add BOM for UTF-8
 
             dataToExport.forEach(family => {
-                const deviceStatusText = family.deviceStatus === 'charging' ? (window.i18n ? window.i18n.getText('family.deviceStates.charging') : '充电') :
+                let deviceStatusText = '';
+
+                // 为离线状态只显示离线时间，不显示"离线"文字
+                if (family.deviceStatus === 'offline' && family.lastSeenTime) {
+                    deviceStatusText = formatOfflineTime(family.lastSeenTime);
+                } else {
+                    deviceStatusText = family.deviceStatus === 'charging' ? (window.i18n ? window.i18n.getText('family.deviceStates.charging') : '充电') :
                                        family.deviceStatus === 'discharging' ? (window.i18n ? window.i18n.getText('family.deviceStates.discharging') : '放电') :
                                        family.deviceStatus === 'standby' ? (window.i18n ? window.i18n.getText('family.deviceStates.standby') : '待机') :
                                        (window.i18n ? window.i18n.getText('family.deviceStates.offline') : '离线');
+                }
 
                 const operationModeText = window.i18n ? window.i18n.getText('family.operationMode.' + family.operationMode) :
                                         (family.operationMode === 0 ? '自用模式' :
