@@ -4879,35 +4879,6 @@
                 </div>
             </div>
             
-            <!-- 第四排：累计价格（全屏宽度） -->
-            <div style="margin-bottom: 20px; margin-top: -20px;">
-                <!-- 累计价格卡片 -->
-                <div class="glass" style="height:620px; min-height:620px; max-height:620px; margin-top:20px; display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start; padding:0;">
-                    <!-- 顶部标题 -->
-                    <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 32px 0 32px;">
-                        <div style="font-size:18px; font-weight:700; color:#fff; letter-spacing:1px;" data-i18n="cumulativePrice">累计价格</div>
-                    </div>
-                    <!-- 关键数字区（完全参考custom-card的price-cards横向卡片组） -->
-                    <div style="display:flex; gap:20px; margin:32px 32px 0 32px;">
-                        <div class="price-card" style="flex:1; min-width:0; padding:12px 0 8px 0; background:rgba(255,255,255,0.10); border-radius:12px; border:1px solid rgba(255,255,255,0.10); display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                            <div class="price-card-label" style="font-size:11px; color:rgba(255,255,255,0.6); margin-bottom:6px; line-height:1.2; height:2.4em; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"><span data-i18n="currentCumulativePrice">当前累计价格</span></div>
-                            <div class="price-card-value" style="font-size:18px; font-weight:600; color:#fff;">$746,630</div>
-                        </div>
-                        <div class="price-card" style="flex:1; min-width:0; padding:12px 0 8px 0; background:rgba(255,255,255,0.10); border-radius:12px; border:1px solid rgba(255,255,255,0.10); display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                            <div class="price-card-label" style="font-size:11px; color:rgba(255,255,255,0.6); margin-bottom:6px; line-height:1.2; height:2.4em; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"><span data-i18n="forecastCumulativePrice5min">预测累计价格(5min)</span></div>
-                            <div class="price-card-value" style="font-size:18px; font-weight:600; color:#fff;">$746,622</div>
-                        </div>
-                        <div class="price-card" style="flex:1; min-width:0; padding:12px 0 8px 0; background:rgba(255,255,255,0.10); border-radius:12px; border:1px solid rgba(255,255,255,0.10); display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                            <div class="price-card-label" style="font-size:11px; color:rgba(255,255,255,0.6); margin-bottom:6px; line-height:1.2; height:2.4em; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;"><span data-i18n="thresholdStatus">阈值状态</span></div>
-                            <div class="price-card-value" data-threshold-status="not_exceeded" style="font-size:18px; font-weight:600; color:#fff;"><span data-i18n="notExceeded">未超阈</span></div>
-                        </div>
-                    </div>
-                    <!-- 图表区（复制行情marketChart结构和样式） -->
-                    <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:stretch; padding:0 32px 32px 32px; margin-top:24px;">
-                        <div id="cumulativeMarketChart" style="flex:1; min-height:0; width:100%; margin-top:20px;"></div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Analytics Section -->
@@ -5457,7 +5428,7 @@
         let dischargeTimeSegments = [...window.dischargeTimeSegments];
         
         // Global variables
-        let marketChart, powerChart, performanceChart, mapChart, cumulativeMarketChart, powerRevenueChart;
+        let marketChart, powerChart, performanceChart, mapChart, powerRevenueChart;
         let powerChartTimeSelector, currentOperation = null;
         let activatedDevices = 0, totalDevices = 500, chartUpdateInterval;
         let pendingOperation = null, previousPanel = null;
@@ -6914,13 +6885,7 @@
                             if (mapChart) {
                                 updateMapStatistics();
                             }
-                            // Refresh cumulative chart
-                            const activeRegionBtn = document.querySelector('.region-switch-glow .time-tab.active');
-                            if (activeRegionBtn) {
-                                const region = activeRegionBtn.textContent.trim();
-                                renderCumulativeChart(region);
-                            }
-                            
+
                             // Refresh condition regions if visible
                             if (currentConditionView !== 'default') {
                                 const type = currentConditionView;
@@ -7199,10 +7164,7 @@
                 
                 // Initialize with NSW region
                 updatePriceCircleRegion('NSW');
-                
-                // Initialize cumulative chart
-                renderCumulativeChart('NSW');
-                
+
                 // Force apply button styles
                 forceButtonStyles();
                 // Apply styles periodically to ensure they stick  
@@ -8230,9 +8192,6 @@
                 tab.classList.remove('active');
             });
             button.classList.add('active');
-            
-            // Update price data
-            updatePriceData(region);
         }
 
         // Discharge & Profit time period switching
@@ -8874,14 +8833,6 @@
             powerChart.setOption({
                 series: [{ data: newData }]
             });
-        }
-
-        function updatePriceData(region) {
-            // Simulate data update based on region
-            const basePrice = Math.random() * 100000 + 700000;
-            document.getElementById('cumulativePrice').textContent = '$' + Math.floor(basePrice).toLocaleString();
-            document.getElementById('forecastCumulative').textContent = '$' + Math.floor(basePrice - 8).toLocaleString();
-            
         }
 
         // Real-time data updates
@@ -10445,21 +10396,9 @@
             
             // Update market chart with new data
             updateMarketChart(region);
-            
+
             // Update power station management module prices
             updatePriceCircleRegion(region);
-            
-            // Sync cumulative price region selector
-            const cumulativeTabs = document.querySelectorAll('.glass .region-tab');
-            cumulativeTabs.forEach(tab => {
-                if (tab.textContent === region) {
-                    tab.classList.add('active');
-                    // Trigger cumulative region update
-                    switchCumulativeRegion(region, tab);
-                } else {
-                    tab.classList.remove('active');
-                }
-            });
         }
         
         // Update price circle region
@@ -14425,202 +14364,6 @@
             }
         });
 
-        // 累计价格卡片图表和区域切换联动
-        function renderCumulativeChart(region) {
-            if (!window.echarts || !document.getElementById('cumulativeMarketChart')) return;
-            const chart = echarts.init(document.getElementById('cumulativeMarketChart'));
-            // 区域参数影响数据生成
-            const regionBase = {
-                'NSW': 200,
-                'QLD': 180,
-                'VIC': 160,
-                'SA': 140,
-                'TAS': 120
-            };
-            const base = regionBase[region] || 200;
-            const hours = [];
-            const prices = [];
-            const forecastPrices = [];
-            const currentTime = new Date().getHours();
-            for (let i = 0; i < 24; i++) {
-                hours.push(`${i}:00`);
-            }
-            let lastPrice = base;
-            for (let i = 0; i < 24; i++) {
-                if (i < currentTime) {
-                    const price = lastPrice + (Math.random() - 0.5) * 20;
-                    prices.push(price);
-                    forecastPrices.push(null);
-                    lastPrice = price;
-                } else if (i === currentTime) {
-                    const price = lastPrice + (Math.random() - 0.5) * 20;
-                    prices.push(price);
-                    forecastPrices.push(price);
-                    lastPrice = price;
-                } else {
-                    prices.push(null);
-                    const price = lastPrice + (Math.random() - 0.5) * 30;
-                    forecastPrices.push(price);
-                    lastPrice = price;
-                }
-            }
-            const option = {
-                backgroundColor: 'transparent',
-                tooltip: {
-                    trigger: 'axis',
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                    textStyle: { color: '#fff' }
-                },
-                legend: {
-                    data: [
-                        window.i18n ? window.i18n.getText('historicalPrice') : 'Historical Price',
-                        window.i18n ? window.i18n.getText('predictedPrice') : 'Predicted Price'
-                    ],
-                    textStyle: { color: 'rgba(255,255,255,0.7)', fontWeight: 600 },
-                    top: 0,
-                    itemWidth: 18,
-                    itemHeight: 8,
-                    selectedMode: false,
-                    formatter: function(name) {
-                        return name;
-                    }
-                },
-                grid: {
-                    left: '3%',
-                    right: '3%',
-                    bottom: '3%',
-                    top: '15%',
-                    containLabel: true
-                },
-                xAxis: {
-                    type: 'category',
-                    data: hours,
-                    axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
-                    axisLabel: { color: 'rgba(255, 255, 255, 0.6)', interval: 2 }
-                },
-                yAxis: {
-                    type: 'value',
-                    name: window.i18n ? window.i18n.getText('price') : 'Price',
-                    nameTextStyle: { color: 'rgba(255, 255, 255, 0.6)' },
-                    axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
-                    axisLabel: { color: 'rgba(255, 255, 255, 0.6)' },
-                    splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }
-                },
-                series: [
-                    {
-                        name: window.i18n ? window.i18n.getText('historicalPrice') : 'Historical Price',
-                        type: 'line',
-                        data: prices,
-                        smooth: true,
-                        lineStyle: { color: '#00ff88', width: 2 },
-                        itemStyle: { color: '#00ff88' },
-                        areaStyle: {
-                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                                { offset: 0, color: 'rgba(0, 255, 136, 0.2)' },
-                                { offset: 1, color: 'rgba(0, 255, 136, 0)' }
-                            ])
-                        },
-                        symbol: 'circle',
-                        showSymbol: false,
-                        markLine: {
-                            silent: true,
-                            symbol: 'none',
-                            data: [
-                                {
-                                    yAxis: base + 50,  // 阈值水平线
-                                    label: {
-                                        show: false  // 隐藏阈值文字
-                                    },
-                                    lineStyle: {
-                                        color: 'rgba(255, 255, 255, 0.3)',
-                                        width: 2,
-                                        type: 'dashed'
-                                    }
-                                },
-                                {
-                                    xAxis: currentTime,  // 当前时间垂直线
-                                    label: {
-                                        show: false  // 隐藏当前时间文字
-                                    },
-                                    lineStyle: {
-                                        color: 'rgba(255, 255, 255, 0.3)',
-                                        width: 2,
-                                        type: 'dashed'
-                                    }
-                                }
-                            ]
-                        },
-                        markPoint: {
-                            symbol: 'circle',
-                            symbolSize: 10,
-                            label: {
-                                show: false
-                            },
-                            itemStyle: {
-                                color: '#fff',
-                                borderColor: 'rgba(255, 255, 255, 0.5)',
-                                borderWidth: 2
-                            },
-                            data: [
-                                {
-                                    coord: [currentTime, base + 50],  // 交叉点坐标
-                                    value: 'Intersection'
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        name: window.i18n ? window.i18n.getText('predictedPrice') : 'Predicted Price',
-                        type: 'line',
-                        data: forecastPrices,
-                        smooth: false,
-                        lineStyle: { color: '#00ff88', width: 2, type: 'dashed', opacity: 0.85 },
-                        itemStyle: { color: '#00ff88' },
-                        areaStyle: {
-                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                                { offset: 0, color: 'rgba(0, 255, 136, 0.15)' },
-                                { offset: 1, color: 'rgba(0, 255, 136, 0)' }
-                            ])
-                        },
-                        symbol: 'circle',
-                        showSymbol: false
-                    }
-                ]
-            };
-            chart.setOption(option);
-            window.addEventListener('resize', throttle(() => chart.resize(), 250));
-        }
-
-        // 区域切换时累计价格卡片所有数据切换
-        function switchCumulativeRegion(region, btn) {
-            // 按钮高亮 - 更新选择器以匹配新的HTML结构
-            const cumulativeContainer = btn.closest('.glass');
-            cumulativeContainer.querySelectorAll('.region-tab').forEach(tab => tab.classList.remove('active'));
-            btn.classList.add('active');
-            
-            // 同步市场区域选择
-            currentRegion = region;
-            
-            // 切换大数字区数据（模拟）
-            const baseMap = { 'NSW': 746630, 'QLD': 623800, 'VIC': 512400, 'SA': 401200, 'TAS': 312000 };
-            const forecastMap = { 'NSW': 746622, 'QLD': 623790, 'VIC': 512390, 'SA': 401180, 'TAS': 311980 };
-            const notExceededText = window.i18n ? window.i18n.getText('notExceeded') : '未超阈';
-            const statusMap = { 'NSW': notExceededText, 'QLD': notExceededText, 'VIC': notExceededText, 'SA': notExceededText, 'TAS': notExceededText };
-            
-            // 更新累计价格卡片中的值
-            const priceCards = cumulativeContainer.querySelectorAll('.price-card-value');
-            if (priceCards.length >= 3) {
-                priceCards[0].textContent = `$${baseMap[region].toLocaleString()}`;
-                priceCards[1].textContent = `$${forecastMap[region].toLocaleString()}`;
-                priceCards[2].textContent = statusMap[region];
-            }
-            
-            // 切换图表
-            renderCumulativeChart(region);
-        }
-
-        // 页面加载时默认渲染 NSW - 这个功能已在主初始化代码中处理
         
         // Force apply button colors
         function forceButtonStyles() {
@@ -14995,9 +14738,8 @@
             </div>
             
             <div class="modal-footer" style="padding: 20px 28px 28px; display: flex; justify-content: center; gap: 16px;">
-                <button class="modal-btn modal-export-btn" onclick="exportDeviceResponseStatistics()" style="background: linear-gradient(135deg, #1e7fff, #0d5dd8); color: #fff; border: none; padding: 12px 32px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; min-width: 120px; box-shadow: 0 2px 8px rgba(30, 127, 255, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(30, 127, 255, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(30, 127, 255, 0.3)'">
-                    <span>📥</span>
-                    <span data-i18n="export">导出</span>
+                <button class="modal-btn modal-export-btn" onclick="openDeviceStatusDrawerFromModal('success')" style="background: linear-gradient(135deg, #1e7fff, #0d5dd8); color: #fff; border: none; padding: 12px 32px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; min-width: 120px; box-shadow: 0 2px 8px rgba(30, 127, 255, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(30, 127, 255, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(30, 127, 255, 0.3)'">
+                    <span data-i18n="viewDetails">查看详情</span>
                 </button>
                 <button class="modal-btn modal-cancel-btn" onclick="closeDeviceResponseModal()" style="background: linear-gradient(135deg, #00ff88, #00dd77); color: #000; border: none; padding: 12px 32px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; min-width: 120px; box-shadow: 0 2px 8px rgba(0, 255, 136, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(0, 255, 136, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 255, 136, 0.3)'" data-i18n="close">关闭</button>
             </div>
@@ -16297,7 +16039,6 @@
                 selectorContainer.style.minHeight = '140px';
                 // 更新内容区域显示当前选中地区的数据
                 updatePriceCircleRegion(selectedMainRegion);
-                renderCumulativeChart(selectedMainRegion);
             }
             
             // 延迟调整间距，等待高度动画完成
@@ -16345,7 +16086,6 @@
                 selectorContainer.style.minHeight = '140px';
                 // 更新内容区域显示当前选中地区的数据
                 updatePriceCircleRegion(selectedMainRegion);
-                renderCumulativeChart(selectedMainRegion);
             }
             
             // 延迟调整间距，等待高度动画完成
@@ -16486,11 +16226,10 @@
             
             // 更新电站管理状态
             updatePowerStationStatus(region, regionStatus);
-            
+
             // 更新相关显示
             updatePriceCircleRegion(region);
-            renderCumulativeChart(region);
-            
+
             // 更新页面数据 - 这是关键的缺失部分
             updatePageDataByRegion(region);
             
