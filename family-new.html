@@ -1904,7 +1904,9 @@
                     batteryMissing: batteryMissing,
                     brand: brand,
                     // 为离线设备添加最后在线时间
-                    lastSeenTime: deviceStatus === 'offline' ? new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)) : null
+                    lastSeenTime: deviceStatus === 'offline' ? new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)) : null,
+                    // 添加逆变器容量
+                    inverterCapacity: null  // 将在下面根据品牌和型号设置
                 };
 
                 // 根据品牌添加型号和版本信息
@@ -1914,6 +1916,9 @@
                     deviceData.managerVersion = `1.${50 + Math.floor(Math.random() * 20)}`;
                     deviceData.slaveVersion = `1.${Math.floor(Math.random() * 20).toString().padStart(2, '0')}`;
                     deviceData.masterVersion = `1.${40 + Math.floor(Math.random() * 15)}`;
+                    // FOX逆变器容量：5kW, 6kW, 8kW, 10kW
+                    const foxCapacities = ['5kW', '6kW', '8kW', '10kW'];
+                    deviceData.inverterCapacity = foxCapacities[Math.floor(Math.random() * foxCapacities.length)];
                 } else {
                     // IPO设备：有型号，有4个版本
                     deviceData.model = ipoModels[Math.floor(Math.random() * ipoModels.length)];
@@ -1921,6 +1926,13 @@
                     deviceData.CSBVersion = `0225${30 + Math.floor(Math.random() * 20)}`;
                     deviceData.DCDCVersion = `0206${Math.floor(Math.random() * 20).toString().padStart(2, '0')}`;
                     deviceData.SDSPVersion = `0202${Math.floor(Math.random() * 20).toString().padStart(2, '0')}`;
+                    // IPO逆变器容量：根据型号提取（IPS-6K-L120-S -> 6kW, IPS-8K-L150-S -> 8kW, IPS-10K-L200-S -> 10kW）
+                    if (deviceData.model) {
+                        const capacityMatch = deviceData.model.match(/IPS-(\d+)K-/);
+                        deviceData.inverterCapacity = capacityMatch ? `${capacityMatch[1]}kW` : '6kW';
+                    } else {
+                        deviceData.inverterCapacity = '6kW';
+                    }
                 }
 
                 data.push(deviceData);
@@ -2218,7 +2230,10 @@
                 <td style="text-align: center;">
                     <input type="checkbox" class="row-checkbox" data-family-id="${family.id}" onchange="updateSelectAllCheckbox()" style="cursor: pointer; width: 18px; height: 18px;">
                 </td>
-                <td>${window.i18n ? window.i18n.getText(family.nameKey) : family.name}</td>
+                <td>
+                    <div>${window.i18n ? window.i18n.getText(family.nameKey) : family.name}</div>
+                    ${family.deviceStatus === 'offline' ? `<div style="color: #ff4757; font-size: 11px; font-weight: 600; margin-top: 4px;">⚠ ${window.i18n ? window.i18n.getText('family.drawer.authExpired') : '授权失效'}</div>` : ''}
+                </td>
                 <td>${family.meterNumber}</td>
                 <td>${family.address || '-'}</td>
                 <td>${brand}</td>
@@ -2710,6 +2725,10 @@
                                 <div class="drawer-info-item">
                                     <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.inverterVersion') : '版本号'}</div>
                                     <div class="drawer-info-value" style="font-size: 11px; line-height: 1.6;">${versionInfo}</div>
+                                </div>
+                                <div class="drawer-info-item">
+                                    <div class="drawer-info-label">${window.i18n ? window.i18n.getText('family.drawer.inverterCapacity') : '逆变器容量'}</div>
+                                    <div class="drawer-info-value">${family.inverterCapacity || '-'}</div>
                                 </div>
                             </div>
                         </div>

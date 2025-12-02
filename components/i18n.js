@@ -1855,6 +1855,7 @@ class I18n {
                         inverterManufacturer: "厂商",
                         inverterDeviceCode: "设备编码",
                         inverterVersion: "版本号",
+                        inverterCapacity: "逆变器容量",
                         batteryInfo: "电池",
                         todayCharge: "今日充电量",
                         todayDischarge: "今日放电量",
@@ -1864,6 +1865,7 @@ class I18n {
                         pvGenerationPower: "发电功率",
                         forReferenceOnly: "（仅供参考）",
                         batteryMissing: "缺少电池",
+                        authExpired: "授权失效",
                         revenue: "收益",
                         discharge: "放电",
                         profitTrend: "获利趋势",
@@ -1944,7 +1946,8 @@ class I18n {
                         interval: "Interval",
                         gridUsage: "电网用电量 (kWh)",
                         feedIn: "馈网量 (kWh)",
-                        price: "价格 ($/kWh)"
+                        price: "价格 ($/kWh)",
+                        soc: "SOC (%)"
                     },
                     granularity: "数据颗粒度",
                     granularity5min: "5分钟",
@@ -2041,7 +2044,8 @@ class I18n {
                         interval: "Interval",
                         gridUsage: "Grid Usage (kWh)",
                         feedIn: "To Grid (kWh)",
-                        price: "Price ($/kWh)"
+                        price: "Price ($/kWh)",
+                        soc: "SOC (%)"
                     },
                     granularity: "Data Granularity",
                     granularity5min: "5 Minutes",
@@ -3862,6 +3866,7 @@ class I18n {
                         inverterManufacturer: "Manufacturer",
                         inverterDeviceCode: "Device Code",
                         inverterVersion: "Version",
+                        inverterCapacity: "Inverter Capacity",
                         batteryInfo: "Battery",
                         todayCharge: "Today's Charge",
                         todayDischarge: "Today's Discharge",
@@ -3871,6 +3876,7 @@ class I18n {
                         pvGenerationPower: "Generation Power",
                         forReferenceOnly: " (For Reference Only)",
                         batteryMissing: "No Battery",
+                        authExpired: "Authorization Expired",
                         revenue: "Revenue",
                         discharge: "Discharge",
                         profitTrend: "Profit Trend",

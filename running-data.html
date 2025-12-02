@@ -371,6 +371,7 @@
                         <th data-i18n-key="runningData.table.gridUsage">电网用电量 (kWh)</th>
                         <th data-i18n-key="runningData.table.feedIn">馈网量 (kWh)</th>
                         <th data-i18n-key="runningData.table.price">价格 ($/kWh)</th>
+                        <th data-i18n-key="runningData.table.soc">SOC (%)</th>
                     </tr>
                 </thead>
                 <tbody id="dataTableBody">
@@ -507,6 +508,7 @@
                 const gridUsage = (Math.random() * 10 * scaleFactor + 5 * scaleFactor).toFixed(2);
                 const feedIn = (Math.random() * 8 * scaleFactor).toFixed(2);
                 const price = (Math.random() * 0.3 + 0.1).toFixed(3);
+                const soc = Math.floor(Math.random() * 40 + 60); // 60-100%
 
                 tableData.push({
                     meterNumber: meterNumber || 'METER-001',
@@ -514,7 +516,8 @@
                     interval: intervalCounter,
                     gridUsage: parseFloat(gridUsage),
                     feedIn: parseFloat(feedIn),
-                    price: parseFloat(price)
+                    price: parseFloat(price),
+                    soc: soc
                 });
 
                 // Increment interval counter
@@ -539,7 +542,7 @@
             if (pageData.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
+                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
                             ${window.i18n ? window.i18n.getText('noData') : '暂无数据'}
                         </td>
                     </tr>
@@ -557,6 +560,7 @@
                     <td>${row.gridUsage}</td>
                     <td>${row.feedIn}</td>
                     <td>$${row.price}</td>
+                    <td>${row.soc}%</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -612,10 +616,10 @@
             const endTime = new Date(endDate);
             endTime.setHours(23, 59, 59);
 
-            // CSV headers - 电表，时间，Interval，电网用电量，馈网量，价格
+            // CSV headers - 电表，时间，Interval，电网用电量，馈网量，价格，SOC
             const headers = window.i18n && window.i18n.getCurrentLanguage() === 'en'
-                ? 'NMI,Time,Interval,Grid Usage (kWh),To Grid (kWh),Price ($/kWh)\n'
-                : '电表,时间,Interval,电网用电量 (kWh),馈网量 (kWh),价格 ($/kWh)\n';
+                ? 'NMI,Time,Interval,Grid Usage (kWh),To Grid (kWh),Price ($/kWh),SOC (%)\n'
+                : '电表,时间,Interval,电网用电量 (kWh),馈网量 (kWh),价格 ($/kWh),SOC (%)\n';
 
             let csv = '\ufeff' + headers; // Add BOM for Excel UTF-8 support
 
@@ -636,8 +640,9 @@
                 const gridUsage = (Math.random() * 10 * scaleFactor + 5 * scaleFactor).toFixed(2);
                 const feedIn = (Math.random() * 8 * scaleFactor).toFixed(2);
                 const price = (Math.random() * 0.3 + 0.1).toFixed(3);
+                const soc = Math.floor(Math.random() * 40 + 60); // 60-100%
 
-                csv += `${meterNumber},${formatDateTime(currentTime)},${intervalCounter},${gridUsage},${feedIn},${price}\n`;
+                csv += `${meterNumber},${formatDateTime(currentTime)},${intervalCounter},${gridUsage},${feedIn},${price},${soc}\n`;
 
                 intervalCounter++;
                 currentTime.setMinutes(currentTime.getMinutes() + granularity);
