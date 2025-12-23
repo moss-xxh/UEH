@@ -4,8 +4,11 @@
     
     console.log('🚀 Condition Settings Modal JS loaded successfully!');
     
+    // 时间条件数据版本号 - 用于检测数据格式变化
+    const TIME_PERIODS_VERSION = '1.0';
+
     // 时间条件数据 - 支持分时多阶策略
-    let timePeriods = {
+    const defaultTimePeriods = {
         charge: [],
         discharge: [
             {
@@ -31,6 +34,8 @@
             }
         ]
     };
+
+    let timePeriods = JSON.parse(JSON.stringify(defaultTimePeriods));
 
     // 创建模态框HTML
     function createModalHTML() {
@@ -717,21 +722,34 @@
 
     function loadTimePeriods() {
         const saved = localStorage.getItem('modalTimePeriods');
-        if (saved) {
+        const savedVersion = localStorage.getItem('modalTimePeriodsVersion');
+
+        if (saved && savedVersion === TIME_PERIODS_VERSION) {
             try {
                 timePeriods = JSON.parse(saved);
-                console.log('Loaded time periods from localStorage:', timePeriods);
+                console.log('✅ Loaded time periods from localStorage:', timePeriods);
             } catch (e) {
-                console.error('Failed to load time periods:', e);
+                console.error('❌ Failed to load time periods:', e);
+                console.log('🔄 Using default time periods');
+                timePeriods = JSON.parse(JSON.stringify(defaultTimePeriods));
             }
         } else {
-            console.log('No saved time periods found, using defaults');
+            if (savedVersion && savedVersion !== TIME_PERIODS_VERSION) {
+                console.log('🔄 Version mismatch (saved:', savedVersion, 'current:', TIME_PERIODS_VERSION, ') - resetting to defaults');
+            } else {
+                console.log('📋 No saved time periods found - using defaults');
+            }
+            timePeriods = JSON.parse(JSON.stringify(defaultTimePeriods));
+            // 保存新的默认值和版本号
+            saveTimePeriods();
         }
     }
 
     function saveTimePeriods() {
         localStorage.setItem('modalTimePeriods', JSON.stringify(timePeriods));
-        console.log('Saved time periods to localStorage:', timePeriods);
+        localStorage.setItem('modalTimePeriodsVersion', TIME_PERIODS_VERSION);
+        console.log('💾 Saved time periods to localStorage:', timePeriods);
+        console.log('📌 Version:', TIME_PERIODS_VERSION);
         // 同时更新主界面的条件显示
         updateMainPageConditionsDisplay();
     }
