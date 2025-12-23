@@ -6,15 +6,7 @@
     
     // 时间条件数据 - 支持分时多阶策略
     let timePeriods = {
-        charge: [
-            {
-                id: 'charge-1',
-                startTime: '06:00',
-                endTime: '08:00',
-                priceThreshold: 50,
-                priceEnabled: true
-            }
-        ],
+        charge: [],
         discharge: [
             {
                 id: 'discharge-1',
