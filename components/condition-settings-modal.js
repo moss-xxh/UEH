@@ -4,13 +4,39 @@
     
     console.log('🚀 Condition Settings Modal JS loaded successfully!');
     
-    // 时间条件数据
+    // 时间条件数据 - 支持分时多阶策略
     let timePeriods = {
         charge: [
-            { id: 'charge-1', startTime: '06:00', endTime: '08:00' }
+            {
+                id: 'charge-1',
+                startTime: '06:00',
+                endTime: '08:00',
+                priceThreshold: 50,
+                priceEnabled: true
+            }
         ],
         discharge: [
-            { id: 'discharge-1', startTime: '17:00', endTime: '20:00' }
+            {
+                id: 'discharge-1',
+                startTime: '00:00',
+                endTime: '18:00',
+                priceThreshold: 10000,
+                priceEnabled: true
+            },
+            {
+                id: 'discharge-2',
+                startTime: '18:00',
+                endTime: '21:00',
+                priceThreshold: 150,
+                priceEnabled: true
+            },
+            {
+                id: 'discharge-3',
+                startTime: '21:00',
+                endTime: '23:59',
+                priceThreshold: 10000,
+                priceEnabled: true
+            }
         ]
     };
 
@@ -39,7 +65,10 @@
                 <div class="time-condition-container" style="display: flex; flex-direction: column; gap: 32px;">
                     <!-- 充电时间段管理 -->
                     <div class="time-periods-section" style="background: rgba(255, 255, 255, 0.02); border-radius: 8px; padding: 24px; border: 1px solid rgba(255, 255, 255, 0.05);">
-                        <h3 style="font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.9); margin: 0 0 16px 0;" data-i18n="settings.timeCondition.chargeTime" data-text-zh="充电条件" data-text-en="Charge Condition">充电条件</h3>
+                        <h3 style="font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.9); margin: 0 0 12px 0;" data-i18n="settings.timeCondition.chargeTime" data-text-zh="充电条件" data-text-en="Charge Condition">充电条件</h3>
+                        <div style="margin-bottom: 16px; padding: 10px 12px; background: rgba(0, 255, 136, 0.08); border-left: 3px solid #00ff88; border-radius: 4px; font-size: 13px; color: rgba(255, 255, 255, 0.8); line-height: 1.5;">
+                            💡 支持分时多阶策略:为不同时间段设置不同价格门槛,系统将同时监测所有时间段,任意条件满足即触发充电
+                        </div>
                         <div id="chargeTimePeriods" class="time-periods-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;"></div>
                         <button class="btn btn-secondary add-period-btn" onclick="addTimePeriod('charge')" style="width: 100%; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; background: transparent; border: 2px dashed rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.6); border-radius: 6px; cursor: pointer; transition: all 0.3s ease;">
                             <span>+</span>
@@ -49,7 +78,10 @@
 
                     <!-- 放电时间段管理 -->
                     <div class="time-periods-section" style="background: rgba(255, 255, 255, 0.02); border-radius: 8px; padding: 24px; border: 1px solid rgba(255, 255, 255, 0.05);">
-                        <h3 style="font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.9); margin: 0 0 16px 0;" data-i18n="settings.timeCondition.dischargeTime" data-text-zh="放电条件" data-text-en="Discharge Condition">放电条件</h3>
+                        <h3 style="font-size: 18px; font-weight: 600; color: rgba(255, 255, 255, 0.9); margin: 0 0 12px 0;" data-i18n="settings.timeCondition.dischargeTime" data-text-zh="放电条件" data-text-en="Discharge Condition">放电条件</h3>
+                        <div style="margin-bottom: 16px; padding: 10px 12px; background: rgba(255, 193, 7, 0.08); border-left: 3px solid #ffc107; border-radius: 4px; font-size: 13px; color: rgba(255, 255, 255, 0.8); line-height: 1.5;">
+                            💡 支持分时多阶策略:为不同时间段设置不同价格门槛,系统将同时监测所有时间段,任意条件满足即触发放电
+                        </div>
                         <div id="dischargeTimePeriods" class="time-periods-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;"></div>
                         <button class="btn btn-secondary add-period-btn" onclick="addTimePeriod('discharge')" style="width: 100%; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; background: transparent; border: 2px dashed rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.6); border-radius: 6px; cursor: pointer; transition: all 0.3s ease;">
                             <span>+</span>
@@ -70,46 +102,54 @@
                 .time-period-item {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
-                    padding: 12px;
+                    gap: 6px;
+                    padding: 8px 10px;
                     background: rgba(255, 255, 255, 0.03);
                     border-radius: 6px;
                     border: 1px solid rgba(255, 255, 255, 0.08);
                     transition: all 0.3s ease;
+                    min-width: 0;
                 }
-                
+
                 .time-period-item:hover {
                     background: rgba(255, 255, 255, 0.05);
                     border-color: rgba(255, 255, 255, 0.1);
                 }
-                
+
                 .time-period-item.disabled {
                     opacity: 0.5;
                 }
-                
+
                 .time-period-checkbox {
-                    width: 20px;
-                    height: 20px;
+                    width: 16px;
+                    height: 16px;
                     cursor: pointer;
                 }
-                
+
                 .time-period-inputs {
                     display: flex;
                     align-items: center;
-                    gap: 8px;
+                    gap: 6px;
                     flex: 1;
+                    min-width: 0;
+                    flex-wrap: nowrap;
                 }
-                
+
                 .time-input {
-                    width: 100px;
-                    padding: 6px 12px;
+                    width: 70px;
+                    padding: 4px 6px;
                     background: rgba(255, 255, 255, 0.05);
                     border: 1px solid rgba(255, 255, 255, 0.1);
                     border-radius: 4px;
                     color: rgba(255, 255, 255, 0.9);
-                    font-size: 14px;
+                    font-size: 12px;
                     text-align: center;
                     transition: all 0.3s ease;
+                    flex-shrink: 0;
+                }
+
+                .time-input.price-input {
+                    width: 60px;
                 }
                 
                 .time-input:focus {
@@ -323,15 +363,32 @@
     // 初始化组件
     function initConditionSettingsModal() {
         console.log('Initializing condition settings modal...');
-        
+
         // 不创建新的模态框，使用现有的 modalContent
         // index.html 中已经有了模态框，我们只需要初始化时间条件功能
-        
+
         // 从localStorage加载保存的时间条件
         loadTimePeriods();
-        
+
+        // 初始化主界面条件显示
+        updateMainPageConditionsDisplay();
+
         // 检查是否需要恢复模态框
         checkAndRestoreModal();
+
+        // 添加语言切换监听，确保模态框中的文本随语言切换更新
+        if (window.i18n && typeof window.i18n.addObserver === 'function') {
+            window.i18n.addObserver((newLanguage, oldLanguage) => {
+                console.log('Language changed, updating conditions display...');
+                // 如果模态框当前是打开状态，重新渲染时间段以更新价格标签
+                const modalContent = document.getElementById('modalContent');
+                if (modalContent && modalContent.style.display !== 'none') {
+                    renderTimePeriods();
+                }
+                // 同时更新主界面的条件显示
+                updateMainPageConditionsDisplay();
+            });
+        }
     }
     
     // 时间条件相关函数
@@ -471,44 +528,74 @@
     function createTimePeriodElement(period, type) {
         const div = document.createElement('div');
         div.className = 'time-period-item';
+
+        // 确保价格字段存在(兼容旧数据)
+        const priceEnabled = period.priceEnabled !== undefined ? period.priceEnabled : true;
+        const priceThreshold = period.priceThreshold || (type === 'charge' ? 50 : 100);
+
+        // 根据类型设置价格比较文字和颜色 - 使用国际化
+        const priceLabel = type === 'charge' ?
+            (window.i18n?.getText('lessThanPrice') || '低于') :
+            (window.i18n?.getText('greaterThanPrice') || '高于');
+        const themeColor = type === 'charge' ? '#00ff88' : '#ffc107';
+
         div.innerHTML = `
             <div class="time-period-inputs">
-                <input type="time" class="time-input" 
-                       value="${period.startTime}" 
-                       onchange="updateTimePeriod('${period.id}', '${type}', 'startTime', this.value)">
-                <span class="time-period-separator">-</span>
-                <input type="time" class="time-input" 
-                       value="${period.endTime}" 
-                       onchange="updateTimePeriod('${period.id}', '${type}', 'endTime', this.value)">
+                <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
+                    <input type="time" class="time-input"
+                           value="${period.startTime}"
+                           onchange="updateTimePeriod('${period.id}', '${type}', 'startTime', this.value)">
+                    <span class="time-period-separator">-</span>
+                    <input type="time" class="time-input"
+                           value="${period.endTime}"
+                           onchange="updateTimePeriod('${period.id}', '${type}', 'endTime', this.value)">
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0;">
+                    <input type="checkbox"
+                           ${priceEnabled ? 'checked' : ''}
+                           onchange="updateTimePeriod('${period.id}', '${type}', 'priceEnabled', this.checked)"
+                           style="width: 14px; height: 14px; cursor: pointer; flex-shrink: 0;">
+                    <span style="color: rgba(255, 255, 255, 0.7); font-size: 11px; white-space: nowrap; flex-shrink: 0;">${priceLabel}</span>
+                    <input type="number"
+                           class="time-input price-input"
+                           value="${priceThreshold}"
+                           ${!priceEnabled ? 'disabled' : ''}
+                           onchange="updateTimePeriod('${period.id}', '${type}', 'priceThreshold', parseFloat(this.value))"
+                           style="width: 55px; ${!priceEnabled ? 'opacity: 0.5;' : ''} border-color: ${themeColor};">
+                </div>
             </div>
-            <button class="period-action-btn delete" 
+            <button class="period-action-btn delete"
                     onclick="deleteTimePeriod('${period.id}', '${type}')"
-                    title="删除">
+                    title="删除"
+                    style="flex-shrink: 0;">
                 ✕
             </button>
         `;
-        
+
         // 防止拖拽干扰
         div.addEventListener('mousedown', (e) => {
             e.stopPropagation();
         });
-        
+
         return div;
     }
 
     function addTimePeriod(type) {
         console.log('Adding time period for type:', type);
-        
+
         const newPeriod = {
             id: `${type}-${Date.now()}`,
             startTime: '00:00',
-            endTime: '01:00'  // 默认1小时时间段，避免开始时间等于结束时间
+            endTime: '01:00',  // 默认1小时时间段，避免开始时间等于结束时间
+            priceThreshold: type === 'charge' ? 50 : 100,  // 默认价格门槛
+            priceEnabled: true  // 默认启用价格条件
         };
-        
+
         timePeriods[type].push(newPeriod);
         renderTimePeriods();
         saveTimePeriods();
-        
+
         console.log('Added new period:', newPeriod);
     }
 
@@ -653,6 +740,85 @@
     function saveTimePeriods() {
         localStorage.setItem('modalTimePeriods', JSON.stringify(timePeriods));
         console.log('Saved time periods to localStorage:', timePeriods);
+        // 同时更新主界面的条件显示
+        updateMainPageConditionsDisplay();
+    }
+
+    // 更新主界面的充放电条件显示
+    function updateMainPageConditionsDisplay() {
+        console.log('📊 Updating main page conditions display...');
+
+        // 获取主界面的容器
+        const chargeList = document.getElementById('chargeConditionsList');
+        const dischargeList = document.getElementById('dischargeConditionsList');
+
+        if (!chargeList || !dischargeList) {
+            console.warn('⚠️ Main page condition containers not found');
+            return;
+        }
+
+        // 获取国际化文本 - 直接使用 i18n API
+        const priceText = window.i18n?.getText('price') || '价格';
+        const lessThanText = window.i18n?.getText('lessThanPrice') || '低于';
+        const greaterThanText = window.i18n?.getText('greaterThanPrice') || '高于';
+
+        console.log('📝 Price text:', priceText, '(should be "Price" in English mode)');
+
+        // 渲染充电条件
+        chargeList.innerHTML = '';
+        if (timePeriods.charge && timePeriods.charge.length > 0) {
+            timePeriods.charge.forEach(period => {
+                const item = document.createElement('div');
+                item.style.cssText = 'display: flex; align-items: center; gap: 20px;';
+
+                // 根据价格是否启用显示不同内容
+                if (period.priceEnabled) {
+                    item.innerHTML = `
+                        <span style="font-size: 14px; color: rgba(255,255,255,0.95); white-space: nowrap;">${period.startTime}-${period.endTime}</span>
+                        <span style="font-size: 14px; color: rgba(255,255,255,0.95); white-space: nowrap;">${priceText}&lt;<span style="color: #00ff88;">$${period.priceThreshold}</span></span>
+                    `;
+                } else {
+                    item.innerHTML = `
+                        <span style="font-size: 14px; color: rgba(255,255,255,0.95); white-space: nowrap;">${period.startTime}-${period.endTime}</span>
+                    `;
+                }
+                chargeList.appendChild(item);
+            });
+        }
+
+        // 如果没有充电条件，显示提示
+        if (chargeList.children.length === 0) {
+            chargeList.innerHTML = '<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">-</div>';
+        }
+
+        // 渲染放电条件
+        dischargeList.innerHTML = '';
+        if (timePeriods.discharge && timePeriods.discharge.length > 0) {
+            timePeriods.discharge.forEach(period => {
+                const item = document.createElement('div');
+                item.style.cssText = 'display: flex; align-items: center; gap: 20px;';
+
+                // 根据价格是否启用显示不同内容
+                if (period.priceEnabled) {
+                    item.innerHTML = `
+                        <span style="font-size: 14px; color: rgba(255,255,255,0.95); white-space: nowrap;">${period.startTime}-${period.endTime}</span>
+                        <span style="font-size: 14px; color: rgba(255,255,255,0.95); white-space: nowrap;">${priceText}&gt;<span style="color: #FFC107;">$${period.priceThreshold}</span></span>
+                    `;
+                } else {
+                    item.innerHTML = `
+                        <span style="font-size: 14px; color: rgba(255,255,255,0.95); white-space: nowrap;">${period.startTime}-${period.endTime}</span>
+                    `;
+                }
+                dischargeList.appendChild(item);
+            });
+        }
+
+        // 如果没有放电条件，显示提示
+        if (dischargeList.children.length === 0) {
+            dischargeList.innerHTML = '<div style="font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic;">-</div>';
+        }
+
+        console.log('✅ Main page conditions display updated');
     }
 
     // 保存条件设置并关闭模态框
@@ -706,6 +872,7 @@
     window.renderTimePeriods = renderTimePeriods;
     window.checkAndRestoreModal = checkAndRestoreModal;
     window.saveConditionSettings = saveConditionSettings;
+    window.updateMainPageConditionsDisplay = updateMainPageConditionsDisplay;
 
     // 页面加载完成后初始化
     if (document.readyState === 'loading') {
@@ -733,8 +900,16 @@
             // 延迟一点时间确保DOM完全加载
             setTimeout(() => {
                 renderTimePeriods();
+                // 同时更新主界面的条件显示
+                updateMainPageConditionsDisplay();
             }, 500);
         }
+
+        // 额外延迟更新主界面显示，确保DOM容器已加载
+        setTimeout(() => {
+            console.log('🔄 Extra delayed update for main page conditions...');
+            updateMainPageConditionsDisplay();
+        }, 1500);
     });
-    
+
 })();

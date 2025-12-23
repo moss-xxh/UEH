@@ -4559,7 +4559,7 @@
                     <!-- Header with Edit Button -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h4 style="margin: 0; font-size: 15px; color: rgba(255,255,255,0.9); font-weight: 600;">
-                            <span data-i18n="settings">设置</span>
+                            <span data-i18n="settingsTitle">设置</span>
                         </h4>
                         <button id="settingsEditBtn" onclick="handleSettingsEdit()" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.3s;">
                             <span data-i18n="edit">编辑</span>
@@ -4583,30 +4583,15 @@
                     <!-- Auto Conditions -->
                     <div class="auto-conditions-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <!-- Charge -->
-                        <div style="background: rgba(0, 255, 136, 0.05); border-left: 3px solid #00ff88; padding: 12px; border-radius: 8px;">
-                            <div style="font-size: 13px; color: rgba(255,255,255,0.9); font-weight: 600;" data-i18n="autoChargeCondition">充电条件</div>
+                        <div id="chargeConditionsContainer" style="background: rgba(0, 255, 136, 0.05); border-left: 3px solid #00ff88; padding: 12px; border-radius: 8px;">
+                            <div style="font-size: 13px; color: rgba(255,255,255,0.9); font-weight: 600; margin-bottom: 10px;" data-i18n="autoChargeCondition">充电条件</div>
+                            <div id="chargeConditionsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
                         </div>
 
                         <!-- Discharge -->
-                        <div style="background: rgba(255, 193, 7, 0.05); border-left: 3px solid #FFC107; padding: 12px; border-radius: 8px;">
+                        <div id="dischargeConditionsContainer" style="background: rgba(255, 193, 7, 0.05); border-left: 3px solid #FFC107; padding: 12px; border-radius: 8px;">
                             <div style="font-size: 13px; color: rgba(255,255,255,0.9); margin-bottom: 10px; font-weight: 600;" data-i18n="autoDischargeCondition">放电条件</div>
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <!-- 条件1 -->
-                                <div style="display: flex; align-items: center; gap: 20px;">
-                                    <span style="font-size: 14px; color: rgba(255,255,255,0.95); white-space: nowrap;">00:00-18:00</span>
-                                    <span style="font-size: 14px; color: rgba(255,255,255,0.95); white-space: nowrap;">价格&gt;<span style="color: #FFC107;">$10000</span></span>
-                                </div>
-                                <!-- 条件2 -->
-                                <div style="display: flex; align-items: center; gap: 20px;">
-                                    <span style="font-size: 14px; color: rgba(255,255,255,0.95); white-space: nowrap;">18:00-21:00</span>
-                                    <span style="font-size: 14px; color: rgba(255,255,255,0.95); white-space: nowrap;">价格&gt;<span style="color: #FFC107;">$150</span></span>
-                                </div>
-                                <!-- 条件3 -->
-                                <div style="display: flex; align-items: center; gap: 20px;">
-                                    <span style="font-size: 14px; color: rgba(255,255,255,0.95); white-space: nowrap;">21:00-23:59</span>
-                                    <span style="font-size: 14px; color: rgba(255,255,255,0.95); white-space: nowrap;">价格&gt;<span style="color: #FFC107;">$10000</span></span>
-                                </div>
-                            </div>
+                            <div id="dischargeConditionsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
                         </div>
                     </div>
                     
@@ -4746,17 +4731,17 @@
                                             </div>
                                             <!-- 成功 -->
                                             <div onclick="openDeviceStatusDrawer('success')" style="cursor: pointer; padding: 6px 8px; text-align: center; background: rgba(0, 255, 136, 0.08); border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 4px; transition: all 0.3s;" onmouseover="this.style.background='rgba(0, 255, 136, 0.15)'; this.style.borderColor='rgba(0, 255, 136, 0.4)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(0, 255, 136, 0.08)'; this.style.borderColor='rgba(0, 255, 136, 0.2)'; this.style.transform='translateY(0)'">
-                                                <div style="font-size: 10px; color: rgba(0, 255, 136, 0.8); margin-bottom: 2px; font-weight: 500;">成功</div>
+                                                <div data-i18n="successStatus" style="font-size: 10px; color: rgba(0, 255, 136, 0.8); margin-bottom: 2px; font-weight: 500;">成功</div>
                                                 <div id="successfulDevices" style="color: #00ff88; font-size: 18px; font-weight: 700; line-height: 1;">0</div>
                                             </div>
                                             <!-- 执行中 -->
                                             <div onclick="openDeviceStatusDrawer('executing')" style="cursor: pointer; padding: 6px 8px; text-align: center; background: rgba(255, 193, 7, 0.08); border: 1px solid rgba(255, 193, 7, 0.2); border-radius: 4px; transition: all 0.3s;" onmouseover="this.style.background='rgba(255, 193, 7, 0.15)'; this.style.borderColor='rgba(255, 193, 7, 0.4)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255, 193, 7, 0.08)'; this.style.borderColor='rgba(255, 193, 7, 0.2)'; this.style.transform='translateY(0)'">
-                                                <div style="font-size: 10px; color: rgba(255, 193, 7, 0.8); margin-bottom: 2px; font-weight: 500;">执行中</div>
+                                                <div data-i18n="executing" style="font-size: 10px; color: rgba(255, 193, 7, 0.8); margin-bottom: 2px; font-weight: 500;">执行中</div>
                                                 <div id="executingDevices" style="color: #FFC107; font-size: 18px; font-weight: 700; line-height: 1;">0</div>
                                             </div>
                                             <!-- 失败 -->
                                             <div onclick="openDeviceStatusDrawer('failed')" style="cursor: pointer; padding: 6px 8px; text-align: center; background: rgba(255, 107, 107, 0.08); border: 1px solid rgba(255, 107, 107, 0.2); border-radius: 4px; transition: all 0.3s;" onmouseover="this.style.background='rgba(255, 107, 107, 0.15)'; this.style.borderColor='rgba(255, 107, 107, 0.4)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255, 107, 107, 0.08)'; this.style.borderColor='rgba(255, 107, 107, 0.2)'; this.style.transform='translateY(0)'">
-                                                <div style="font-size: 10px; color: rgba(255, 107, 107, 0.8); margin-bottom: 2px; font-weight: 500;">失败</div>
+                                                <div data-i18n="failedStatus" style="font-size: 10px; color: rgba(255, 107, 107, 0.8); margin-bottom: 2px; font-weight: 500;">失败</div>
                                                 <div id="failedDevices" style="color: #ff6b6b; font-size: 18px; font-weight: 700; line-height: 1;">0</div>
                                             </div>
                                         </div>
@@ -17495,24 +17480,25 @@
             localStorage.setItem('modalMode', mode);
         }
 
-        function saveConditionSettings() {
-            // 保存当前正在编辑的数据
-            saveRegionData(currentSelectedRegion, currentConditionType);
-            
-            // 保存所有地区的设置数据到localStorage
-            localStorage.setItem('regionTimeSettings', JSON.stringify(selectedRegionData));
-            
-            // 更新显示的勾选状态
-            updateConditionsDisplayFromSaved();
-            
-            // 关闭弹窗
-            closeConditionSettingsModal();
-            
-            // 显示保存成功提示
-            showAutoOperationNotification('设置', '多地区条件设置已保存');
-            
-            console.log('多地区时间条件设置已保存:', selectedRegionData);
-        }
+        // 旧函数已废弃，由 condition-settings-modal.js 中的同名函数替代
+        // function saveConditionSettings() {
+        //     // 保存当前正在编辑的数据
+        //     saveRegionData(currentSelectedRegion, currentConditionType);
+        //
+        //     // 保存所有地区的设置数据到localStorage
+        //     localStorage.setItem('regionTimeSettings', JSON.stringify(selectedRegionData));
+        //
+        //     // 更新显示的勾选状态
+        //     updateConditionsDisplayFromSaved();
+        //
+        //     // 关闭弹窗
+        //     closeConditionSettingsModal();
+        //
+        //     // 显示保存成功提示
+        //     showAutoOperationNotification('设置', '多地区条件设置已保存');
+        //
+        //     console.log('多地区时间条件设置已保存:', selectedRegionData);
+        // }
         
         // 从保存的设置更新显示
         function updateConditionsDisplayFromSaved() {
@@ -18184,25 +18170,26 @@
             }
         }
         
-        function closeConditionSettingsModal() {
-            console.log('Closing condition settings modal...');
-            try {
-                const modalContent = document.getElementById('modalContent');
-                if (modalContent) {
-                    modalContent.style.display = 'none';
-                    
-                    // 清除localStorage状态
-                    localStorage.removeItem('conditionSettingsModalOpen');
-                    localStorage.removeItem('modalPosition');
-                    
-                    console.log('Modal closed successfully');
-                } else {
-                    console.error('Modal content element not found when trying to close!');
-                }
-            } catch (error) {
-                console.error('Error closing modal:', error);
-            }
-        }
+        // 旧函数已废弃，由 condition-settings-modal.js 中的同名函数替代
+        // function closeConditionSettingsModal() {
+        //     console.log('Closing condition settings modal...');
+        //     try {
+        //         const modalContent = document.getElementById('modalContent');
+        //         if (modalContent) {
+        //             modalContent.style.display = 'none';
+        //
+        //             // 清除localStorage状态
+        //             localStorage.removeItem('conditionSettingsModalOpen');
+        //             localStorage.removeItem('modalPosition');
+        //
+        //             console.log('Modal closed successfully');
+        //         } else {
+        //             console.error('Modal content element not found when trying to close!');
+        //         }
+        //     } catch (error) {
+        //         console.error('Error closing modal:', error);
+        //     }
+        // }
         
         // 初始化时间段显示
         function initTimeSegmentDisplay() {
@@ -18464,11 +18451,12 @@
         }
         
         // 确保函数全局可用
-        window.openConditionSettingsModal = openConditionSettingsModal;
-        window.closeConditionSettingsModal = closeConditionSettingsModal;
+        // window.openConditionSettingsModal = openConditionSettingsModal; // 已被 condition-settings-modal.js 覆盖
+        // window.closeConditionSettingsModal = closeConditionSettingsModal; // 已被 condition-settings-modal.js 覆盖
+        // window.saveConditionSettings = saveConditionSettings; // 已被 condition-settings-modal.js 覆盖
         window.saveCurrentRegionSettings = saveCurrentRegionSettings;
         window.updateModalTranslations = updateModalTranslations;
-        window.checkAndRestoreModal = checkAndRestoreModal;
+        // window.checkAndRestoreModal = checkAndRestoreModal; // 已被 condition-settings-modal.js 覆盖
         window.editTimeSegment = editTimeSegment;
         window.deleteTimeSegment = deleteTimeSegment;
         window.closeAddSegmentModal = closeAddSegmentModal;
@@ -20820,7 +20808,7 @@
                         ⏰ <span data-i18n="timeConditionSettings">分时段价格策略</span>
                     </div>
                     <div style="margin-bottom: 20px; padding: 12px; background: rgba(0, 150, 255, 0.08); border-left: 3px solid #0096ff; border-radius: 4px; font-size: 13px; color: rgba(255, 255, 255, 0.8); line-height: 1.6;">
-                        💡 为不同时间段设置不同价格阈值，系统将同时监测所有时间段，任意条件满足即触发相应操作。勾选价格条件可启用/禁用该时段的价格限制。
+                        <span data-i18n="multiPeriodStrategyTip">💡 为不同时间段设置不同价格阈值，系统将同时监测所有时间段，任意条件满足即触发相应操作。勾选价格条件可启用/禁用该时段的价格限制。</span>
                     </div>
                     
                     <!-- 24小时时间轴显示 -->
@@ -22100,6 +22088,21 @@
             // Start binding attempt
             setTimeout(bindTestToolsButton, 100);
         });
+    </script>
+
+    <!-- 确保 condition-settings-modal.js 的函数覆盖 dashboard.html 中的旧函数 -->
+    <script>
+        // 延迟执行以确保 condition-settings-modal.js 已加载
+        setTimeout(() => {
+            console.log('🔧 Verifying condition-settings-modal.js functions...');
+            if (typeof window.updateMainPageConditionsDisplay === 'function') {
+                console.log('✅ condition-settings-modal.js functions are available');
+                // 立即更新主界面显示
+                window.updateMainPageConditionsDisplay();
+            } else {
+                console.error('❌ condition-settings-modal.js functions not found!');
+            }
+        }, 100);
     </script>
 </body>
 </html>
