@@ -441,32 +441,59 @@
     // 更新24小时时间轴显示
     function updateTimelineDisplay() {
         console.log('📅 Updating timeline display...');
-        
+
         const chargeBlocks = document.getElementById('chargeTimelineBlocks');
         const dischargeBlocks = document.getElementById('dischargeTimelineBlocks');
-        
+
         if (!chargeBlocks || !dischargeBlocks) {
-            console.error('❌ Timeline containers not found!');
+            console.warn('⚠️ Timeline containers not found, will retry...');
+            // 延迟重试,确保DOM已完全加载
+            setTimeout(() => {
+                const chargeRetry = document.getElementById('chargeTimelineBlocks');
+                const dischargeRetry = document.getElementById('dischargeTimelineBlocks');
+                if (chargeRetry && dischargeRetry) {
+                    console.log('✅ Timeline containers found on retry, rendering...');
+                    renderTimelineContent(chargeRetry, dischargeRetry);
+                } else {
+                    console.error('❌ Timeline containers still not found after retry');
+                }
+            }, 100);
             return;
         }
-        
+
+        renderTimelineContent(chargeBlocks, dischargeBlocks);
+    }
+
+    // 渲染时间轴内容的辅助函数
+    function renderTimelineContent(chargeBlocks, dischargeBlocks) {
         // 清空现有显示
         chargeBlocks.innerHTML = '';
         dischargeBlocks.innerHTML = '';
-        
+
+        console.log(`🔋 Rendering ${timePeriods.charge.length} charge periods`);
+        console.log(`⚡ Rendering ${timePeriods.discharge.length} discharge periods`);
+
         // 渲染充电时间段
-        timePeriods.charge.forEach(period => {
+        timePeriods.charge.forEach((period, index) => {
             const blocks = createTimelineBlocks(period, '#00ff88');
-            blocks.forEach(block => chargeBlocks.appendChild(block));
+            blocks.forEach(block => {
+                chargeBlocks.appendChild(block);
+                console.log(`  ✓ Added charge block ${index + 1}: ${period.startTime}-${period.endTime}`);
+            });
         });
-        
+
         // 渲染放电时间段
-        timePeriods.discharge.forEach(period => {
+        timePeriods.discharge.forEach((period, index) => {
             const blocks = createTimelineBlocks(period, '#ffc107');
-            blocks.forEach(block => dischargeBlocks.appendChild(block));
+            blocks.forEach(block => {
+                dischargeBlocks.appendChild(block);
+                console.log(`  ✓ Added discharge block ${index + 1}: ${period.startTime}-${period.endTime}`);
+            });
         });
-        
-        console.log('✅ Timeline display updated');
+
+        console.log('✅ Timeline display updated successfully');
+        console.log(`   - Charge blocks: ${chargeBlocks.children.length}`);
+        console.log(`   - Discharge blocks: ${dischargeBlocks.children.length}`);
     }
 
     // 创建时间轴块
