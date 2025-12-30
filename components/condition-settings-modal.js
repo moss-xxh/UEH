@@ -5,11 +5,19 @@
     console.log('🚀 Condition Settings Modal JS loaded successfully!');
     
     // 时间条件数据版本号 - 用于检测数据格式变化
-    const TIME_PERIODS_VERSION = '1.1';
+    const TIME_PERIODS_VERSION = '1.2';
 
     // 时间条件数据 - 支持分时多阶策略
     const defaultTimePeriods = {
-        charge: [],
+        charge: [
+            {
+                id: 'charge-1',
+                startTime: '00:00',
+                endTime: '07:00',
+                priceThreshold: 50,
+                priceEnabled: true
+            }
+        ],
         discharge: [
             {
                 id: 'discharge-1',
