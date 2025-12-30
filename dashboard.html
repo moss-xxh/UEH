@@ -19029,20 +19029,22 @@
             return hours * 60 + minutes;
         }
         
-        // 更新时间轴显示
+        // 更新时间轴显示 - 已废弃，由 condition-settings-modal.js 中的 updateTimelineDisplay() 替代
         function updateTimeline() {
-            const timelineDisplay = document.getElementById('timelineDisplay');
-            if (!timelineDisplay) return;
-            
-            timelineDisplay.innerHTML = '';
-            
+            // ⚠️ 不要清空 timelineDisplay，新系统使用 chargeTimelineBlocks 和 dischargeTimelineBlocks
+            // 旧代码会干扰新的时间轴渲染系统，所以这个函数现在什么都不做
+
+            // const timelineDisplay = document.getElementById('timelineDisplay');
+            // if (!timelineDisplay) return;
+            // timelineDisplay.innerHTML = '';  // ❌ 这行代码会清空时间轴！
+
             // 不在时间轴上显示时间段，只在时间条件卡片中显示
             // // 显示充电时间段
             // chargeTimeSegments.forEach(segment => {
             //     const segmentBar = createTimelineSegment(segment, 'charge');
             //     timelineDisplay.appendChild(segmentBar);
             // });
-            
+
             // // 显示放电时间段
             // dischargeTimeSegments.forEach(segment => {
             //     const segmentBar = createTimelineSegment(segment, 'discharge');
