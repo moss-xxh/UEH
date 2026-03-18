@@ -1234,16 +1234,14 @@ function queryReport() {
 // ══════════════════════════════════════════════════════════
 function build(data) {
     const file = (EXPORT_FILES[_renderedType]||{})[_renderedKey];
-    const exportHtml = file
-        ? `<a class="export-btn" href="${file}" download="${file}">
-               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    const svgIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                    <polyline points="7 10 12 15 17 10"/>
                    <line x1="12" y1="15" x2="12" y2="3"/>
-               </svg>
-               ${t({zh:'导出下载',en:'Export'})}
-           </a>`
-        : '';
+               </svg>`;
+    const exportHtml = file
+        ? `<a class="export-btn" href="${file}" download="${file}">${svgIcon} ${t({zh:'导出下载',en:'Export'})}</a>`
+        : `<button class="export-btn" onclick="window.print()">${svgIcon} ${t({zh:'导出PDF',en:'Export PDF'})}</button>`;
 
     let h = `<div class="rpt-banner">
         <div class="rpt-banner-top">
