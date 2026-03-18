@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operations Data Report - March 12, 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f7;
+            color: #000000;
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        /* 主容器白色卡片 */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        /* 卡片头部 */
+        .container-header {
+            padding: 40px 60px 30px 60px;
+            border-bottom: 1px solid #e8e9ed;
+            position: relative;
+        }
+
+        .report-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+        }
+
+        .report-date {
+            font-size: 16px;
+            color: #86868b;
+            font-weight: 400;
+        }
+
+        .report-note {
+            font-size: 13px;
+            color: #86868b;
+            font-weight: 400;
+            margin-top: 8px;
+        }
+
+        /* 卡片主体内容区域 */
+        .container-body {
+            padding: 40px 60px 60px 60px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 24px;
+        }
+
+        .section-subtitle {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin: 32px 0 16px 0;
+        }
+
+        /* 卡片网格 */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 0;
+        }
+
+        .metric-card {
+            background: #f5f5f7;
+            padding: 28px 24px;
+            border-radius: 12px;
+            border: none;
+        }
+
+        .card-label {
+            font-size: 14px;
+            color: #86868b;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .card-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        /* 新增用户 - 蓝色 */
+        .card-value.value-increase {
+            color: #007aff;
+        }
+
+        /* 退出用户 - 红色 */
+        .card-value.value-decrease {
+            color: #ff3b30;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: #86868b;
+        }
+
+        /* 双栏卡片布局 */
+        .dual-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin: 24px 0;
+        }
+
+        .chart-card {
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .chart-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 28px;
+        }
+
+        /* 条形图样式 */
+        .bar-chart-item {
+            margin-bottom: 24px;
+        }
+
+        .bar-chart-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .bar-label-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: #1d1d1f;
+        }
+
+        .bar-label-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .bar-container {
+            width: 100%;
+            height: 8px;
+            background: #f5f5f7;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: #007aff;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+
+        /* 饼图样式 */
+        .pie-chart-container {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .pie-chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .pie-legend {
+            flex: 1;
+        }
+
+        .pie-legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .pie-legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .pie-legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .pie-legend-color.color-1 {
+            background: #007aff;
+        }
+
+        .pie-legend-color.color-2 {
+            background: #34c759;
+        }
+
+        .pie-legend-color.color-3 {
+            background: #ff9500;
+        }
+
+        .pie-legend-label {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .pie-legend-name {
+            font-size: 14px;
+            color: #1d1d1f;
+            font-weight: 500;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .pie-legend-value {
+            font-size: 14px;
+            color: #1d1d1f;
+            font-weight: 600;
+            flex-shrink: 0;
+            white-space: nowrap;
+            margin-left: auto;
+        }
+
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0 0 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .data-table th {
+            background: #5B7FE8;
+            color: #ffffff;
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            border-bottom: 1px solid #e8e9ed;
+        }
+
+        .data-table td {
+            padding: 14px 16px;
+            font-size: 13px;
+            color: #1d1d1f;
+            border-bottom: 1px solid #e8e9ed;
+            background: #ffffff;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        /* 获利指标容器 */
+        .profit-metrics-container {
+            background: #f5f5f7;
+            border-radius: 12px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        .profit-metric-item {
+            padding: 28px 24px;
+            border-right: 1px solid #d1d1d6;
+            border-bottom: 1px solid #d1d1d6;
+        }
+
+        .profit-metric-item:last-child {
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .profit-metric-item:nth-child(1),
+        .profit-metric-item:nth-child(2),
+        .profit-metric-item:nth-child(3) {
+            border-bottom: 1px solid #d1d1d6;
+        }
+
+        .profit-metric-item:nth-child(3) {
+            border-right: none;
+        }
+
+        /* 第二行：2个指标居中对齐 */
+        .profit-metric-item:nth-child(4) {
+            grid-column: 2 / 3;
+            border-bottom: none;
+        }
+
+        .profit-metric-item:nth-child(5) {
+            grid-column: 3 / 4;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        /* 导出按钮 */
+        .export-btn {
+            position: absolute;
+            top: 40px;
+            right: 60px;
+            padding: 10px 20px;
+            background: #1d1d1f;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .export-btn:hover {
+            background: #000000;
+            transform: translateY(-1px);
+        }
+
+        .export-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 封面页 - 网页预览时隐藏 */
+        .cover-page {
+            display: none;
+            background: linear-gradient(135deg, #4169E1 0%, #5B7FE8 50%, #7B9AFF 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-page::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 80%;
+            height: 150%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="800" height="800" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+            transform: rotate(-15deg);
+        }
+
+        .cover-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cover-logo {
+            width: 180px;
+            height: auto;
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            display: block;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+        }
+
+        .cover-date-note {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+            margin-top: 40px;
+            letter-spacing: 1px;
+        }
+
+        /* 移动端响应式适配 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px 0;
+            }
+
+            .main-container {
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .container-header {
+                padding: 20px 16px;
+            }
+
+            .report-title {
+                font-size: 24px;
+            }
+
+            .report-date {
+                font-size: 14px;
+            }
+
+            .export-btn {
+                top: 20px;
+                right: 16px;
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+
+            .container-body {
+                padding: 20px 16px;
+            }
+
+            .section {
+                margin-bottom: 30px;
+            }
+
+            .section-title {
+                font-size: 18px;
+                margin-bottom: 16px;
+            }
+
+            .section-subtitle {
+                font-size: 15px;
+                margin: 20px 0 12px 0;
+            }
+
+            /* 卡片改为单列布局 */
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .metric-card {
+                padding: 20px 16px;
+            }
+
+            .card-label {
+                font-size: 13px;
+                margin-bottom: 10px;
+            }
+
+            .card-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+
+            .card-subtitle {
+                font-size: 13px;
+            }
+
+            /* 双栏改为单列 */
+            .dual-cards {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin: 16px 0;
+            }
+
+            .chart-card {
+                padding: 20px 16px;
+            }
+
+            .chart-card-title {
+                font-size: 15px;
+                margin-bottom: 20px;
+            }
+
+            /* 移动端表格滚动优化 */
+            .data-table {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                border-radius: 8px;
+                font-size: 10px;
+            }
+
+            .data-table thead,
+            .data-table tbody {
+                display: table;
+                width: max-content;
+                min-width: 100%;
+                table-layout: auto;
+            }
+
+            .data-table tr {
+                display: table-row;
+            }
+
+            .data-table th,
+            .data-table td {
+                display: table-cell;
+                padding: 8px 6px;
+                font-size: 10px;
+                white-space: nowrap;
+                vertical-align: middle;
+            }
+
+            .data-table th {
+                background: #5B7FE8 !important;
+                color: #ffffff !important;
+                font-weight: 600;
+                border-right: 1px solid rgba(255, 255, 255, 0.2);
+                text-align: left;
+            }
+
+            .data-table th:last-child {
+                border-right: none;
+            }
+
+            .data-table td {
+                background: #ffffff !important;
+                border-bottom: 1px solid #e8e9ed;
+                text-align: left;
+            }
+
+            .data-table tbody tr:last-child td {
+                border-bottom: none;
+            }
+        }
+
+        /* 打印样式 */
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                counter-reset: page;
+            }
+
+            /* 默认页面设置 - 内容页有边距 */
+            @page {
+                margin: 20mm 15mm 25mm 15mm;
+                size: A4 portrait;
+                @bottom-center {
+                    content: counter(page) " / " counter(pages);
+                    font-size: 10pt;
+                    color: #666666;
+                    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+                }
+            }
+
+            /* 封面页专属页面设置 - 无边距和无页码 */
+            @page :first {
+                margin: 0;
+                size: A4 portrait;
+                @bottom-center {
+                    content: none;
+                }
+            }
+
+            /* 隐藏导出按钮 */
+            .export-btn {
+                display: none !important;
+            }
+
+            /* 保持主容器样式 */
+            .main-container {
+                max-width: 100% !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                page-break-inside: avoid;
+            }
+
+            /* 隐藏报告表头 */
+            .container-header {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                overflow: hidden !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .report-title,
+            .report-date,
+            .export-btn {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            /* 内容区域 - 表头隐藏后从顶部开始 */
+            .container-body {
+                padding: 10px 25px 25px 25px !important;
+            }
+
+            /* 紧凑化章节间距 */
+            .section {
+                margin-bottom: 20px !important;
+            }
+
+            .section-title {
+                font-size: 17px !important;
+                margin-bottom: 12px !important;
+            }
+
+            .section-subtitle {
+                font-size: 14px !important;
+                margin: 16px 0 10px 0 !important;
+            }
+
+            /* 确保卡片保持3列布局 */
+            .cards-grid {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 12px !important;
+                margin-bottom: 0 !important;
+            }
+
+            /* 确保双栏保持2列布局 */
+            .dual-cards {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 16px !important;
+                margin: 12px 0 !important;
+            }
+
+            .chart-card {
+                padding: 16px !important;
+            }
+
+            .chart-card-title {
+                font-size: 14px !important;
+                margin-bottom: 16px !important;
+            }
+
+            .cards-grid,
+            .dual-cards {
+                page-break-inside: avoid;
+            }
+
+            /* 重置表格样式确保正常显示 */
+            .data-table {
+                display: table !important;
+                width: 100% !important;
+                overflow: visible !important;
+                font-size: 12px !important;
+            }
+
+            .data-table thead,
+            .data-table tbody {
+                display: table-row-group !important;
+                width: auto !important;
+            }
+
+            .data-table tr {
+                display: table-row !important;
+            }
+
+            .data-table th,
+            .data-table td {
+                display: table-cell !important;
+                padding: 10px 12px !important;
+                font-size: 12px !important;
+                white-space: normal !important;
+                vertical-align: middle !important;
+            }
+
+            .data-table th {
+                background: #5B7FE8 !important;
+                color: #ffffff !important;
+                font-weight: 600 !important;
+                text-align: left !important;
+            }
+
+            .data-table td {
+                background: #ffffff !important;
+                border-bottom: 1px solid #e8e9ed !important;
+                text-align: left !important;
+            }
+
+            /* 保持正常字体大小 */
+            .metric-card {
+                padding: 16px 14px !important;
+            }
+
+            .card-label {
+                font-size: 12px !important;
+                margin-bottom: 8px !important;
+            }
+
+            .card-value {
+                font-size: 26px !important;
+                margin-bottom: 6px !important;
+            }
+
+            .card-subtitle {
+                font-size: 11px !important;
+            }
+
+            /* 优化品牌分布饼图打印显示 */
+            .pie-chart-container {
+                display: flex !important;
+                align-items: center !important;
+                gap: 20px !important;
+            }
+
+            .pie-chart {
+                width: 140px !important;
+                height: 140px !important;
+                flex-shrink: 0 !important;
+            }
+
+            .pie-legend {
+                flex: 1 !important;
+                min-width: 0 !important;
+            }
+
+            .pie-legend-item {
+                display: flex !important;
+                align-items: center !important;
+                margin-bottom: 10px !important;
+            }
+
+            .pie-legend-label {
+                flex: 1 !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                gap: 8px !important;
+                min-width: 0 !important;
+            }
+
+            .pie-legend-name {
+                font-size: 12px !important;
+                flex: 1 1 auto !important;
+                min-width: 0 !important;
+            }
+
+            .pie-legend-value {
+                font-size: 12px !important;
+                flex-shrink: 0 !important;
+                white-space: nowrap !important;
+            }
+
+            /* 获利部分打印优化 - 保持布局，优化间距 */
+            .profit-metrics-container {
+                gap: 6px !important;
+                padding: 6px !important;
+            }
+
+            .profit-metric-item {
+                padding: 14px 12px !important;
+            }
+
+            /* Profit部分从新页开始 - 已禁用以避免Excel导出时产生大间距 */
+            /* .profit-section {
+                page-break-before: always !important;
+            } */
+
+            /* 封面页打印样式 - 全屏无边距 */
+            .cover-page {
+                display: flex !important;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 297mm !important;
+                width: 210mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                page-break-after: always;
+                background: linear-gradient(135deg, #4169E1 0%, #5B7FE8 50%, #7B9AFF 100%) !important;
+                text-align: center;
+                position: relative !important;
+                overflow: hidden;
+                box-sizing: border-box;
+                min-height: 297mm !important;
+                max-height: 297mm !important;
+            }
+
+            .cover-page::before {
+                opacity: 0.3 !important;
+            }
+
+            .cover-content {
+                position: relative;
+                z-index: 1;
+            }
+
+            .cover-logo {
+                display: block !important;
+                width: 200px !important;
+                height: auto !important;
+                position: absolute !important;
+                top: 50px !important;
+                left: 50px !important;
+                margin: 0 !important;
+                z-index: 10 !important;
+                filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15)) !important;
+            }
+
+            .cover-title {
+                font-size: 52px !important;
+                font-weight: 700 !important;
+                color: white !important;
+                margin-bottom: 30px !important;
+                letter-spacing: 4px;
+            }
+
+            .cover-version {
+                font-size: 36px !important;
+                color: rgba(255, 255, 255, 0.85) !important;
+                font-weight: 400 !important;
+                margin-top: 20px !important;
+                margin-bottom: 0 !important;
+            }
+
+            .cover-company {
+                display: none !important;
+            }
+
+            .cover-footer {
+                display: none !important;
+            }
+
+            .cover-date {
+                display: none !important;
+            }
+
+            .cover-date-note {
+                display: block !important;
+                font-size: 18px !important;
+                color: rgba(255, 255, 255, 0.9) !important;
+                margin-top: 40px !important;
+            }
+
+        }
+    </style>
+</head>
+<body>
+    <!-- 封面页 - 仅在打印时显示 -->
+    <div class="cover-page">
+        <img src="../../../../logo_white.png" alt="AlwaysControl Technology" class="cover-logo">
+        <div class="cover-content">
+            <h1 class="cover-title">Operations Data Report</h1>
+            <p class="cover-version">2026-03-12</p>
+            <p class="cover-date-note">All data statistics up to 2026-03-12 23:59:59</p>
+            <p class="cover-company">Virtual Power Plant Operations Report</p>
+        </div>
+        <div class="cover-footer">
+            <div>Professional Energy Management Platform</div>
+            <p class="cover-date">Report Generated: March 12, 2026</p>
+        </div>
+    </div>
+
+    <!-- 主容器白色卡片 -->
+    <div class="main-container">
+        <!-- 卡片头部 -->
+        <div class="container-header">
+            <h1 class="report-title">Operations Data Report</h1>
+            <p class="report-date">March 12, 2026</p>
+            <p class="report-note">All data statistics up to 2026-03-12 23:59:59</p>
+            <!-- 导出PDF按钮 -->
+            <button class="export-btn" onclick="exportToPDF()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Export PDF
+            </button>
+        </div>
+
+        <!-- 卡片主体内容 -->
+        <div class="container-body">
+
+            <!-- 1. Users -->
+            <div class="section">
+                <h2 class="section-title">1. Users</h2>
+
+                <h3 class="section-subtitle">1.1 User Statistics</h3>
+
+                <div class="cards-grid">
+                    <div class="metric-card">
+                        <div class="card-label">Total Users</div>
+                        <div class="card-value">108</div>
+                        <div class="card-subtitle">vs Yesterday <span style="color: #007aff;">↑1</span></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="card-label">Auth Success</div>
+                        <div class="card-value" style="color: #34c759;">104</div>
+                        <div class="card-subtitle">vs Yesterday <span style="color: #007aff;">↑1</span></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="card-label">Auth Expired</div>
+                        <div class="card-value" style="color: #ff3b30;">4</div>
+                        <div class="card-subtitle">vs Yesterday <span style="color: #86868b;">→0</span></div>
+                    </div>
+                </div>
+
+                <h3 class="section-subtitle">1.2 Distribution</h3>
+
+                <div class="dual-cards">
+                    <!-- Region Distribution - 条形图 -->
+                    <div class="chart-card">
+                        <h3 class="chart-card-title">Region Distribution</h3>
+                        <div class="bar-chart">
+
+                            <div class="bar-chart-item">
+                                <div class="bar-label">
+                                    <span class="bar-label-text">NSW <span style='color: #007aff; font-size: 13px;'>(+1)</span></span>
+                                    <span class="bar-label-value">70</span>
+                                </div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 100.0%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="bar-chart-item">
+                                <div class="bar-label">
+                                    <span class="bar-label-text">VIC</span>
+                                    <span class="bar-label-value">38</span>
+                                </div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 54.285714285714285%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="bar-chart-item">
+                                <div class="bar-label">
+                                    <span class="bar-label-text">QLD</span>
+                                    <span class="bar-label-value">0</span>
+                                </div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 0.0%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="bar-chart-item">
+                                <div class="bar-label">
+                                    <span class="bar-label-text">SA</span>
+                                    <span class="bar-label-value">0</span>
+                                </div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 0.0%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="bar-chart-item">
+                                <div class="bar-label">
+                                    <span class="bar-label-text">TAS</span>
+                                    <span class="bar-label-value">0</span>
+                                </div>
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: 0.0%;"></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Brand Distribution -->
+                    <div class="chart-card">
+                        <h3 class="chart-card-title">Brand Distribution</h3>
+
+                        <div class="pie-chart-container">
+                            <div class="pie-chart" style="background: conic-gradient(#007aff 0% 59.25925925925925%, #34c759 59.25925925925925% 83.33333333333333%, #ff9500 83.33333333333333% 91.66666666666666%, #ff3b30 91.66666666666666% 99.07407407407406%, #5856d6 99.07407407407406% 99.99999999999999%);"></div>
+                            <div class="pie-legend">
+
+                                <div class="pie-legend-item">
+                                    <div class="pie-legend-color" style="background: #007aff;"></div>
+                                    <div class="pie-legend-label">
+                                        <span class="pie-legend-name">FOX ESS <span style='color: #007aff; font-size: 13px;'>(+1)</span></span>
+                                        <span class="pie-legend-value">64 (59.3%)</span>
+                                    </div>
+                                </div>
+
+                                <div class="pie-legend-item">
+                                    <div class="pie-legend-color" style="background: #34c759;"></div>
+                                    <div class="pie-legend-label">
+                                        <span class="pie-legend-name">Alpha</span>
+                                        <span class="pie-legend-value">26 (24.1%)</span>
+                                    </div>
+                                </div>
+
+                                <div class="pie-legend-item">
+                                    <div class="pie-legend-color" style="background: #ff9500;"></div>
+                                    <div class="pie-legend-label">
+                                        <span class="pie-legend-name">Growatt</span>
+                                        <span class="pie-legend-value">9 (8.3%)</span>
+                                    </div>
+                                </div>
+
+                                <div class="pie-legend-item">
+                                    <div class="pie-legend-color" style="background: #ff3b30;"></div>
+                                    <div class="pie-legend-label">
+                                        <span class="pie-legend-name">Ipotisedge</span>
+                                        <span class="pie-legend-value">8 (7.4%)</span>
+                                    </div>
+                                </div>
+
+                                <div class="pie-legend-item">
+                                    <div class="pie-legend-color" style="background: #5856d6;"></div>
+                                    <div class="pie-legend-label">
+                                        <span class="pie-legend-name">Whes</span>
+                                        <span class="pie-legend-value">1 (0.9%)</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Dispatch -->
+            <div class="section">
+                <h2 class="section-title">2. Dispatch</h2>
+
+                <h3 class="section-subtitle">2.1 Dispatch Statistics</h3>
+
+                <div class="cards-grid">
+                    <div class="metric-card">
+                        <div class="card-label">Dispatch Count</div>
+                        <div class="card-value">0</div>
+                        <div class="card-subtitle">vs Yesterday →0</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="card-label">Device Count</div>
+                        <div class="card-value">0</div>
+                        <div class="card-subtitle">vs Yesterday →0</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="card-label">Success Rate</div>
+                        <div class="card-value">0.0%</div>
+                        <div class="card-subtitle">vs Yesterday →0%</div>
+                    </div>
+                </div>
+
+                <h3 class="section-subtitle">2.2 Dispatch Records</h3>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Dispatch Time</th>
+                            <th>Region</th>
+                            <th>Device Count</th>
+                            <th>Success Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #86868b;">No dispatch records</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+                <h4 class="section-subtitle" style="font-size: 15px; margin: 24px 0 12px 0;">2.3.2 Offline Devices（9）</h4>
+                <p style="font-size: 13px; color: #86868b; margin-bottom: 16px;">Note: Devices offline for more than 1 hour</p>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Device SN</th>
+                            <th>Brand</th>
+                            <th>Region</th>
+                            <th>Offline Time</th>
+                            <th>Offline Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td>60KB802056RB009 <span style='color: #ff9500; font-size: 12px;'>(Auth Expired)</span></td>
+                            <td>FOX ESS</td>
+                            <td>NSW</td>
+                            <td>2025-11-24 21:50:12</td>
+                            <td style="color: #ff3b30; font-weight: 600;">108d 2h 9min</td>
+                        </tr>
+
+                        <tr>
+                            <td>AL7011023080066</td>
+                            <td>Alpha</td>
+                            <td>VIC</td>
+                            <td>2025-12-17 13:42:29</td>
+                            <td style="color: #ff3b30; font-weight: 600;">85d 10h 17min</td>
+                        </tr>
+
+                        <tr>
+                            <td>2448-36640066PH</td>
+                            <td>Ipotisedge</td>
+                            <td>VIC</td>
+                            <td>2025-12-18 12:27:05</td>
+                            <td style="color: #ff3b30; font-weight: 600;">84d 11h 32min</td>
+                        </tr>
+
+                        <tr>
+                            <td>60KB10305BAA152 <span style='color: #ff9500; font-size: 12px;'>(Auth Expired)</span></td>
+                            <td>FOX ESS</td>
+                            <td>NSW</td>
+                            <td>2026-01-29 16:41:02</td>
+                            <td style="color: #ff3b30; font-weight: 600;">42d 7h 18min</td>
+                        </tr>
+
+                        <tr>
+                            <td>60KB10305APA061</td>
+                            <td>FOX ESS</td>
+                            <td>VIC</td>
+                            <td>2026-02-09 13:08:39</td>
+                            <td style="color: #ff3b30; font-weight: 600;">31d 10h 51min</td>
+                        </tr>
+
+                        <tr>
+                            <td>2448-32780210PH <span style='color: #ff9500; font-size: 12px;'>(Auth Expired)</span></td>
+                            <td>Ipotisedge</td>
+                            <td>NSW</td>
+                            <td>2026-02-19 17:47:24</td>
+                            <td style="color: #ff3b30; font-weight: 600;">21d 6h 12min</td>
+                        </tr>
+
+                        <tr>
+                            <td>60HD15305AXM130</td>
+                            <td>FOX ESS</td>
+                            <td>NSW</td>
+                            <td>2026-03-10 18:56:07</td>
+                            <td style="color: #ff3b30; font-weight: 600;">2d 5h 3min</td>
+                        </tr>
+
+                        <tr>
+                            <td>AL7011025083127</td>
+                            <td>Alpha</td>
+                            <td>NSW</td>
+                            <td>2026-03-11 12:26:28</td>
+                            <td style="color: #ff3b30; font-weight: 600;">1d 11h 33min</td>
+                        </tr>
+
+                        <tr>
+                            <td>60HD103061PM126 <span style='color: #ff9500; font-size: 12px;'>(Auth Expired)</span></td>
+                            <td>FOX ESS</td>
+                            <td>NSW</td>
+                            <td>2026-03-11 16:31:02</td>
+                            <td style="color: #ff3b30; font-weight: 600;">1d 7h 28min</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+                <h4 class="section-subtitle" style="font-size: 15px; margin: 24px 0 12px 0;">2.3.3 Authorization Failed Devices（4）</h4>
+                <p style="font-size: 13px; color: #86868b; margin-bottom: 16px;">Note: Devices with expired authorization</p>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Device SN</th>
+                            <th>Brand</th>
+                            <th>Region</th>
+                            <th>NMI</th>
+                            <th>Auth Failed Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td>60KB802056RB009</td>
+                            <td>FOX ESS</td>
+                            <td>NSW</td>
+                            <td>43100752983</td>
+                            <td style="color: #ff3b30; font-weight: 600;">2025-11-24 21:50:12</td>
+                        </tr>
+
+                        <tr>
+                            <td>60KB10305BAA152</td>
+                            <td>FOX ESS</td>
+                            <td>NSW</td>
+                            <td>41034407170</td>
+                            <td style="color: #ff3b30; font-weight: 600;">2026-01-29 16:41:02</td>
+                        </tr>
+
+                        <tr>
+                            <td>2448-32780210PH</td>
+                            <td>Ipotisedge</td>
+                            <td>NSW</td>
+                            <td>43113504240</td>
+                            <td style="color: #ff3b30; font-weight: 600;">2026-02-19 17:47:24</td>
+                        </tr>
+
+                        <tr>
+                            <td>60HD103061PM126</td>
+                            <td>FOX ESS</td>
+                            <td>NSW</td>
+                            <td>41026592856</td>
+                            <td style="color: #ff3b30; font-weight: 600;">2026-03-11 16:31:02</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+                <h3 class="section-subtitle">2.4 Exception Records（0）</h3>
+                <p style="font-size: 13px; color: #86868b; margin-bottom: 16px;">✅ No exceptions today</p>
+
+            </div>
+
+            <!-- 3. Profit -->
+            <div class="section profit-section">
+                <h2 class="section-title">3. Profit</h2>
+
+                <h3 class="section-subtitle">3.1 Profit Statistics</h3>
+
+                <div class="profit-metrics-container">
+                    <div class="profit-metric-item">
+                        <div class="card-label">Total Participation Rate (Users with Feed-in > 0)</div>
+                        <div class="card-value">85.2%</div>
+                        <div class="card-subtitle">vs Yesterday ↓4.5%</div>
+                    </div>
+                    <div class="profit-metric-item">
+                        <div class="card-label">Total Income</div>
+                        <div class="card-value">$-18.18</div>
+                        <div class="card-subtitle">vs Yesterday ↓$38.94</div>
+                    </div>
+                    <div class="profit-metric-item">
+                        <div class="card-label">Avg Income Per User (Income/Participants)</div>
+                        <div class="card-value">$-0.20</div>
+                        <div class="card-subtitle">vs Yesterday ↓$0.42</div>
+                    </div>
+                    <div class="profit-metric-item">
+                        <div class="card-label">Feed-in Energy</div>
+                        <div class="card-value">1254.21 kWh</div>
+                        <div class="card-subtitle">vs Yesterday ↓14.54 kWh</div>
+                    </div>
+                    <div class="profit-metric-item">
+                        <div class="card-label">Avg Income Per kWh</div>
+                        <div class="card-value">$-0.0145</div>
+                        <div class="card-subtitle">vs Yesterday ↓$0.0309</div>
+                    </div>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Region</th>
+                            <th>Participation Rate</th>
+                            <th>Income ($)</th>
+                            <th>Avg Income/User</th>
+                            <th>Feed-in Energy(kWh)</th>
+                            <th>Avg Income/kWh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td>NSW</td>
+                            <td>90.0% <span style='color: #ff3b30; font-size: 12px;'>(-4.2%)</span></td>
+                            <td>$25.48 <span style='color: #007aff; font-size: 12px;'>(+$3.22)</span></td>
+                            <td>$0.40 <span style='color: #007aff; font-size: 12px;'>(+$0.06)</span></td>
+                            <td>1056.47 <span style='color: #ff3b30; font-size: 12px;'>(-103.37)</span></td>
+                            <td>$0.0241 <span style='color: #007aff; font-size: 12px;'>(+$0.0049)</span></td>
+                        </tr>
+
+                        <tr>
+                            <td>VIC</td>
+                            <td>76.3% <span style='color: #ff3b30; font-size: 12px;'>(-5.3%)</span></td>
+                            <td>$-43.66 <span style='color: #ff3b30; font-size: 12px;'>(-$42.16)</span></td>
+                            <td>$-1.51 <span style='color: #ff3b30; font-size: 12px;'>(-$1.46)</span></td>
+                            <td>197.74 <span style='color: #007aff; font-size: 12px;'>(+88.83)</span></td>
+                            <td>$-0.2208 <span style='color: #ff3b30; font-size: 12px;'>(-$0.2071)</span></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <!-- 结束 container-body -->
+    </div>
+    <!-- 结束 main-container -->
+
+    <script>
+        function exportToPDF() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

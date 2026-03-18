@@ -85,8 +85,22 @@ class I18n {
                     organization: "组织",
                     pushStrategy: "推送策略",
                     operationLog: "操作记录",
+                    reports: "报告",
                     messageCenter: "消息中心",
                     settings: "设置"
+                },
+                reports: {
+                    title: "报告中心",
+                    daily: "日报",
+                    monthly: "月报",
+                    yearly: "年报",
+                    selectDate: "选择日期",
+                    selectMonth: "选择月份",
+                    selectYear: "选择年份",
+                    query: "查询",
+                    export: "导出下载",
+                    noData: "暂无该时间段的报告数据",
+                    loading: "加载中..."
                 },
                 analysis: {
                     realtime: "实时分析",
@@ -2026,8 +2040,22 @@ class I18n {
                     organization: "Organization",
                     pushStrategy: "Push Strategy",
                     operationLog: "Operation Log",
+                    reports: "Reports",
                     messageCenter: "Message Center",
                     settings: "Settings"
+                },
+                reports: {
+                    title: "Report Center",
+                    daily: "Daily",
+                    monthly: "Monthly",
+                    yearly: "Yearly",
+                    selectDate: "Select Date",
+                    selectMonth: "Select Month",
+                    selectYear: "Select Year",
+                    query: "Query",
+                    export: "Export & Download",
+                    noData: "No report data available for this period",
+                    loading: "Loading..."
                 },
                 
                 // Running Data page translations

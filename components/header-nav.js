@@ -83,8 +83,9 @@ class HeaderNav {
     createHeaderHTML() {
         const navItems = [
             { href: 'dashboard.html', i18nKey: 'nav.home', key: 'home' },
-            { href: '002.html', i18nKey: 'nav.profit', key: 'profit' },
             { href: 'family-new.html', i18nKey: 'nav.family', key: 'family' },
+            { href: 'reports.html', i18nKey: 'nav.reports', key: 'reports' },
+            { href: '002.html', i18nKey: 'nav.profit', key: 'profit' },
             { href: '001.html', i18nKey: 'nav.analysis', key: 'analysis' },
             { href: 'organization-new.html', i18nKey: 'nav.organization', key: 'organization' },
             { href: 'push-strategy-page.html', i18nKey: 'nav.pushStrategy', key: 'pushStrategy' },

@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="reports.title">报告中心</title>
+    <link rel="stylesheet" href="components/common-styles.css">
+    <link rel="stylesheet" href="components/i18n.css">
+    <link rel="stylesheet" href="components/notification-center.css">
+    <link rel="stylesheet" href="components/header-nav.css">
+    <link rel="stylesheet" href="components/drawer-component.css">
+    <link rel="stylesheet" href="components/user-dropdown.css">
+    <script src="components/i18n.js"></script>
+    <script src="components/simple-message-icon.js"></script>
+    <script src="components/user-dropdown-simple-new.js"></script>
+    <script src="components/header-nav.js"></script>
+    <script src="components/drawer-component.js"></script>
+    <style>
+        html, body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            margin: 0; padding: 0;
+            overflow-x: hidden;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        /* ═══════════════════════════════
+           Page wrapper
+        ═══════════════════════════════ */
+        .page-wrapper { max-width: 100%; margin: 0; padding: 100px 16px 100px; }
+
+        /* ═══════════════════════════════
+           Query panel
+        ═══════════════════════════════ */
+        .query-panel {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 18px;
+            padding: 24px 20px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .query-panel-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            margin-right: auto;
+        }
+        .type-tabs { display: flex; gap: 6px; }
+        .type-tab {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5);
+            padding: 8px 20px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .type-tab:hover { color: #fff; border-color: rgba(255,255,255,0.25); }
+        .type-tab.active {
+            background: linear-gradient(135deg,#00ff88,#00cc6a);
+            border-color: transparent;
+            color: #000;
+            font-weight: 700;
+        }
+        .date-input {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 9px;
+            color: #fff;
+            font-size: 14px;
+            padding: 9px 14px;
+            outline: none;
+            color-scheme: dark;
+            transition: border-color 0.15s;
+        }
+        .date-input:focus { border-color: #00ff88; }
+        .query-btn {
+            background: linear-gradient(135deg,#00ff88,#00cc6a);
+            border: none;
+            border-radius: 9px;
+            color: #000;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 9px 28px;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        .query-btn:hover { opacity: 0.85; }
+        .query-btn:active { transform: scale(0.97); }
+
+        /* ═══════════════════════════════
+           States
+        ═══════════════════════════════ */
+        .state-box {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 0;
+            gap: 14px;
+            color: rgba(255,255,255,0.28);
+            font-size: 15px;
+        }
+        .state-box.visible { display: flex; }
+        .state-icon { font-size: 48px; }
+        .spinner {
+            width: 26px; height: 26px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #00ff88;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ═══════════════════════════════
+           Report output
+        ═══════════════════════════════ */
+        #reportOutput { display: none; }
+        #reportOutput.visible { display: block; }
+
+        /* ── Report banner ── */
+        .rpt-banner {
+            border-radius: 18px;
+            padding: 32px 24px 28px;
+            margin-bottom: 32px;
+            background: linear-gradient(135deg, rgba(0,255,136,0.08) 0%, rgba(0,204,106,0.04) 50%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(0,255,136,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        .rpt-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
+            background: linear-gradient(180deg,#00ff88,#00cc6a);
+            border-radius: 18px 0 0 18px;
+        }
+        .rpt-banner-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .rpt-title { font-size: 30px; font-weight: 800; color: #fff; margin-bottom: 6px; letter-spacing: -0.3px; }
+        .rpt-date  { font-size: 17px; color: rgba(255,255,255,0.55); }
+        .rpt-note  { font-size: 13px; color: rgba(255,255,255,0.28); margin-top: 4px; }
+        .export-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,255,136,0.1);
+            border: 1px solid rgba(0,255,136,0.25);
+            border-radius: 9px;
+            color: #00ff88;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 9px 20px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .export-btn:hover { background: rgba(0,255,136,0.18); border-color: rgba(0,255,136,0.4); }
+
+        /* ── Section ── */
+        .rpt-section {
+            margin-bottom: 36px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+        .rpt-section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 28px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .rpt-section-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .icon-users   { background: rgba(96,165,250,0.15); }
+        .icon-dispatch{ background: rgba(251,191,36,0.15); }
+        .icon-profit  { background: rgba(0,255,136,0.15); }
+        .rpt-section-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .rpt-section-body { padding: 24px 20px; }
+
+        /* ── Subsection ── */
+        .rpt-sub {
+            margin-bottom: 28px;
+        }
+        .rpt-sub:last-child { margin-bottom: 0; }
+        .rpt-sub-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.45);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .rpt-sub-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.06);
+        }
+
+        /* ── KPI cards ── */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+        .kpi-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 20px 22px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.15s;
+        }
+        .kpi-card:hover { border-color: rgba(255,255,255,0.14); }
+        .kpi-label {
+            font-size: 15px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 10px;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        .kpi-value.green  { color: #00ff88; }
+        .kpi-value.red    { color: #ff5f5f; }
+        .kpi-value.yellow { color: #ffc107; }
+        .kpi-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 5px;
+        }
+        .kpi-badge.up   { background: rgba(0,255,136,0.1);  color: #00ff88; }
+        .kpi-badge.down { background: rgba(255,95,95,0.1);  color: #ff5f5f; }
+        .kpi-badge.flat { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.35); }
+        .kpi-sub { font-size: 13px; color: rgba(255,255,255,0.3); margin-top: 6px; line-height: 1.4; }
+        .kpi-tip-wrap { position: relative; display: inline-flex; align-items: center; vertical-align: middle; margin-left: 4px; }
+        .kpi-tip-icon {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+            flex-shrink: 0;
+        }
+        .kpi-tip-icon:hover { background: rgba(255,255,255,0.15); color: #fff; }
+        .kpi-card { position: relative; z-index: 1; }
+        .kpi-card:hover { z-index: 10; }
+        .kpi-tip-box {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            background: rgba(20,20,20,0.95);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.6;
+            white-space: nowrap;
+            z-index: 100;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            pointer-events: none;
+        }
+        .kpi-tip-box::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 20px;
+            border: 6px solid transparent;
+            border-bottom-color: rgba(20,20,20,0.95);
+        }
+        .kpi-tip-icon:hover + .kpi-tip-box { display: block; }
+
+        /* ── User flow layout ── */
+        .user-flow {
+            display: flex;
+            align-items: stretch;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 16px;
+        }
+        .uf-panel {
+            flex: 1;
+            padding: 28px 24px;
+            text-align: center;
+            background: rgba(255,255,255,0.03);
+        }
+        .uf-panel-label {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+            font-weight: 500;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+        .uf-panel-value {
+            font-size: 52px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+        .uf-panel-sub {
+            font-size: 14px;
+            color: rgba(255,255,255,0.35);
+            margin-top: 10px;
+        }
+        .uf-panel.end {
+            position: relative;
+        }
+        .uf-panel.end::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00ff88, #00cc6a);
+        }
+        .uf-panel.end .uf-panel-label { color: #00ff88; font-weight: 600; }
+        .uf-panel.end .uf-panel-value { color: #00ff88; }
+        .uf-panel.net {
+            border-left: 1px solid rgba(255,255,255,0.06);
+            border-right: 1px solid rgba(255,255,255,0.06);
+        }
+        .uf-panel.net .uf-panel-value { color: #00ff88; }
+        .auth-status-row {
+            display: flex;
+            gap: 14px;
+        }
+        .auth-status-item {
+            flex: 1;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .auth-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .auth-dot.green { background: #00ff88; }
+        .auth-dot.red   { background: #ff5f5f; }
+        .auth-label { font-size: 15px; color: rgba(255,255,255,0.45); font-weight: 500; }
+        .auth-value { font-size: 28px; font-weight: 700; margin-left: auto; }
+        .auth-value.green { color: #00ff88; }
+        .auth-value.red   { color: #ff5f5f; }
+
+        /* ── Chart container ── */
+        .rpt-chart-wrap {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .rpt-chart-legend {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 12px;
+        }
+        .rpt-chart-legend .bar-icon { display:inline-block;width:12px;height:12px;border-radius:2px;background:rgba(96,165,250,0.7);margin-right:4px;vertical-align:middle; }
+        .rpt-chart-legend .line-icon { display:inline-block;width:20px;height:2px;background:#ff9500;margin-right:4px;vertical-align:middle; }
+        .rpt-chart-axis {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+        .rpt-chart-axis .left { color: rgba(96,165,250,0.8); }
+        .rpt-chart-axis .right { color: #ff9500; }
+
+        /* ── Stacked bar chart ── */
+        .stacked-chart-wrap {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 20px;
+        }
+        .stacked-legend {
+            display: flex;
+            gap: 18px;
+            font-size: 13px;
+            margin-bottom: 14px;
+        }
+        .stacked-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            user-select: none;
+            transition: opacity 0.2s;
+        }
+        .stacked-legend-item.off { opacity: 0.3; text-decoration: line-through; }
+        .stacked-legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        /* ── Pie pair ── */
+        .pie-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 640px) { .pie-pair { grid-template-columns: 1fr; } }
+        .pie-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 24px;
+        }
+        .pie-card-title {
+            font-size: 14px; font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 20px;
+        }
+        .pie-canvas-wrap {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+        .pie-legend-list { flex: 1; }
+        .pie-legend-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .pie-legend-row:last-child { margin-bottom: 0; }
+        .pie-legend-color { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+        .pie-legend-name { font-size: 14px; color: rgba(255,255,255,0.6); font-weight: 500; }
+        .pie-legend-val { font-size: 14px; color: #fff; font-weight: 700; margin-left: auto; }
+        .pie-legend-pct { font-size: 12px; color: rgba(255,255,255,0.35); margin-left: 6px; min-width: 42px; text-align: right; }
+
+        /* ── Distribution bars ── */
+        .dist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 640px) { .dist-grid { grid-template-columns: 1fr; } }
+        .dist-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 20px 22px;
+        }
+        .dist-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 18px;
+        }
+        .dist-item { margin-bottom: 12px; }
+        .dist-item:last-child { margin-bottom: 0; }
+        .dist-item-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .dist-item-name { font-size: 15px; color: rgba(255,255,255,0.7); font-weight: 500; }
+        .dist-item-right { display: flex; align-items: center; gap: 8px; }
+        .dist-item-val  { font-size: 15px; color: rgba(255,255,255,0.55); }
+        .dist-item-delta{ font-size: 13px; color: #00ff88; font-weight: 600; }
+        .dist-track {
+            height: 5px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .dist-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg,#00ff88,#00cc6a);
+            transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        /* ── Tables ── */
+        .tbl-wrap {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+        .rpt-tbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+        .rpt-tbl thead th {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.45);
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 12px 16px;
+            text-align: left;
+            white-space: nowrap;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .rpt-tbl tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.1s; }
+        .rpt-tbl tbody tr:last-child { border-bottom: none; }
+        .rpt-tbl tbody tr:hover { background: rgba(255,255,255,0.03); }
+        .rpt-tbl td[rowspan] { border-right: 1px solid rgba(255,255,255,0.06); font-weight: 600; }
+        .rpt-tbl td {
+            padding: 14px 16px;
+            font-size: 15px;
+            color: rgba(255,255,255,0.72);
+            vertical-align: middle;
+            line-height: 1.4;
+        }
+        .rpt-tbl td:first-child {
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+        }
+        .rpt-tbl.sm td { padding: 10px 16px; font-size: 14px; }
+        .rpt-tbl { font-size: 15px; }
+        .rpt-tbl.sm thead th { padding: 11px 16px; }
+        .sum-row td {
+            font-weight: 700 !important;
+            color: #fff !important;
+            background: rgba(0,255,136,0.06) !important;
+            border-top: 1px solid rgba(0,255,136,0.15) !important;
+            font-family: inherit !important;
+            font-size: 12.5px !important;
+        }
+        .empty-td {
+            text-align: center;
+            padding: 28px 0 !important;
+            color: rgba(255,255,255,0.2) !important;
+            font-style: italic;
+            font-family: inherit !important;
+            font-size: 13px !important;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .tag-red   { background: rgba(255,95,95,0.14);  color: #ff5f5f; }
+        .tag-green { background: rgba(0,255,136,0.12);  color: #00ff88; }
+        .tag-gray  { background: rgba(255,255,255,0.07);color: rgba(255,255,255,0.4); }
+        .c-green   { color: #00ff88 !important; }
+        .c-red     { color: #ff5f5f !important; }
+    </style>
+</head>
+<body>
+<div id="headerContainer"></div>
+
+<div class="page-wrapper">
+
+    <!-- ══ Query panel ══ -->
+    <div class="query-panel">
+        <div class="query-panel-title" data-i18n="reports.title">报告中心</div>
+        <div class="type-tabs">
+            <button class="type-tab active" data-type="daily"   onclick="selectType('daily')"   data-i18n="reports.daily">日报</button>
+            <button class="type-tab"         data-type="monthly" onclick="selectType('monthly')" data-i18n="reports.monthly">月报</button>
+            <button class="type-tab"         data-type="yearly"  onclick="selectType('yearly')"  data-i18n="reports.yearly">年报</button>
+        </div>
+        <input type="date"  class="date-input" id="dailyPicker">
+        <input type="month" class="date-input" id="monthlyPicker" style="display:none">
+        <select class="date-input" id="yearlyPicker" style="display:none">
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+        </select>
+        <script>
+        (function(){
+            const now = new Date();
+            const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
+            document.getElementById('dailyPicker').value = `${y}-${m}-${d}`;
+            document.getElementById('monthlyPicker').value = `${y}-${m}`;
+            const sel = document.getElementById('yearlyPicker');
+            for(let i=0;i<sel.options.length;i++){ if(sel.options[i].value==String(y)){ sel.selectedIndex=i; break; } }
+        })();
+        </script>
+        <button class="query-btn" onclick="queryReport()" data-i18n="reports.query">查询</button>
+    </div>
+
+    <!-- ══ States ══ -->
+    <div class="state-box" id="loadingBox"><div class="spinner"></div><span data-i18n="reports.loading">加载中...</span></div>
+    <div class="state-box" id="noDataBox"><div class="state-icon">📭</div><span data-i18n="reports.noData">暂无该时间段的报告数据</span></div>
+
+    <!-- ══ Report output ══ -->
+    <div id="reportOutput"></div>
+
+</div>
+
+<script>
+// ── Header ──
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof HeaderNav !== 'undefined') new HeaderNav({ currentPage: 'reports' });
+});
+
+// ── i18n helpers ──
+function getLang() { return (window.i18n && window.i18n.getCurrentLanguage()) || 'zh'; }
+function t(v) { return typeof v === 'object' ? (v[getLang()] || v.zh || v.en || '') : (v || ''); }
+
+// ── Export files ──
+const EXPORT_FILES = {
+    daily:   { '2026-03-12': 'report_2026-03-12_en.html' },
+    monthly: { '2026-01':    'report_2026-01.html' },
+    yearly:  { '2025': '' }
+};
+
+// ══════════════════════════════════════════════════════════
+// Report data  –  all text = { zh, en }
+// ══════════════════════════════════════════════════════════
+const REPORTS = {
+    daily: {
+        '2026-03-12': {
+            title:   { zh:'运维数据日报',       en:'Operations Daily Report' },
+            date:    { zh:'2026年03月12日',      en:'March 12, 2026' },
+            note:    { zh:'数据截至 2026-03-12 23:59:59', en:'Data up to 2026-03-12 23:59:59' },
+            sections: [
+                {
+                    icon: '👤',
+                    iconClass: 'icon-users',
+                    title: { zh:'用户', en:'Users' },
+                    groups: [
+                        {
+                            label: { zh:'用户统计', en:'User Statistics' },
+                            type: 'kpi',
+                            items: [
+                                { label:{zh:'总用户数',en:'Total Users'},  value:'108', delta:{zh:'较昨日 ↑1',en:'vs Yesterday ↑1'}, dir:'up' },
+                                { label:{zh:'授权成功',en:'Auth Success'}, value:'104', cls:'green', delta:{zh:'较昨日 ↑1',en:'vs Yesterday ↑1'}, dir:'up' },
+                                { label:{zh:'授权过期',en:'Auth Expired'}, value:'4',   cls:'red',   delta:{zh:'较昨日 →0',en:'vs Yesterday →0'}, dir:'flat' }
+                            ]
+                        },
+                        {
+                            label: { zh:'分布', en:'Distribution' },
+                            type: 'dist',
+                            charts: [
+                                {
+                                    title: {zh:'地区分布',en:'By Region'}, total: 108,
+                                    rows: [
+                                        {name:'NSW',val:70,delta:'+1'},{name:'VIC',val:38},
+                                        {name:'QLD',val:0},{name:'SA',val:0},{name:'TAS',val:0}
+                                    ]
+                                },
+                                {
+                                    title: {zh:'品牌分布',en:'By Brand'}, total: 108,
+                                    rows: [
+                                        {name:'FOX ESS',   val:64, pct:'59.3%', delta:'+1'},
+                                        {name:'Alpha',     val:26, pct:'24.1%'},
+                                        {name:'Growatt',   val:9,  pct:'8.3%'},
+                                        {name:'Ipotisedge',val:8,  pct:'7.4%'},
+                                        {name:'Whes',      val:1,  pct:'0.9%'}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    icon: '⚡',
+                    iconClass: 'icon-dispatch',
+                    title: { zh:'调度', en:'Dispatch' },
+                    groups: [
+                        {
+                            label: { zh:'调度统计', en:'Dispatch Statistics' },
+                            type: 'kpi',
+                            items: [
+                                { label:{zh:'调度次数',en:'Dispatch Count'}, value:'0',    delta:{zh:'较昨日 →0',en:'vs Yesterday →0'}, dir:'flat' },
+                                { label:{zh:'设备数量',en:'Device Count'},   value:'0',    delta:{zh:'较昨日 →0',en:'vs Yesterday →0'}, dir:'flat' },
+                                { label:{zh:'成功率',  en:'Success Rate'},   value:'0.0%', delta:{zh:'较昨日 →0%',en:'vs Yesterday →0%'}, dir:'flat' }
+                            ]
+                        },
+                        {
+                            label: { zh:'调度记录', en:'Dispatch Records' },
+                            type: 'table',
+                            headers: [{zh:'事件',en:'Event'},{zh:'设备数',en:'Devices'},{zh:'成功',en:'Success'},{zh:'成功率',en:'Rate'}],
+                            rows: [],
+                            empty: { zh:'今日无调度记录', en:'No dispatch records today' }
+                        },
+                        {
+                            label: { zh:'离线设备（9台）', en:'Offline Devices (9)' },
+                            type: 'table',
+                            headers: [
+                                {zh:'设备SN',en:'Device SN'},{zh:'品牌',en:'Brand'},{zh:'地区',en:'Region'},
+                                {zh:'离线时间',en:'Offline Since'},{zh:'离线时长',en:'Duration'},{zh:'授权',en:'Auth'}
+                            ],
+                            rows: [
+                                ['60KB802056RB009','FOX ESS',   'NSW','2025-11-24 21:50','108d 2h 9min', '__exp'],
+                                ['AL7011023080066','Alpha',     'VIC','2025-12-17 13:42','85d 10h 17min',''],
+                                ['2448-36640066PH','Ipotisedge','VIC','2025-12-18 12:27','84d 11h 32min',''],
+                                ['60KB10305BAA152','FOX ESS',   'NSW','2026-01-29 16:41','42d 7h 18min', '__exp'],
+                                ['60KB10305APA061','FOX ESS',   'VIC','2026-02-09 13:08','31d 10h 51min',''],
+                                ['2448-32780210PH','Ipotisedge','NSW','2026-02-19 17:47','21d 6h 12min', '__exp'],
+                                ['60HD15305AXM130','FOX ESS',   'NSW','2026-03-10 18:56','2d 5h 3min',   ''],
+                                ['AL7011025083127','Alpha',     'NSW','2026-03-11 12:26','1d 11h 33min', ''],
+                                ['60HD103061PM126','FOX ESS',   'NSW','2026-03-11 16:31','1d 7h 28min',  '__exp']
+                            ]
+                        },
+                        {
+                            label: { zh:'授权失败设备（4台）', en:'Auth Failed Devices (4)' },
+                            type: 'table',
+                            headers: [
+                                {zh:'设备SN',en:'Device SN'},{zh:'品牌',en:'Brand'},{zh:'地区',en:'Region'},
+                                'NMI',{zh:'失败时间',en:'Failed Time'}
+                            ],
+                            rows: [
+                                ['60KB802056RB009','FOX ESS',   'NSW','43100752983','2025-11-24 21:50'],
+                                ['60KB10305BAA152','FOX ESS',   'NSW','41034407170','2026-01-29 16:41'],
+                                ['2448-32780210PH','Ipotisedge','NSW','43113504240','2026-02-19 17:47'],
+                                ['60HD103061PM126','FOX ESS',   'NSW','41026592856','2026-03-11 16:31']
+                            ]
+                        },
+                        {
+                            label: { zh:'异常记录', en:'Exception Records' },
+                            type: 'table',
+                            headers: [{zh:'类型',en:'Type'},{zh:'设备',en:'Device'},{zh:'时间',en:'Time'},{zh:'详情',en:'Detail'}],
+                            rows: [],
+                            empty: { zh:'今日无异常记录', en:'No exceptions today' }
+                        }
+                    ]
+                },
+                {
+                    icon: '💰',
+                    iconClass: 'icon-profit',
+                    title: { zh:'获利', en:'Profit' },
+                    groups: [
+                        {
+                            label: { zh:'获利统计', en:'Profit Statistics' },
+                            type: 'kpi',
+                            items: [
+                                { label:{zh:'总参与率',       en:'Participation'},       value:'85.2%',   delta:{zh:'较昨日 ↓4.5%',en:'vs Yesterday ↓4.5%'}, dir:'down' },
+                                { label:{zh:'总收益',         en:'Total Income'},        value:'$-18.18', delta:{zh:'较昨日 ↓$38.94',en:'vs Yesterday ↓$38.94'}, dir:'down' },
+                                { label:{zh:'平均收益/用户',  en:'Avg / User'},          value:'$-0.20',  delta:{zh:'较昨日 ↓$0.42',en:'vs Yesterday ↓$0.42'}, dir:'down' },
+                                { label:{zh:'馈网电量',       en:'Feed-in (kWh)'},       value:'1254.21', delta:{zh:'较昨日 ↓14.54 kWh',en:'vs Yesterday ↓14.54 kWh'}, dir:'down' },
+                                { label:{zh:'平均收益/kWh',  en:'Avg / kWh'},           value:'$-0.0145',delta:{zh:'较昨日 ↓$0.0309',en:'vs Yesterday ↓$0.0309'}, dir:'down' }
+                            ]
+                        },
+                        {
+                            label: { zh:'各地区明细', en:'Regional Details' },
+                            type: 'table',
+                            headers: [
+                                {zh:'地区',en:'Region'},{zh:'参与率',en:'Participation'},{zh:'收益',en:'Income'},
+                                {zh:'均值/用户',en:'Avg/User'},{zh:'馈网kWh',en:'Feed-in kWh'},{zh:'均值/kWh',en:'Avg/kWh'}
+                            ],
+                            rows: [
+                                ['NSW','90.0% (-4.2%)','$25.48 (+$3.22)',  '$0.40 (+$0.06)','1056.47 (-103.37)','$0.0241'],
+                                ['VIC','76.3% (-5.3%)','$-43.66 (-$42.16)','$-1.51 (-$1.46)','197.74 (+88.83)',  '$-0.2208']
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    monthly: {
+        '2026-01': {
+            title:   { zh:'运维数据月报',       en:'Monthly Operations Report' },
+            date:    { zh:'2026年01月',          en:'January 2026' },
+            note:    { zh:'统计区间：2026-01-01 至 2026-01-31', en:'Period: 2026-01-01 to 2026-01-31' },
+            sections: [
+                {
+                    icon: '👤',
+                    iconClass: 'icon-users',
+                    title: { zh:'用户', en:'Users' },
+                    groups: [
+                        {
+                            label: { zh:'用户统计', en:'User Statistics' },
+                            type: 'userflow',
+                            startLabel: { zh:'月初', en:'Start' },
+                            startValue: '54',
+                            startSub:   { zh:'台设备', en:'devices' },
+                            endLabel:   { zh:'月末', en:'End' },
+                            endValue:   '71',
+                            endSub:     { zh:'台设备', en:'devices' },
+                            changeLabel:{ zh:'本月变化', en:'Monthly Change' },
+                            added:      { label:{zh:'↑ 新增用户',en:'↑ New Users'}, value:'+18' },
+                            removed:    { label:{zh:'↓ 退出用户',en:'↓ Departed'},  value:'-1' },
+                            net:        { label:{zh:'净变化',en:'Net Change'}, value:'+17' },
+                            authSuccess:{ label:{zh:'授权成功',en:'Auth Success'},   value:'68' },
+                            authExpired:{ label:{zh:'授权失效',en:'Auth Expired'},   value:'3' }
+                        },
+                        {
+                            label: { zh:'分布', en:'Distribution' },
+                            type: 'dist',
+                            charts: [
+                                {
+                                    title: {zh:'地区分布',en:'By Region'}, total: 71,
+                                    rows: [
+                                        {name:'NSW',val:46,delta:'+12'},
+                                        {name:'VIC',val:25,delta:'+6/-1'}
+                                    ]
+                                },
+                                {
+                                    title: {zh:'品牌分布',en:'By Brand'}, total: 71,
+                                    rows: [
+                                        {name:'foxess',     val:34,pct:'47.9%',delta:'+13'},
+                                        {name:'alpha',      val:25,pct:'35.2%',delta:'+3/-1'},
+                                        {name:'ipotisedge', val:9, pct:'12.7%'},
+                                        {name:'growatt',    val:3, pct:'4.2%', delta:'+2'}
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            label: { zh:'本月离线设备', en:'Offline Devices This Month' },
+                            type: 'kpi',
+                            items: [
+                                { label:{zh:'离线设备数',en:'Offline Devices'}, value:'6', cls:'red', delta:{zh:'较上月 ↑2',en:'vs Last Month ↑2'}, dir:'down' },
+                                { label:{zh:'离线次数',  en:'Offline Events'},  value:'14', delta:{zh:'较上月 ↑5',en:'vs Last Month ↑5'}, dir:'down' },
+                                { label:{zh:'平均离线时长',en:'Avg Offline Duration'}, value:{zh:'19h 26min',en:'19h 26min'}, delta:{zh:'较上月 ↑3h 12min',en:'vs Last Month ↑3h 12min'}, dir:'down' },
+                                { label:{zh:'在线率',en:'Online Rate'}, value:'96.8%', cls:'green', delta:{zh:'较上月 ↓1.4%',en:'vs Last Month ↓1.4%'}, dir:'down', tooltip:true }
+                            ]
+                        },
+                        {
+                            label: { zh:'离线设备明细', en:'Offline Device Details' },
+                            type: 'table',
+                            mergeCols: [0,1,2,3,6],
+                            headers: [
+                                {zh:'设备SN',en:'Device SN'},
+                                {zh:'厂商',en:'Brand'},
+                                {zh:'电表',en:'Meter'},
+                                {zh:'离线次数',en:'Count'},
+                                {zh:'离线时间',en:'Offline Period'},
+                                {zh:'离线时长',en:'Duration'},
+                                {zh:'合计离线时长',en:'Total Duration'}
+                            ],
+                            rows: [
+                                ['60KB802056RB009','FOX ESS','NMI-4930182','3','01-03 22:10 — 01-04 16:25',{zh:'18h 15min',en:'18h 15min'},{zh:'54h 40min',en:'54h 40min'}],
+                                ['60KB802056RB009','FOX ESS','NMI-4930182','3','01-14 08:30 — 01-15 05:20',{zh:'20h 50min',en:'20h 50min'},{zh:'54h 40min',en:'54h 40min'}],
+                                ['60KB802056RB009','FOX ESS','NMI-4930182','3','01-27 11:00 — 01-28 02:35',{zh:'15h 35min',en:'15h 35min'},{zh:'54h 40min',en:'54h 40min'}],
+                                ['AL7011023080066','Alpha','NMI-6120087','3','01-06 14:50 — 01-07 22:30',{zh:'31h 40min',en:'31h 40min'},{zh:'52h 15min',en:'52h 15min'}],
+                                ['AL7011023080066','Alpha','NMI-6120087','3','01-19 03:20 — 01-19 18:45',{zh:'15h 25min',en:'15h 25min'},{zh:'52h 15min',en:'52h 15min'}],
+                                ['AL7011023080066','Alpha','NMI-6120087','3','01-30 20:00 — 01-31 01:10',{zh:'5h 10min',en:'5h 10min'},{zh:'52h 15min',en:'52h 15min'}],
+                                ['2448-36640066PH','Ipotisedge','NMI-7810045','2','01-09 16:40 — 01-10 14:55',{zh:'22h 15min',en:'22h 15min'},{zh:'38h 50min',en:'38h 50min'}],
+                                ['2448-36640066PH','Ipotisedge','NMI-7810045','2','01-22 21:15 — 01-23 13:50',{zh:'16h 35min',en:'16h 35min'},{zh:'38h 50min',en:'38h 50min'}],
+                                ['60KB10305BAA152','FOX ESS','NMI-4930291','2','01-11 07:20 — 01-12 01:45',{zh:'18h 25min',en:'18h 25min'},{zh:'36h 10min',en:'36h 10min'}],
+                                ['60KB10305BAA152','FOX ESS','NMI-4930291','2','01-25 15:30 — 01-26 09:15',{zh:'17h 45min',en:'17h 45min'},{zh:'36h 10min',en:'36h 10min'}],
+                                ['60HD15305AXM130','FOX ESS','NMI-4930518','2','01-08 02:10 — 01-08 13:40',{zh:'11h 30min',en:'11h 30min'},{zh:'25h 20min',en:'25h 20min'}],
+                                ['60HD15305AXM130','FOX ESS','NMI-4930518','2','01-21 18:50 — 01-22 08:40',{zh:'13h 50min',en:'13h 50min'},{zh:'25h 20min',en:'25h 20min'}],
+                                ['60KB10305APA061','FOX ESS','NMI-5240163','2','01-16 10:00 — 01-16 22:30',{zh:'12h 30min',en:'12h 30min'},{zh:'22h 55min',en:'22h 55min'}],
+                                ['60KB10305APA061','FOX ESS','NMI-5240163','2','01-28 06:15 — 01-28 16:40',{zh:'10h 25min',en:'10h 25min'},{zh:'22h 55min',en:'22h 55min'}]
+                            ]
+                        }
+                    ]
+                },
+                {
+                    icon: '⚡',
+                    iconClass: 'icon-dispatch',
+                    title: { zh:'调度统计', en:'Dispatch' },
+                    groups: [
+                        {
+                            label: { zh:'整体统计', en:'Overall' },
+                            type: 'kpi',
+                            items: [
+                                { label:{zh:'调度天数',en:'Dispatch Days'},  value:'11',    delta:{zh:'较上月 ↓4',  en:'vs Last Month ↓4'}, dir:'down' },
+                                { label:{zh:'调度次数',en:'Dispatch Count'}, value:'49',    delta:{zh:'较上月 ↓125',en:'vs Last Month ↓125'}, dir:'down' },
+                                { label:{zh:'成功率',  en:'Success Rate'},   value:'98.1%', cls:'green', delta:{zh:'较上月 ↑9.2%',en:'vs Last Month ↑9.2%'}, dir:'up' }
+                            ]
+                        },
+                        {
+                            label: { zh:'各地区调度', en:'By Region' },
+                            type: 'table',
+                            headers: [{zh:'地区',en:'Region'},{zh:'调度天数',en:'Days'},{zh:'任务数',en:'Tasks'},{zh:'成功/总计',en:'Success/Total'},{zh:'成功率',en:'Rate'}],
+                            rows: [
+                                ['NSW','7','27','925 / 949','97.5%'],
+                                ['VIC','6','22','392 / 394','99.5%']
+                            ]
+                        },
+                        {
+                            label: { zh:'失败率 >50% 设备', en:'Devices >50% Failure' },
+                            type: 'table',
+                            headers: [
+                                {zh:'设备SN',en:'Device SN'},{zh:'品牌',en:'Brand'},{zh:'地区',en:'Region'},
+                                {zh:'任务数',en:'Tasks'},{zh:'失败数',en:'Failures'},{zh:'失败率',en:'Failure Rate'}
+                            ],
+                            rows: [['60HG502057TF151','foxess','NSW','8','8','__red:100.0%']]
+                        }
+                    ]
+                },
+                {
+                    icon: '💰',
+                    iconClass: 'icon-profit',
+                    title: { zh:'获利统计', en:'Revenue' },
+                    groups: [
+                        {
+                            label: { zh:'整体获利', en:'Overall Revenue' },
+                            type: 'kpi',
+                            items: [
+                                { label:{zh:'总收益',en:'Total Revenue'}, value:'$1697.47', delta:{zh:'较上月 ↑$490.04',en:'vs Last Month ↑$490.04'}, dir:'up' },
+                                { label:{zh:'总馈网电量',en:'Total Feed-In'}, value:'31130.67 kWh', delta:{zh:'较上月 ↑8293.39 kWh',en:'vs Last Month ↑8293.39 kWh'}, dir:'up' },
+                                { label:{zh:'每度电收益',en:'Revenue per kWh'}, value:'$0.05', delta:{zh:'较上月 ↑$0.00',en:'vs Last Month ↑$0.00'}, dir:'up' }
+                            ]
+                        },
+                        {
+                            label: { zh:'各地区获利', en:'Revenue by Region' },
+                            type: 'table',
+                            headers: [
+                                {zh:'地区',en:'Region'},{zh:'总收益（占比）',en:'Revenue (Share)'},{zh:'馈网电量（占比）',en:'Feed-in (Share)'},{zh:'每度电收益',en:'$/kWh'}
+                            ],
+                            rows: [
+                                ['NSW','$1319.60 (77.7%)','17495.04 kWh (56.2%)','$0.075'],
+                                ['VIC','$377.87 (22.3%)','13635.63 kWh (43.8%)','$0.028']
+                            ]
+                        },
+                        {
+                            label: { zh:'每日收益详情', en:'Daily Revenue Details' },
+                            type: 'chart',
+                            legendBar: {zh:'获利（$）',en:'Revenue ($)'},
+                            legendLine: {zh:'每度电获利（$/kWh）',en:'Revenue per kWh ($/kWh)'},
+                            axisLeft: {zh:'← 获利（$）',en:'← Revenue ($)'},
+                            axisRight: {zh:'每度电获利 →',en:'$/kWh →'},
+                            labels: ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31'],
+                            bars: [-34.0,-0.98,8.2,17.21,6.05,99.81,133.63,74.74,47.64,693.44,-22.52,2.16,30.0,20.48,19.29,-2.01,-8.11,-3.87,10.28,28.83,2.08,0.31,15.45,12.77,55.66,38.78,210.36,43.57,42.87,113.3,42.04],
+                            line: [-0.049,-0.001,0.009,0.019,0.005,0.063,0.135,0.095,0.073,0.762,-0.042,0.003,0.041,0.024,0.031,-0.002,-0.009,-0.005,0.012,0.024,0.001,0.000,0.012,0.008,0.046,0.052,0.163,0.033,0.040,0.083,0.054]
+                        },
+                        {
+                            label: { zh:'每日明细', en:'Daily Details' },
+                            type: 'table',
+                            small: true,
+                            headers: [
+                                {zh:'日期',en:'Date'},{zh:'调度',en:'Dispatch'},{zh:'次数',en:'Count'},
+                                {zh:'馈网 kWh',en:'Feed-in kWh'},{zh:'获利 $',en:'Revenue $'},{zh:'$/kWh',en:'$/kWh'}
+                            ],
+                            summary: [{zh:'合计',en:'Total'},'—','49','31130.67','$1697.47','$0.055'],
+                            rows: [
+                                ['01-01','__no','—','686.93','$-34.00','$-0.049'],['01-02','__no','—','877.20','$-0.98','$-0.001'],
+                                ['01-03','__no','—','895.59','$8.20','$0.009'],['01-04','__yes','4','897.54','$17.21','$0.019'],
+                                ['01-05','__no','—','1102.49','$6.05','$0.005'],['01-06','__yes','8','1583.70','$99.81','$0.063'],
+                                ['01-07','__yes','5','992.09','$133.63','$0.135'],['01-08','__yes','11','789.51','$74.74','$0.095'],
+                                ['01-09','__yes','6','652.37','$47.64','$0.073'],['01-10','__yes','1','910.31','$693.44','$0.762'],
+                                ['01-11','__no','—','531.49','$-22.52','$-0.042'],['01-12','__no','—','681.14','$2.16','$0.003'],
+                                ['01-13','__no','—','723.56','$30.00','$0.041'],['01-14','__no','—','843.91','$20.48','$0.024'],
+                                ['01-15','__no','—','630.91','$19.29','$0.031'],['01-16','__no','—','1072.07','$-2.01','$-0.002'],
+                                ['01-17','__no','—','888.73','$-8.11','$-0.009'],['01-18','__no','—','860.76','$-3.87','$-0.005'],
+                                ['01-19','__no','—','862.91','$10.28','$0.012'],['01-20','__no','—','1185.93','$28.83','$0.024'],
+                                ['01-21','__no','—','1410.85','$2.08','$0.001'],['01-22','__no','—','1347.60','$0.31','$0.000'],
+                                ['01-23','__no','—','1334.34','$15.45','$0.012'],['01-24','__no','—','1582.81','$12.77','$0.008'],
+                                ['01-25','__yes','5','1217.36','$55.66','$0.046'],['01-26','__yes','3','750.16','$38.78','$0.052'],
+                                ['01-27','__yes','1','1289.10','$210.36','$0.163'],['01-28','__yes','1','1309.13','$43.57','$0.033'],
+                                ['01-29','__no','—','1076.70','$42.87','$0.040'],['01-30','__yes','4','1363.59','$113.30','$0.083'],
+                                ['01-31','__no','—','779.86','$42.04','$0.054']
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    yearly: {
+        '2025': {
+            title:   { zh:'运维数据年报',       en:'Annual Operations Report' },
+            date:    { zh:'2025年度',            en:'Year 2025' },
+            note:    { zh:'统计区间：2025-01-01 至 2025-12-31', en:'Period: 2025-01-01 to 2025-12-31' },
+            sections: [
+                {
+                    icon: '👤',
+                    iconClass: 'icon-users',
+                    title: { zh:'用户', en:'Users' },
+                    groups: [
+                        {
+                            label: { zh:'用户统计', en:'User Statistics' },
+                            type: 'userflow',
+                            startLabel: { zh:'年初', en:'Start of Year' },
+                            startValue: '12',
+                            startSub:   { zh:'台设备', en:'devices' },
+                            endLabel:   { zh:'年末', en:'End of Year' },
+                            endValue:   '54',
+                            endSub:     { zh:'台设备', en:'devices' },
+                            changeLabel:{ zh:'年度变化', en:'Annual Change' },
+                            added:      { label:{zh:'↑ 新增用户',en:'↑ New Users'}, value:'+46' },
+                            removed:    { label:{zh:'↓ 退出用户',en:'↓ Departed'},  value:'-4' },
+                            net:        { label:{zh:'净变化',en:'Net Change'}, value:'+42' },
+                            authSuccess:{ label:{zh:'授权成功',en:'Auth Success'},   value:'51' },
+                            authExpired:{ label:{zh:'授权失效',en:'Auth Expired'},   value:'3' }
+                        },
+                        {
+                            label: { zh:'年度用户趋势', en:'Annual User Trend' },
+                            type: 'stackedbar',
+                            legend1: {zh:'授权成功',en:'Auth Success'},
+                            legend2: {zh:'授权失效',en:'Auth Expired'},
+                            labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                            data1: [13,15,18,22,26,30,34,38,40,43,47,51],
+                            data2: [0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3]
+                        },
+                        {
+                            label: { zh:'分布', en:'Distribution' },
+                            type: 'dist',
+                            charts: [
+                                {
+                                    title: {zh:'地区分布',en:'By Region'}, total: 54,
+                                    rows: [
+                                        {name:'NSW',val:34,delta:'+28'},
+                                        {name:'VIC',val:20,delta:'+18/-4'}
+                                    ]
+                                },
+                                {
+                                    title: {zh:'品牌分布',en:'By Brand'}, total: 54,
+                                    rows: [
+                                        {name:'foxess',     val:21,pct:'38.9%',delta:'+19'},
+                                        {name:'alpha',      val:22,pct:'40.7%',delta:'+16/-4'},
+                                        {name:'ipotisedge', val:9, pct:'16.7%',delta:'+9'},
+                                        {name:'growatt',    val:2, pct:'3.7%', delta:'+2'}
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            label: { zh:'年度离线设备', en:'Offline Devices This Year' },
+                            type: 'kpi',
+                            items: [
+                                { label:{zh:'离线设备数',en:'Offline Devices'}, value:'18', cls:'red', delta:{zh:'较上年 ↑10',en:'vs Last Year ↑10'}, dir:'down' },
+                                { label:{zh:'离线次数',  en:'Offline Events'},  value:'87', delta:{zh:'较上年 ↑42',en:'vs Last Year ↑42'}, dir:'down' },
+                                { label:{zh:'平均离线时长',en:'Avg Offline Duration'}, value:{zh:'14h 35min',en:'14h 35min'}, delta:{zh:'较上年 ↓2h 10min',en:'vs Last Year ↓2h 10min'}, dir:'up' },
+                                { label:{zh:'在线率',en:'Online Rate'}, value:'94.2%', cls:'green', delta:{zh:'较上年 ↑1.8%',en:'vs Last Year ↑1.8%'}, dir:'up', tooltip:true }
+                            ]
+                        },
+                        {
+                            label: { zh:'月度离线趋势', en:'Monthly Offline Trend' },
+                            type: 'offlinechart',
+                            labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                            avgDur:    [8.2,12.5,6.0,15.3,9.8,11.2,18.6,14.1,10.5,16.8,13.2,9.4],
+                            onlineRate:[97.1,95.8,98.2,93.5,96.4,95.2,92.8,94.6,96.0,93.1,95.0,96.5]
+                        }
+                    ]
+                },
+                {
+                    icon: '⚡',
+                    iconClass: 'icon-dispatch',
+                    title: { zh:'调度统计', en:'Dispatch' },
+                    groups: [
+                        {
+                            label: { zh:'整体统计', en:'Overall' },
+                            type: 'kpi',
+                            items: [
+                                { label:{zh:'调度天数',en:'Dispatch Days'},  value:'156' },
+                                { label:{zh:'调度次数',en:'Dispatch Count'}, value:'2087' },
+                                { label:{zh:'成功率',  en:'Success Rate'},   value:'91.3%', cls:'green' }
+                            ]
+                        },
+                        {
+                            label: { zh:'各地区调度', en:'By Region' },
+                            type: 'table',
+                            headers: [{zh:'地区',en:'Region'},{zh:'调度天数',en:'Days'},{zh:'任务数',en:'Tasks'},{zh:'成功/总计',en:'Success/Total'},{zh:'成功率',en:'Rate'}],
+                            rows: [
+                                ['NSW','98','1198','18450 / 20215','91.3%'],
+                                ['VIC','82','889','12680 / 13910','91.2%']
+                            ]
+                        }
+                    ]
+                },
+                {
+                    icon: '💰',
+                    iconClass: 'icon-profit',
+                    title: { zh:'获利统计', en:'Revenue' },
+                    groups: [
+                        {
+                            label: { zh:'整体获利', en:'Overall Revenue' },
+                            type: 'kpi',
+                            items: [
+                                { label:{zh:'总收益',en:'Total Revenue'}, value:'$14,520.83', delta:{zh:'较上年 ↑$8,740.21',en:'vs Last Year ↑$8,740.21'}, dir:'up' },
+                                { label:{zh:'总馈网电量',en:'Total Feed-In'}, value:'286,450.32 kWh', delta:{zh:'较上年 ↑172,300 kWh',en:'vs Last Year ↑172,300 kWh'}, dir:'up' },
+                                { label:{zh:'每度电收益',en:'Revenue per kWh'}, value:'$0.051', delta:{zh:'较上年 ↑$0.003',en:'vs Last Year ↑$0.003'}, dir:'up' }
+                            ]
+                        },
+                        {
+                            label: { zh:'各地区获利', en:'Revenue by Region' },
+                            type: 'table',
+                            headers: [
+                                {zh:'地区',en:'Region'},{zh:'总收益（占比）',en:'Revenue (Share)'},{zh:'馈网电量（占比）',en:'Feed-in (Share)'},{zh:'每度电收益',en:'$/kWh'}
+                            ],
+                            rows: [
+                                ['NSW','$9,845.60 (67.8%)','165,230.18 kWh (57.7%)','$0.060'],
+                                ['VIC','$4,675.23 (32.2%)','121,220.14 kWh (42.3%)','$0.039']
+                            ]
+                        },
+                        {
+                            label: { zh:'月度收益趋势', en:'Monthly Revenue Trend' },
+                            type: 'chart',
+                            legendBar: {zh:'获利（$）',en:'Revenue ($)'},
+                            legendLine: {zh:'每度电获利（$/kWh）',en:'Revenue per kWh ($/kWh)'},
+                            axisLeft: {zh:'← 获利（$）',en:'← Revenue ($)'},
+                            axisRight: {zh:'每度电获利 →',en:'$/kWh →'},
+                            labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                            bars: [680.50,745.20,920.30,1050.40,1180.60,1350.80,1420.50,1380.20,1290.60,1210.40,1105.30,1207.43],
+                            line: [0.036,0.037,0.039,0.043,0.044,0.048,0.052,0.053,0.053,0.051,0.050,0.053]
+                        },
+                        {
+                            label: { zh:'月度明细', en:'Monthly Details' },
+                            type: 'table',
+                            small: true,
+                            headers: [
+                                {zh:'月份',en:'Month'},{zh:'调度天数',en:'Days'},{zh:'调度次数',en:'Tasks'},
+                                {zh:'馈网 kWh',en:'Feed-in kWh'},{zh:'获利 $',en:'Revenue $'},{zh:'$/kWh',en:'$/kWh'}
+                            ],
+                            summary: [{zh:'合计',en:'Total'},'156','2087','286450.32','$14520.83','$0.051'],
+                            rows: [
+                                [{zh:'01月',en:'Jan'},'10','120','18920.45','$680.50','$0.036'],
+                                [{zh:'02月',en:'Feb'},'11','135','20150.30','$745.20','$0.037'],
+                                [{zh:'03月',en:'Mar'},'13','168','23480.60','$920.30','$0.039'],
+                                [{zh:'04月',en:'Apr'},'13','174','24310.50','$1050.40','$0.043'],
+                                [{zh:'05月',en:'May'},'14','195','26540.70','$1180.60','$0.044'],
+                                [{zh:'06月',en:'Jun'},'15','210','28350.40','$1350.80','$0.048'],
+                                [{zh:'07月',en:'Jul'},'14','198','27120.80','$1420.50','$0.052'],
+                                [{zh:'08月',en:'Aug'},'13','185','25890.30','$1380.20','$0.053'],
+                                [{zh:'09月',en:'Sep'},'12','170','24560.20','$1290.60','$0.053'],
+                                [{zh:'10月',en:'Oct'},'12','162','23780.40','$1210.40','$0.051'],
+                                [{zh:'11月',en:'Nov'},'11','145','22210.60','$1105.30','$0.050'],
+                                [{zh:'12月',en:'Dec'},'18','225','22837.28','$1207.43','$0.053']
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+};
+
+// ══════════════════════════════════════════════════════════
+// State
+// ══════════════════════════════════════════════════════════
+let currentType = 'daily';
+let _renderedType = null, _renderedKey = null;
+
+function selectType(type) {
+    currentType = type;
+    document.querySelectorAll('.type-tab').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+    document.getElementById('dailyPicker').style.display   = type==='daily'   ? '' : 'none';
+    document.getElementById('monthlyPicker').style.display = type==='monthly' ? '' : 'none';
+    document.getElementById('yearlyPicker').style.display  = type==='yearly'  ? '' : 'none';
+    clearOutput();
+    // Auto-query: find available data for this type
+    const keys = Object.keys(REPORTS[type] || {}).sort().reverse();
+    if (keys.length > 0) {
+        if (type === 'daily')   document.getElementById('dailyPicker').value = keys[0];
+        if (type === 'monthly') document.getElementById('monthlyPicker').value = keys[0];
+        if (type === 'yearly')  { const sel = document.getElementById('yearlyPicker'); for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===keys[0]) sel.selectedIndex=i; }
+        queryReport();
+    }
+}
+
+function getKey() {
+    if (currentType==='daily')   return document.getElementById('dailyPicker').value;
+    if (currentType==='monthly') return document.getElementById('monthlyPicker').value;
+    return document.getElementById('yearlyPicker').value;
+}
+
+function clearOutput() {
+    setState(null);
+    const o = document.getElementById('reportOutput');
+    o.innerHTML = ''; o.classList.remove('visible');
+    _renderedType = null; _renderedKey = null;
+}
+
+function setState(id) {
+    ['loadingBox','noDataBox'].forEach(x => {
+        document.getElementById(x).classList.toggle('visible', x===id);
+    });
+}
+
+// ══════════════════════════════════════════════════════════
+// Query
+// ══════════════════════════════════════════════════════════
+function queryReport() {
+    const key = getKey(); if (!key) return;
+    clearOutput();
+    setState('loadingBox');
+    setTimeout(() => {
+        setState(null);
+        const data = (REPORTS[currentType]||{})[key];
+        if (!data) { setState('noDataBox'); return; }
+        _renderedType = currentType; _renderedKey = key;
+        const o = document.getElementById('reportOutput');
+        _pendingCharts = []; _pendingStacked = []; _pendingOffline = []; _pendingPies = [];
+        o.innerHTML = build(data);
+        o.classList.add('visible');
+        requestAnimationFrame(() => { renderCharts(); renderStacked(); renderOffline(); renderPies(); });
+    }, 320);
+}
+
+// ══════════════════════════════════════════════════════════
+// Build HTML
+// ══════════════════════════════════════════════════════════
+function build(data) {
+    const file = (EXPORT_FILES[_renderedType]||{})[_renderedKey];
+    const exportHtml = file
+        ? `<a class="export-btn" href="${file}" download="${file}">
+               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                   <polyline points="7 10 12 15 17 10"/>
+                   <line x1="12" y1="15" x2="12" y2="3"/>
+               </svg>
+               ${t({zh:'导出下载',en:'Export'})}
+           </a>`
+        : '';
+
+    let h = `<div class="rpt-banner">
+        <div class="rpt-banner-top">
+            <div>
+                <div class="rpt-title">${t(data.title)}</div>
+                <div class="rpt-date">${t(data.date)}</div>
+                <div class="rpt-note">${t(data.note)}</div>
+            </div>
+            ${exportHtml}
+        </div>
+    </div>`;
+
+    for (const sec of data.sections) {
+        h += `<div class="rpt-section">
+            <div class="rpt-section-header">
+                <div class="rpt-section-icon ${sec.iconClass}">${sec.icon}</div>
+                <div class="rpt-section-title">${t(sec.title)}</div>
+            </div>
+            <div class="rpt-section-body">`;
+
+        for (const g of sec.groups) {
+            h += `<div class="rpt-sub">
+                <div class="rpt-sub-title">${t(g.label)}</div>`;
+            if (g.type === 'kpi')      h += buildKpi(g.items);
+            if (g.type === 'dist')     h += buildDist(g.charts);
+            if (g.type === 'table')    h += buildTable(g);
+            if (g.type === 'userflow') h += buildUserFlow(g);
+            if (g.type === 'chart')      h += buildChart(g);
+            if (g.type === 'stackedbar')  h += buildStackedBar(g);
+            if (g.type === 'offlinechart') h += buildOfflineChart(g);
+            if (g.type === 'piepair')     h += buildPiePair(g);
+            h += `</div>`;
+        }
+        h += `</div></div>`;
+    }
+    return h;
+}
+
+function fmtKpiValue(v) {
+    const s = t(v);
+    // __split:24/48 → green "24" + gray " / " + white "48"
+    if (typeof s === 'string' && s.startsWith('__split:')) {
+        const parts = s.slice(8).split('/');
+        return `<span style="color:#00ff88">${parts[0].trim()}</span><span style="color:rgba(255,255,255,0.35)"> / </span><span>${parts[1].trim()}</span>`;
+    }
+    return s;
+}
+
+function buildKpi(items) {
+    const zh = getLang() === 'zh';
+    const tipHtml = zh
+        ? `<b>在线率计算规则</b><br>统计周期内：<br>在线率 = 设备在线时间 / 设备加入时间<br><br>设备加入时间 = 审核通过日 → 月末(或退出日)<br>在线时间 = 加入时间 - 累计离线时间`
+        : `<b>Online Rate Formula</b><br>Within the period:<br>Online Rate = Device Online Time / Device Enrolled Time<br><br>Enrolled Time = Approval Date → End of Month (or Exit Date)<br>Online Time = Enrolled Time - Total Offline Time`;
+    const cols = items.length === 4 ? 4 : 3;
+    let h = `<div class="kpi-row" style="grid-template-columns:repeat(${cols},1fr)">`;
+    for (const it of items) {
+        const cls = it.cls ? ` ${it.cls}` : '';
+        const dir = it.dir || 'flat';
+        const badge = it.delta
+            ? `<span class="kpi-badge ${dir}">${t(it.delta)}</span>` : '';
+        const sub = it.sub
+            ? `<div class="kpi-sub">${t(it.sub)}</div>` : '';
+        const tipInline = it.tooltip
+            ? ` <span class="kpi-tip-wrap"><span class="kpi-tip-icon">?</span><div class="kpi-tip-box">${tipHtml}</div></span>` : '';
+        h += `<div class="kpi-card">
+            <div class="kpi-label">${t(it.label)}${tipInline}</div>
+            <div class="kpi-value${cls}">${fmtKpiValue(it.value)}</div>
+            ${badge}${sub}
+        </div>`;
+    }
+    return h + '</div>';
+}
+
+function buildUserFlow(g) {
+    return `<div class="user-flow">
+        <div class="uf-panel">
+            <div class="uf-panel-label">${t(g.startLabel)}</div>
+            <div class="uf-panel-value">${g.startValue}</div>
+            <div class="uf-panel-sub">${t(g.startSub)}</div>
+        </div>
+        <div class="uf-panel net">
+            <div class="uf-panel-label">${t(g.net.label)}</div>
+            <div class="uf-panel-value">${g.net.value}</div>
+            <div class="uf-panel-sub">${t(g.net.sub || '')}</div>
+        </div>
+        <div class="uf-panel end">
+            <div class="uf-panel-label">${t(g.endLabel)}</div>
+            <div class="uf-panel-value">${g.endValue}</div>
+            <div class="uf-panel-sub">${t(g.endSub)}</div>
+        </div>
+    </div>
+    <div class="auth-status-row">
+        <div class="auth-status-item">
+            <div class="auth-dot green"></div>
+            <span class="auth-label">${t(g.authSuccess.label)}</span>
+            <span class="auth-value green">${g.authSuccess.value}</span>
+        </div>
+        <div class="auth-status-item">
+            <div class="auth-dot red"></div>
+            <span class="auth-label">${t(g.authExpired.label)}</span>
+            <span class="auth-value red">${g.authExpired.value}</span>
+        </div>
+    </div>`;
+}
+
+function buildDist(charts) {
+    let h = '<div class="dist-grid">';
+    for (const c of charts) {
+        h += `<div class="dist-card">
+            <div class="dist-card-title">${t(c.title)}</div>`;
+        for (const row of c.rows) {
+            const pct = c.total > 0 ? Math.round(row.val / c.total * 100) : 0;
+            const val = row.pct ? `${row.val} (${row.pct})` : String(row.val);
+            const delta = row.delta ? `<span class="dist-item-delta">${row.delta}</span>` : '';
+            h += `<div class="dist-item">
+                <div class="dist-item-top">
+                    <span class="dist-item-name">${row.name}</span>
+                    <div class="dist-item-right">
+                        <span class="dist-item-val">${val}</span>${delta}
+                    </div>
+                </div>
+                <div class="dist-track"><div class="dist-fill" style="width:${pct}%"></div></div>
+            </div>`;
+        }
+        h += '</div>';
+    }
+    return h + '</div>';
+}
+
+let _pendingCharts = [];
+let _pendingStacked = [];
+function buildChart(g) {
+    const id = 'rptChart' + (_pendingCharts.length);
+    _pendingCharts.push({ id, g });
+    return `<div class="rpt-chart-wrap">
+        <div class="rpt-chart-legend">
+            <span><span class="bar-icon"></span>${t(g.legendBar)}</span>
+            <span><span class="line-icon"></span>${t(g.legendLine)}</span>
+        </div>
+        <canvas id="${id}" style="display:block;width:100%;height:300px;"></canvas>
+        <div class="rpt-chart-axis">
+            <span class="left">${t(g.axisLeft)}</span>
+            <span class="right">${t(g.axisRight)}</span>
+        </div>
+    </div>`;
+}
+
+function renderCharts() {
+    for (const { id, g } of _pendingCharts) {
+        const canvas = document.getElementById(id);
+        if (!canvas) continue;
+        const dpr = window.devicePixelRatio || 1;
+        const W = 900, H = 300;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = '100%';
+        canvas.style.height = H + 'px';
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        const padL = 44, padR = 52, padT = 24, padB = 32;
+        const cW = W - padL - padR, cH = H - padT - padB;
+        const n = g.labels.length;
+        const barW = cW / n * 0.45;
+        const maxBar = Math.max(...g.bars);
+        const minBar = Math.min(...g.bars);
+        const barTop = Math.max(maxBar, 0);
+        const barBot = Math.min(minBar, 0);
+        const barRange = (barTop - barBot) || 1;
+        const minLine = Math.min(...g.line);
+        const maxLine = Math.max(...g.line);
+        const lineRange = maxLine - minLine || 1;
+
+        function barY(v) { return padT + cH - ((v - barBot) / barRange) * cH; }
+        const zeroY = barY(0);
+
+        // Grid
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const y = padT + cH * (1 - i / 4);
+            ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+        }
+
+        // Zero line if negative values exist
+        if (minBar < 0) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(padL, zeroY); ctx.lineTo(W - padR, zeroY); ctx.stroke();
+        }
+
+        // Bars (support negative)
+        g.bars.forEach((v, i) => {
+            if (v === 0) return;
+            const x = padL + (i + 0.5) * cW / n - barW / 2;
+            const top = v > 0 ? barY(v) : zeroY;
+            const bh = Math.abs(barY(v) - zeroY);
+            ctx.fillStyle = v > 0 ? 'rgba(96,165,250,0.55)' : 'rgba(255,95,95,0.45)';
+            ctx.fillRect(x, top, barW, bh);
+            // Label
+            ctx.fillStyle = v > 0 ? 'rgba(96,165,250,0.9)' : 'rgba(255,95,95,0.8)';
+            ctx.font = 'bold 10px -apple-system,sans-serif';
+            ctx.textAlign = 'center';
+            if (n <= 12) ctx.fillText(v > 0 ? '$'+v.toFixed(0) : '$'+v.toFixed(0), x + barW / 2, v > 0 ? top - 4 : top + bh + 12);
+        });
+
+        // Line
+        function ly(p) { return padT + cH - (p - minLine) / lineRange * cH * 0.88 - cH * 0.06; }
+        ctx.strokeStyle = '#ff9500';
+        ctx.lineWidth = 2;
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        g.line.forEach((p, i) => {
+            const x = padL + (i + 0.5) * cW / n;
+            i === 0 ? ctx.moveTo(x, ly(p)) : ctx.lineTo(x, ly(p));
+        });
+        ctx.stroke();
+
+        // Dots
+        g.line.forEach((p, i) => {
+            const x = padL + (i + 0.5) * cW / n;
+            ctx.beginPath(); ctx.arc(x, ly(p), 3, 0, Math.PI * 2);
+            ctx.fillStyle = p < 0 ? '#ff5f5f' : '#ff9500';
+            ctx.fill();
+        });
+
+        // X labels
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.font = '11px -apple-system,sans-serif';
+        ctx.textAlign = 'center';
+        const step = n > 15 ? 5 : 1;
+        g.labels.forEach((l, i) => {
+            if (i % step === 0 || i === n - 1) ctx.fillText(l, padL + (i + 0.5) * cW / n, H - 6);
+        });
+
+        // Left Y axis (bars - revenue)
+        ctx.fillStyle = 'rgba(96,165,250,0.7)';
+        ctx.font = '11px -apple-system,sans-serif';
+        ctx.textAlign = 'right';
+        for (let i = 0; i <= 4; i++) {
+            const val = barBot + barRange * i / 4;
+            ctx.fillText('$' + Math.round(val), padL - 5, padT + cH * (1 - i / 4) + 4);
+        }
+
+        // Right Y axis (line - $/kWh)
+        ctx.fillStyle = '#ff9500';
+        ctx.textAlign = 'left';
+        for (let i = 0; i <= 4; i++) {
+            const val = minLine + lineRange * i / 4;
+            ctx.fillText(val.toFixed(3), W - padR + 5, padT + cH * (1 - i / 4) + 4);
+        }
+    }
+    _pendingCharts = [];
+}
+
+function buildStackedBar(g) {
+    const id = 'rptStacked' + (_pendingStacked.length);
+    _pendingStacked.push({ id, g });
+    return `<div class="stacked-chart-wrap">
+        <div class="stacked-legend" id="${id}_legend">
+            <div class="stacked-legend-item" data-series="1" onclick="toggleStackedLegend('${id}',1)">
+                <span class="stacked-legend-dot" style="background:#00ff88"></span>
+                <span>${t(g.legend1)}</span>
+            </div>
+            <div class="stacked-legend-item" data-series="2" onclick="toggleStackedLegend('${id}',2)">
+                <span class="stacked-legend-dot" style="background:#ff5f5f"></span>
+                <span>${t(g.legend2)}</span>
+            </div>
+        </div>
+        <div style="position:relative;">
+            <canvas id="${id}" style="display:block;width:100%;height:260px;"></canvas>
+            <div id="${id}_tip" style="display:none;position:absolute;background:rgba(20,20,20,0.92);color:#fff;font-size:12px;padding:10px 14px;border-radius:8px;pointer-events:none;white-space:nowrap;z-index:10;border:1px solid rgba(255,255,255,0.1);box-shadow:0 4px 16px rgba(0,0,0,0.4);"></div>
+        </div>
+    </div>`;
+}
+
+// Track hidden series per chart
+const _stackedHidden = {};
+function toggleStackedLegend(id, series) {
+    if (!_stackedHidden[id]) _stackedHidden[id] = new Set();
+    const set = _stackedHidden[id];
+    if (set.has(series)) set.delete(series); else set.add(series);
+    // Toggle visual
+    const legend = document.getElementById(id + '_legend');
+    legend.querySelectorAll('.stacked-legend-item').forEach(el => {
+        el.classList.toggle('off', set.has(parseInt(el.dataset.series)));
+    });
+    // Re-render
+    const entry = _pendingStacked.find(e => e.id === id);
+    if (entry) renderOneStacked(entry, set);
+}
+
+function renderStacked() {
+    for (const entry of _pendingStacked) {
+        renderOneStacked(entry, _stackedHidden[entry.id] || new Set());
+    }
+}
+
+function renderOneStacked(entry, hidden) {
+    const { id, g } = entry;
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const W = 900, H = 260;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = '100%';
+    canvas.style.height = H + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const padL = 40, padR = 20, padT = 20, padB = 36;
+    const cW = W - padL - padR, cH = H - padT - padB;
+    const n = g.labels.length;
+    const barW = Math.min(cW / n * 0.55, 50);
+
+    const show1 = !hidden.has(1);
+    const show2 = !hidden.has(2);
+
+    // Calculate max
+    let maxVal = 0;
+    for (let i = 0; i < n; i++) {
+        let sum = 0;
+        if (show1) sum += (g.data1[i] || 0);
+        if (show2) sum += (g.data2[i] || 0);
+        if (sum > maxVal) maxVal = sum;
+    }
+    if (maxVal === 0) maxVal = 12;
+    // Round up to nice number
+    maxVal = Math.ceil(maxVal / 10) * 10 || 10;
+
+    // Grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    const gridSteps = 5;
+    for (let i = 0; i <= gridSteps; i++) {
+        const y = padT + cH * (1 - i / gridSteps);
+        ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    }
+
+    // Y labels
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.font = '11px -apple-system,sans-serif';
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= gridSteps; i++) {
+        const val = Math.round(maxVal * i / gridSteps);
+        ctx.fillText(val, padL - 6, padT + cH * (1 - i / gridSteps) + 4);
+    }
+
+    // Bars
+    for (let i = 0; i < n; i++) {
+        const x = padL + (i + 0.5) * cW / n - barW / 2;
+        let y = padT + cH; // bottom
+
+        // Draw data1 (success - green) first at bottom
+        if (show1 && g.data1[i] > 0) {
+            const bh = (g.data1[i] / maxVal) * cH;
+            const top = y - bh;
+            ctx.fillStyle = 'rgba(0,255,136,0.6)';
+            ctx.beginPath();
+            const r = Math.min(3, barW / 2);
+            // Only round top corners if no data2 on top
+            if (!show2 || !g.data2[i]) {
+                ctx.moveTo(x + r, top); ctx.lineTo(x + barW - r, top);
+                ctx.arcTo(x + barW, top, x + barW, top + r, r);
+            } else {
+                ctx.moveTo(x, top); ctx.lineTo(x + barW, top);
+            }
+            ctx.lineTo(x + barW, y); ctx.lineTo(x, y);
+            if (!show2 || !g.data2[i]) {
+                ctx.lineTo(x, top + r); ctx.arcTo(x, top, x + r, top, r);
+            } else {
+                ctx.lineTo(x, top);
+            }
+            ctx.fill();
+            y = top;
+        }
+
+        // Draw data2 (expired - red) stacked on top
+        if (show2 && g.data2[i] > 0) {
+            const bh = (g.data2[i] / maxVal) * cH;
+            const top = y - bh;
+            ctx.fillStyle = 'rgba(255,95,95,0.6)';
+            ctx.beginPath();
+            const r = Math.min(3, barW / 2);
+            ctx.moveTo(x + r, top); ctx.lineTo(x + barW - r, top);
+            ctx.arcTo(x + barW, top, x + barW, top + r, r);
+            ctx.lineTo(x + barW, y); ctx.lineTo(x, y);
+            ctx.lineTo(x, top + r); ctx.arcTo(x, top, x + r, top, r);
+            ctx.fill();
+        }
+
+        // Total value label on top
+        let total = 0;
+        if (show1) total += (g.data1[i] || 0);
+        if (show2) total += (g.data2[i] || 0);
+        if (total > 0) {
+            const topY = padT + cH - (total / maxVal) * cH;
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.font = 'bold 11px -apple-system,sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(total, x + barW / 2, topY - 5);
+        }
+    }
+
+    // X labels
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '12px -apple-system,sans-serif';
+    ctx.textAlign = 'center';
+    g.labels.forEach((l, i) => {
+        ctx.fillText(l, padL + (i + 0.5) * cW / n, H - 8);
+    });
+
+    // Hover tooltip
+    const tip = document.getElementById(id + '_tip');
+    if (!tip) return;
+    const zh = getLang() === 'zh';
+    canvas.onmousemove = function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const mx = (e.clientX - rect.left) / rect.width * W;
+        const idx = Math.floor((mx - padL) / (cW / n));
+        if (idx >= 0 && idx < n) {
+            const d1 = g.data1[idx] || 0, d2 = g.data2[idx] || 0;
+            const total = d1 + d2;
+            tip.innerHTML = `<b>${g.labels[idx]}</b><br>`
+                + `<span style="color:#00ff88">●</span> ${zh?'授权成功':'Auth Success'}: <b>${d1}</b><br>`
+                + `<span style="color:#ff5f5f">●</span> ${zh?'授权失效':'Auth Expired'}: <b>${d2}</b><br>`
+                + `${zh?'合计':'Total'}: <b>${total}</b>`;
+            tip.style.display = 'block';
+            const px = (e.clientX - rect.left);
+            tip.style.left = (px < rect.width * 0.7 ? px + 12 : px - 140) + 'px';
+            tip.style.top = (e.clientY - rect.top - 60) + 'px';
+        } else {
+            tip.style.display = 'none';
+        }
+    };
+    canvas.onmouseleave = function() { tip.style.display = 'none'; };
+}
+
+let _pendingOffline = [];
+let _pendingPies = [];
+function buildPiePair(g) {
+    let h = '<div class="pie-pair">';
+    for (const pie of [g.pie1, g.pie2]) {
+        const id = 'rptPie' + _pendingPies.length;
+        _pendingPies.push({ id, pie });
+        const total = pie.items.reduce((s, it) => s + it.value, 0);
+        h += `<div class="pie-card">
+            <div class="pie-card-title">${t(pie.title)}</div>
+            <div class="pie-canvas-wrap">
+                <canvas id="${id}" width="280" height="280" style="width:140px;height:140px;flex-shrink:0;"></canvas>
+                <div class="pie-legend-list">`;
+        for (const it of pie.items) {
+            const pct = total > 0 ? (it.value / total * 100).toFixed(1) : '0.0';
+            h += `<div class="pie-legend-row">
+                <span class="pie-legend-color" style="background:${it.color}"></span>
+                <span class="pie-legend-name">${it.name}</span>
+                <span class="pie-legend-val">${it.label}</span>
+                <span class="pie-legend-pct">${pct}%</span>
+            </div>`;
+        }
+        h += `</div></div></div>`;
+    }
+    return h + '</div>';
+}
+
+function renderPies() {
+    for (const { id, pie } of _pendingPies) {
+        const canvas = document.getElementById(id);
+        if (!canvas) continue;
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const size = 140;
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+        canvas.style.width = size + 'px';
+        canvas.style.height = size + 'px';
+        ctx.scale(dpr, dpr);
+
+        const cx = size / 2, cy = size / 2, r = size / 2 - 4;
+        const total = pie.items.reduce((s, it) => s + it.value, 0);
+        let startAngle = -Math.PI / 2;
+
+        for (const it of pie.items) {
+            const slice = total > 0 ? (it.value / total) * Math.PI * 2 : 0;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, r, startAngle, startAngle + slice);
+            ctx.closePath();
+            ctx.fillStyle = it.color;
+            ctx.fill();
+            startAngle += slice;
+        }
+
+        // Inner circle (donut)
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * 0.55, 0, Math.PI * 2);
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fill();
+
+        // Center text - total percentage
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.font = 'bold 14px -apple-system,sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('100%', cx, cy);
+    }
+    _pendingPies = [];
+}
+
+function buildOfflineChart(g) {
+    const id = 'rptOffline' + (_pendingOffline.length);
+    _pendingOffline.push({ id, g });
+    const zh = getLang() === 'zh';
+    return `<div class="stacked-chart-wrap">
+        <div class="stacked-legend" id="${id}_legend">
+            <div class="stacked-legend-item" data-series="2" onclick="toggleOfflineLegend('${id}',2)">
+                <span class="stacked-legend-dot" style="background:#ff9500"></span>
+                <span>${zh?'平均离线时长(h)':'Avg Offline Duration(h)'}</span>
+            </div>
+            <div class="stacked-legend-item" data-series="3" onclick="toggleOfflineLegend('${id}',3)">
+                <span class="stacked-legend-dot" style="background:#00ff88"></span>
+                <span>${zh?'在线率(%)':'Online Rate(%)'}</span>
+            </div>
+        </div>
+        <div style="position:relative;">
+            <canvas id="${id}" style="display:block;width:100%;height:280px;"></canvas>
+            <div id="${id}_tip" style="display:none;position:absolute;background:rgba(20,20,20,0.92);color:#fff;font-size:12px;padding:10px 14px;border-radius:8px;pointer-events:none;white-space:nowrap;z-index:10;border:1px solid rgba(255,255,255,0.1);box-shadow:0 4px 16px rgba(0,0,0,0.4);"></div>
+        </div>
+    </div>`;
+}
+
+const _offlineHidden = {};
+function toggleOfflineLegend(id, series) {
+    if (!_offlineHidden[id]) _offlineHidden[id] = new Set();
+    const set = _offlineHidden[id];
+    if (set.has(series)) set.delete(series); else set.add(series);
+    document.getElementById(id + '_legend').querySelectorAll('.stacked-legend-item').forEach(el => {
+        el.classList.toggle('off', set.has(parseInt(el.dataset.series)));
+    });
+    const entry = _pendingOffline.find(e => e.id === id);
+    if (entry) renderOneOffline(entry, set);
+}
+
+function renderOffline() {
+    for (const entry of _pendingOffline) renderOneOffline(entry, _offlineHidden[entry.id] || new Set());
+}
+
+function renderOneOffline(entry, hidden) {
+    const { id, g } = entry;
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const W = 900, H = 280;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = '100%'; canvas.style.height = H + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const padL = 44, padR = 52, padT = 24, padB = 36;
+    const cW = W - padL - padR, cH = H - padT - padB;
+    const n = g.labels.length;
+    const show2 = !hidden.has(2), show3 = !hidden.has(3);
+
+    const maxDur = show2 ? Math.max(...g.avgDur) * 1.2 : 20;
+
+    // Grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1;
+    for (let i = 0; i <= 5; i++) {
+        const y = padT + cH * (1 - i / 5);
+        ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    }
+
+    // Line 1: avg duration (orange)
+    if (show2) {
+        ctx.strokeStyle = '#ff9500'; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+        ctx.beginPath();
+        g.avgDur.forEach((v, i) => {
+            const x = padL + (i + 0.5) * cW / n;
+            const y = padT + cH - (v / maxDur) * cH;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        g.avgDur.forEach((v, i) => {
+            const x = padL + (i + 0.5) * cW / n;
+            const y = padT + cH - (v / maxDur) * cH;
+            ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff9500'; ctx.fill();
+        });
+    }
+
+    // Line 2: online rate (green), 0-100%
+    if (show3) {
+        ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+        ctx.beginPath();
+        g.onlineRate.forEach((v, i) => {
+            const x = padL + (i + 0.5) * cW / n;
+            const y = padT + cH - (v / 100) * cH;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        g.onlineRate.forEach((v, i) => {
+            const x = padL + (i + 0.5) * cW / n;
+            const y = padT + cH - (v / 100) * cH;
+            ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#00ff88'; ctx.fill();
+        });
+    }
+
+    // X labels
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '12px -apple-system,sans-serif'; ctx.textAlign = 'center';
+    g.labels.forEach((l, i) => ctx.fillText(l, padL + (i + 0.5) * cW / n, H - 8));
+
+    // Left Y: duration
+    if (show2) {
+        ctx.fillStyle = '#ff9500'; ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'right';
+        for (let i = 0; i <= 5; i++) {
+            ctx.fillText(Math.round(maxDur * i / 5) + 'h', padL - 5, padT + cH * (1 - i / 5) + 4);
+        }
+    }
+
+    // Right Y: online rate %
+    if (show3) {
+        ctx.fillStyle = '#00ff88'; ctx.font = '11px -apple-system,sans-serif'; ctx.textAlign = 'left';
+        for (let i = 0; i <= 5; i++) {
+            ctx.fillText(Math.round(100 * i / 5) + '%', W - padR + 5, padT + cH * (1 - i / 5) + 4);
+        }
+    }
+
+    // Hover
+    const tip = document.getElementById(id + '_tip');
+    if (!tip) return;
+    const zh = getLang() === 'zh';
+    canvas.onmousemove = function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const mx = (e.clientX - rect.left) / rect.width * W;
+        const idx = Math.floor((mx - padL) / (cW / n));
+        if (idx >= 0 && idx < n) {
+            tip.innerHTML = `<b>${g.labels[idx]}</b><br>`
+                + `<span style="color:#ff9500">●</span> ${zh?'平均离线时长':'Avg Duration'}: <b>${g.avgDur[idx]}h</b><br>`
+                + `<span style="color:#00ff88">●</span> ${zh?'在线率':'Online Rate'}: <b>${g.onlineRate[idx]}%</b>`;
+            tip.style.display = 'block';
+            const px = e.clientX - rect.left;
+            tip.style.left = (px < rect.width * 0.7 ? px + 12 : px - 160) + 'px';
+            tip.style.top = (e.clientY - rect.top - 70) + 'px';
+        } else { tip.style.display = 'none'; }
+    };
+    canvas.onmouseleave = function() { tip.style.display = 'none'; };
+}
+
+function buildTable(g) {
+    const sm = g.small ? ' sm' : '';
+    let h = `<div class="tbl-wrap"><table class="rpt-tbl${sm}">
+        <thead><tr>${g.headers.map(hd=>`<th>${t(hd)}</th>`).join('')}</tr></thead>
+        <tbody>`;
+
+    if (!g.rows || g.rows.length === 0) {
+        const empty = t(g.empty) || (getLang()==='zh' ? '暂无数据' : 'No data');
+        h += `<tr><td class="empty-td" colspan="${g.headers.length}">${empty}</td></tr>`;
+    } else if (g.mergeCols && g.mergeCols.length > 0) {
+        // Grouped table with rowspan on mergeCols
+        const mergeSet = new Set(g.mergeCols);
+        // Calculate rowspan for each group (group by first column value)
+        const spans = [];
+        let i = 0;
+        while (i < g.rows.length) {
+            const key = fmtCell(g.rows[i][0]);
+            let count = 1;
+            while (i + count < g.rows.length && fmtCell(g.rows[i + count][0]) === key) count++;
+            for (let j = 0; j < count; j++) spans.push({ isFirst: j === 0, span: count });
+            i += count;
+        }
+        for (let r = 0; r < g.rows.length; r++) {
+            const row = g.rows[r];
+            const { isFirst, span } = spans[r];
+            h += '<tr>';
+            for (let c = 0; c < row.length; c++) {
+                if (mergeSet.has(c)) {
+                    if (isFirst) {
+                        h += `<td rowspan="${span}" style="vertical-align:middle;">${fmtCell(row[c])}</td>`;
+                    }
+                    // skip merged cells on non-first rows
+                } else {
+                    h += `<td>${fmtCell(row[c])}</td>`;
+                }
+            }
+            h += '</tr>';
+        }
+        if (g.summary) {
+            h += `<tr class="sum-row">${g.summary.map(c=>`<td>${t(c)}</td>`).join('')}</tr>`;
+        }
+    } else {
+        for (const row of g.rows) {
+            h += '<tr>' + row.map(cell => `<td>${fmtCell(cell)}</td>`).join('') + '</tr>';
+        }
+        if (g.summary) {
+            h += `<tr class="sum-row">${g.summary.map(c=>`<td>${t(c)}</td>`).join('')}</tr>`;
+        }
+    }
+    return h + '</tbody></table></div>';
+}
+
+function fmtCell(v) {
+    if (v && typeof v === 'object' && (v.zh || v.en)) return t(v);
+    if (typeof v !== 'string') return String(v);
+    const zh = getLang() === 'zh';
+    if (v === '__exp') return `<span class="tag tag-red">${zh?'授权过期':'Auth Expired'}</span>`;
+    if (v === '__yes') return `<span class="tag tag-green">${zh?'是':'Yes'}</span>`;
+    if (v === '__no')  return `<span class="tag tag-gray">${zh?'否':'No'}</span>`;
+    if (v.startsWith('__red:'))   return `<span class="c-red">${v.slice(6)}</span>`;
+    if (v.startsWith('__green:')) return `<span class="c-green">${v.slice(8)}</span>`;
+    return v;
+}
+
+// ══════════════════════════════════════════════════════════
+// i18n observer
+// ══════════════════════════════════════════════════════════
+function applyI18n() {
+    if (!window.i18n) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const txt = window.i18n.getText(el.dataset.i18n);
+        if (txt && txt !== el.dataset.i18n && !el.children.length) el.textContent = txt;
+    });
+    if (_renderedKey && _renderedType) {
+        const data = (REPORTS[_renderedType]||{})[_renderedKey];
+        if (data) {
+            document.getElementById('reportOutput').innerHTML = build(data);
+        }
+    }
+}
+
+function attachI18n() {
+    if (window.i18n) { window.i18n.addObserver(applyI18n); applyI18n(); }
+    else setTimeout(attachI18n, 200);
+}
+document.addEventListener('DOMContentLoaded', () => {
+    attachI18n();
+    // Auto-query: find the best available report type & date
+    autoQuery();
+});
+
+function autoQuery() {
+    // Try daily with today's date first
+    const now = new Date();
+    const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
+    const todayKey = `${y}-${m}-${d}`;
+    const monthKey = `${y}-${m}`;
+    const yearKey = String(y);
+
+    // Check which type has data, prefer daily > monthly > yearly
+    if (REPORTS.daily && REPORTS.daily[todayKey]) {
+        selectType('daily');
+        document.getElementById('dailyPicker').value = todayKey;
+        queryReport();
+    } else if (REPORTS.monthly && REPORTS.monthly[monthKey]) {
+        selectType('monthly');
+        document.getElementById('monthlyPicker').value = monthKey;
+        queryReport();
+    } else {
+        // Fall back: find any available data, latest first
+        const types = ['daily','monthly','yearly'];
+        for (const tp of types) {
+            const keys = Object.keys(REPORTS[tp] || {}).sort().reverse();
+            if (keys.length > 0) {
+                selectType(tp);
+                if (tp === 'daily')   document.getElementById('dailyPicker').value = keys[0];
+                if (tp === 'monthly') document.getElementById('monthlyPicker').value = keys[0];
+                if (tp === 'yearly')  { const sel = document.getElementById('yearlyPicker'); for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===keys[0]) sel.selectedIndex=i; }
+                queryReport();
+                break;
+            }
+        }
+    }
+}
+</script>
+</body>
+</html>
